@@ -1,28 +1,54 @@
 @push('styles')
     <style>
-        /* css taruh disini
-    hati-hati, mungkin kalau nama id/class kalian sama dgn yang page partials lain, maka bisa ke overwrite --}}
-    disini  */
+        #session-1{
+            color: var(--black);
+            font-size: 50px;
+            font-weight: lighter;
+            font-family: "Arial";
+        }
+        #session-2{
+            color: var(--black);
+            font-size: 50px;
+            font-weight: bold;
+            font-family: "Arial Black";
+        }
+        #grid-session{
+            background-color: yellow;
+        }
+        #description-session{
+            background-color: yellow;
+        }
+        #info-session-1{
+            font-family: "Arial";
+            text-align: center;
+            font-weight: 800;
+            font-size: 16px;
+        }
+        #info-session-2{
+            font-family: "Arial";
+            text-align: center;
+            font-weight: 500;
+            font-size: 16px;
+        }
     </style>
 @endpush
 
-{{-- html  --}}
-{{-- taruh tanpa perlu struktur html utuh --}}
-{{-- jadi langsung taruh aja kayak bikin html langsung, gaperlu head dll --}}
-{{-- contoh --}}
-{{-- <div>
-<h1>halo</h1>
-</div> --}}
-
-
-<h1 class="text-center text-4xl font-bold text-white">ticket</h1>
+<div class="grid grid-cols-12" id="grid-session">
+    <div class="col-span-6">
+        <h1 id="session-1">SESSION</h1>
+    </div>
+    <div class="col-span-6 ml-2">
+        <h1 id="session-2">ACCESS</h1>
+    </div>
+</div>
+<div id="description-session">
+    <h2 id="info-session-1">Tickets for D-Day sessions will be available soon</h2>
+    <h2 id="info-session-2">Check back for more details.</h2>
+</div>
 
 
 @push('scripts')
 <script>
-    // js taruh disini 
-    // hati-hati, mungkin kalau nama variable kalian sama dgn yang page partials lain, maka bisa ke overwrite 
-    // jadi kasih nama yg unik ya ges
-    // disini
+
 </script>
 @endpush
