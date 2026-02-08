@@ -139,6 +139,63 @@
             display: none !important;
         }
 
+        /* Font */
+        /* Inter */
+        @font-face {
+            font-family: 'InterRegular';
+            src: url('{{ asset('assets/fonts/Inter_28pt-Regular.ttf') }}') format('truetype');
+        }
+
+        .font-inter-regular {
+            font-family: 'InterRegular', sans-serif;
+        }
+        @font-face {
+            font-family: 'InterLight';
+            src: url('{{ asset('assets/fonts/Inter_18pt-Light.ttf') }}') format('truetype');
+        }
+
+        .font-inter-light {
+            font-family: 'InterLight', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'InterSemiBold';
+            src: url('{{ asset('assets/fonts/Inter_28pt-SemiBold.ttf') }}') format('truetype');
+        }
+
+        .font-inter-semibold {
+            font-family: 'InterSemiBold', sans-serif;
+        }
+
+        /* Montech */
+
+        @font-face {
+            font-family: 'MontechBlack';
+            src: url('{{ asset('assets/fonts/MONTECHV02-Black.ttf') }}') format('truetype');
+        }
+
+        .font-montech-black {
+            font-family: 'MontechBlack', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'MontechBold';
+            src: url('{{ asset('assets/fonts/MONTECHV02-Bold.ttf') }}') format('truetype');
+        }
+
+        .font-montech-bold {
+            font-family: 'MontechBold', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'MontechMedium';
+            src: url('{{ asset('assets/fonts/MONTECHV02-Medium.ttf') }}') format('truetype');
+        }
+
+        .font-montech-medium {
+            font-family: 'MontechMedium', sans-serif;
+        }
+
         /* Custom Scrollbar */
     </style>
 </head>
