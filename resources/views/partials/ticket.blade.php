@@ -1,50 +1,39 @@
 @push('styles')
     <style>
-        #session-1{
+        .title-session{
             color: var(--black);
             font-size: 50px;
-            font-weight: lighter;
             font-family: "Arial";
         }
-        #session-2{
+        .info-session{
             color: var(--black);
-            font-size: 50px;
-            font-weight: bold;
-            font-family: "Arial Black";
-        }
-        #grid-session{
-            background-color: yellow;
-        }
-        #description-session{
-            background-color: yellow;
-        }
-        #info-session-1{
             font-family: "Arial";
             text-align: center;
-            font-weight: 800;
-            font-size: 16px;
-        }
-        #info-session-2{
-            font-family: "Arial";
-            text-align: center;
-            font-weight: 500;
             font-size: 16px;
         }
     </style>
 @endpush
 
-<div class="grid grid-cols-12" id="grid-session">
-    <div class="col-span-6">
-        <h1 id="session-1">SESSION</h1>
+<div class="relative w-screen left-1/2 -translate-x-1/2 h-auto overflow-hidden">
+    <div class="absolute inset-0 w-full h-full z-0" style="background-color: yellow"></div>
+    <div class="relative z-10 container mx-auto py-20 px-4">
+        <div class="flex items-center justify-center gap-6">
+            <div>
+                <h1 class="title-session" style="font-weight: lighter">SESSION</h1>
+            </div>
+            <div>
+                <h1 class="title-session" style="font-weight: bold">ACCESS</h1>
+            </div>
+        </div>
+        <div>
+            <h2 class="info-session" style="font-weight: 800">Tickets for D-Day sessions will be available soon</h2>
+            <h2 class="info-session" style="font-weight: 500">Check back for more details.</h2>
+        </div>
     </div>
-    <div class="col-span-6 ml-2">
-        <h1 id="session-2">ACCESS</h1>
-    </div>
+    
 </div>
-<div id="description-session">
-    <h2 id="info-session-1">Tickets for D-Day sessions will be available soon</h2>
-    <h2 id="info-session-2">Check back for more details.</h2>
-</div>
+
+
 
 
 @push('scripts')
