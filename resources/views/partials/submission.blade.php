@@ -1,31 +1,9 @@
 @push('styles')
     <style>
-        html,body{
-            background-color: #000 !important;
-            background-image: url('https://as1.ftcdn.net/jpg/01/00/30/58/1000_F_100305801_Iuo4E3KhUYyjxidZWCsXBbwKDpBeHY7Q.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-
-        #submission-title-1{
-            font-family: "montech v01";
-            font-size: 50px;
-            font-weight: bold;
-            color: var(--primary-white);
-        }
-
-        #submission-title-2 {
-            font-family: "Inter";
-            font-size: 20px;
+        .submission-title{
             font-weight: bold;
             color: var(--primary-white);
             position: center;
-        }
-
-        h1{
-            text-align: center;
         }
     </style>
 @endpush
@@ -42,14 +20,14 @@
 
     <div class="relative z-10 container mx-auto py-20 px-4"> 
         <div class="flex items-center justify-center gap-6">
-            <div id="submission-title-1">
-                <h1 class="leading-tight text-center"> 
+            <div class="submission-title font-montech-bold leading-tight text-center animate-from-left" style="font-size: 50px">
+                <h1> 
                     SUBMISSIONS <br>
                     ARE NOW OPEN!
                 </h1>
             </div>
 
-            <div id="submission-title-2"> 
+            <div class="submission-title font-inter-regular animate-from-right" style="font-size: 20px"> 
                 Select one of the <br>
                 categories to learn more <br>
                 or submit your films!
@@ -76,6 +54,31 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <script>
     gsap.registerPlugin(ScrollTrigger);
+
+    gsap.from(".animate-from-left",{
+        scrollTrigger: {
+            trigger: ".animate-from-left",
+            start: "top 80%",
+            toggleActions: "play pause resume reverse"
+        },
+        x: -150,
+        opacity: 0,
+        duration: 1.5,
+        ease: "power2.out"
+    });
+
+    gsap.from(".animate-from-right",{
+        scrollTrigger: {
+            trigger: ".animate-from-right",
+            start: "top 80%",
+            toggleActions: "play pause resume reverse"
+        },
+        x: 150,
+        opacity: 0,
+        duration: 1.5,
+        ease: "power2.out"
+    });
+
     gsap.from(".submission-photo-animation",{
         scrollTrigger: {
             trigger: ".submission-photo-animation",
