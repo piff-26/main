@@ -183,6 +183,7 @@
     $(function() {
         const $section = $('#scheduleSection');
         const $track = $('#scheduleTrack');
+        const $dragArea = $('#scheduleTrack');
         const $cards = $('.schedule-card');
         const totalCards = $cards.length;
         const GAP = 32;
@@ -276,14 +277,14 @@
             resumeAutoScroll();
         }
 
-        $section.on('mousedown', e => onDragStart(e.clientX));
+        $dragArea.on('mousedown', e => onDragStart(e.clientX));
         $(document).on('mousemove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.clientX); } });
         $(document).on('mouseup', onDragEnd);
 
-        $section.on('touchstart', e => onDragStart(e.touches[0].clientX));
-        $section.on('touchmove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.touches[0].clientX); } });
-        $section.on('touchend', onDragEnd);
-        $section.on('dragstart', e => e.preventDefault());
+        $dragArea.on('touchstart', e => onDragStart(e.touches[0].clientX));
+        $dragArea.on('touchmove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.touches[0].clientX); } });
+        $dragArea.on('touchend', onDragEnd);
+        $dragArea.on('dragstart', e => e.preventDefault());
     });
 </script>
 @endpush
