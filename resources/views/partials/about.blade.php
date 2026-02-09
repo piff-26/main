@@ -58,8 +58,35 @@
 
     .word-rotate {
         display: inline-block;
-        min-width: 200px;
-        text-align: center;
+        white-space: nowrap;
+    }
+
+    .rotate-wrapper {
+        display: inline-block;
+        width: 11ch;
+    }
+
+    .word-rotate::after {
+        content: '|';
+        opacity: 1;
+        color: var(--blue);
+    }
+
+    .word-rotate.idle::after {
+        animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+
+        0%,
+        49% {
+            opacity: 1;
+        }
+
+        50%,
+        100% {
+            opacity: 0;
+        }
     }
 </style>
 @endpush
@@ -75,7 +102,10 @@
             <div class="mb-4 justify-center flex">
                 <div>
                     <h1 class="about-title text-[--primary-white] text-center md:text-left font-montech-bold mb-2">
-                        CELEBRATING <span class="word-rotate rotating-word">CREATIVES</span>
+                        CELEBRATING
+                        <span class="rotate-wrapper text-center md:text-left">
+                            <span class="word-rotate rotating-word text-center md:text-left">CREATIVES</span>
+                        </span>
                     </h1>
                     <h1 class="about-title text-[--yellow] text-center md:text-left font-montech-bold">
                         HERE, THERE, EVERYWHERE.
@@ -130,24 +160,43 @@
 
 @push('scripts')
 <script>
-    // Rotating Words Animation
     $(function() {
         const words = ['CREATIVES', 'FILM MAKERS', 'STUDENTS', 'VOICES', 'DIVERSITY', 'HUMANS', 'IDEAS'];
         const $word = $('.rotating-word');
         let index = 0;
 
-        setInterval(() => {
-            gsap.to($word[0], {
-                opacity: 0,
-                y: -20,
-                duration: 0.5,
-                onComplete: () => {
-                    index = (index + 1) % words.length;
-                    $word.text(words[index]);
-                    gsap.fromTo($word[0], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 });
-                }
+        function animate(word, isDelete, onComplete) {
+            $word.removeClass('idle');
+            let chars = isDelete ? word.length : 0;
+            gsap.to({}, {
+                duration: word.length * (isDelete ? 0.08 : 0.12),
+                ease: 'none',
+                onUpdate: function() {
+                    const progress = isDelete ? 1 - this.progress() : this.progress();
+                    const newChars = Math.floor(progress * word.length);
+                    if (newChars !== chars) {
+                        chars = newChars;
+                        $word.text(word.substring(0, chars) || ' ');
+                    }
+                },
+                onComplete
             });
-        }, 2000);
+        }
+
+        (function cycle() {
+            const word = words[index];
+            animate(word, false, () => {
+                $word.addClass('idle');
+                gsap.delayedCall(2, () => {
+                    animate(word, true, () => {
+                        gsap.delayedCall(0.5, () => {
+                            index = (index + 1) % words.length;
+                            cycle();
+                        });
+                    });
+                });
+            });
+        })();
     });
 </script>
 @endpush
