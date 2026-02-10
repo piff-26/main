@@ -2,12 +2,12 @@
     <style>
         .title-session{
             color: var(--black);
-            font-size: 50px;
+            /* Font size dipindahkan ke class HTML agar responsif */
         }
         .info-session{
             color: var(--black);
             text-align: center;
-            font-size: 16px;
+            /* Font size dipindahkan ke class HTML agar responsif */
         }
         .perspective-wrap {
             perspective: 1000px;
@@ -16,30 +16,37 @@
 @endpush
 
 <div class="relative w-screen left-1/2 -translate-x-1/2 h-auto overflow-hidden">
+    {{-- Background Color --}}
     <div class="absolute inset-0 w-full h-full z-0" style="background-color: #fec401"></div>
-    <div class="relative z-10 container mx-auto py-20 px-4">
-        <div class="flex items-center justify-center gap-6 perspective-wrap">
+    
+    {{-- Container: Padding vertikal disesuaikan (py-10 di HP, py-20 di Desktop) --}}
+    <div class="relative z-10 container mx-auto py-10 md:py-20 px-4">
+        
+        {{-- Flex: Berubah jadi Column di HP, Row di Tablet/Desktop (sm:flex-row) --}}
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 perspective-wrap">
             <div>
-                <h1 class="title-session font-montech-regular ticket-animation-1">SESSION</h1>
+                {{-- Font Size: text-4xl (HP) -> text-[50px] (Desktop) --}}
+                <h1 class="title-session font-montech-regular ticket-animation-1 text-4xl sm:text-[50px]">SESSION</h1>
             </div>
             <div>
-                <h1 class="title-session font-montech-bold ticket-animation-1">ACCESS</h1>
+                <h1 class="title-session font-montech-bold ticket-animation-1 text-4xl sm:text-[50px]">ACCESS</h1>
             </div>
         </div>
-        <div>
-            <h2 class="info-session font-inter-semibold ticket-animation-2">Tickets for D-Day sessions will be available soon</h2>
-            <h2 class="info-session font-inter-regular ticket-animation-2">Check back for more details.</h2>
+
+        {{-- Margin top ditambahkan sedikit agar tidak terlalu mepet dengan judul --}}
+        <div class="mt-4">
+            {{-- Font Size: text-sm (HP) -> text-base (Desktop) --}}
+            <h2 class="info-session font-inter-semibold ticket-animation-2 text-sm sm:text-base">Tickets for D-Day sessions will be available soon</h2>
+            <h2 class="info-session font-inter-regular ticket-animation-2 text-sm sm:text-base">Check back for more details.</h2>
         </div>
     </div>
     
 </div>
 
-
-
-
 @push('scripts')
 <script>
     gsap.registerPlugin(ScrollTrigger);
+    
     gsap.from(".ticket-animation-1",{
         scrollTrigger:{
             trigger: ".ticket-animation-1",
