@@ -1,29 +1,5 @@
 @push('styles')
 <style>
-    .about-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: 1;
-        background-image: url('{{ asset('assets/img/dummy1.png') }}');
-        background-size: cover;
-        background-position: center;
-    }
-
-    .about-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--black);
-        opacity: 0.5;
-        z-index: 2;
-    }
-
     .about-content {
         position: relative;
         z-index: 3;
@@ -92,10 +68,6 @@
 @endpush
 
 <div class="relative w-full h-screen overflow-hidden">
-    <div class="about-bg"></div>
-
-    <div class="about-overlay"></div>
-
     <div class="about-content mx-auto px-16 py-12 flex items-center justify-center h-full">
         <div class="w-full">
             <!-- About Title -->
