@@ -8,6 +8,7 @@
         background-position: center;
         background-image: url('{{ asset('assets/img/bg-home-blue.png') }}');
         background-repeat: no-repeat;
+        background-size: cover;
     }
 </style>
 @endpush
