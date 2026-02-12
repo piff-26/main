@@ -160,6 +160,15 @@
         }
 
         @font-face {
+            font-family: 'InterBold';
+            src: url('{{ asset('assets/fonts/Inter_18pt-Bold.ttf') }}') format('truetype');
+        }
+
+        .font-inter-bold {
+            font-family: 'InterBold', sans-serif;
+        }
+
+        @font-face {
             font-family: 'InterSemiBold';
             src: url('{{ asset('assets/fonts/Inter_28pt-SemiBold.ttf') }}') format('truetype');
         }
