@@ -8,6 +8,10 @@ use App\Http\Controllers\AuthController;
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/test', function () {
+    return view('user.test');
+});
+
 Route::prefix('admin')->group(function(){
     Route::get('/',function(){
         return redirect()->route('admin.dashboard');
