@@ -2,60 +2,60 @@
 @section('title', 'Home')
 
 @push('styles')
-<style>
-    #title_wrapper {
-        width: 100%;
-        background-position: center;
-        background-image: url('{{ asset('assets/img/bg-home-blue.png') }}');
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-</style>
+    <style>
+        #title_wrapper {
+            width: 100%;
+            background-position: center;
+            background-image: url('{{ asset('assets/img/bg-home-blue.png') }}');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
 @endpush
 
 @section('content')
-<div class="bg-[--black]  min-h-screen">
-    {{-- <h1 class="text-3xl font-bold underline">
+    <div class="bg-[--black]  min-h-screen">
+        {{-- <h1 class="text-3xl font-bold underline">
             Welcome to the User Home Page!
         </h1> --}}
 
-    <div id="title_wrapper">
-        {{-- title --}}
-        <div class="relative min-h-screen pb-24 flex items-center justify-center" id="title">
-            <div class="relative z-31">
-                @include('partials.title')
+        <div id="title_wrapper">
+            {{-- title --}}
+            <div class="relative min-h-screen pb-24 flex items-center justify-center" id="title">
+                <div class="relative z-31">
+                    @include('partials.title')
+                </div>
+            </div>
+
+            {{-- about us --}}
+            <div class="relative min-h-screen pb-24 flex items-center justify-center" id="about">
+                <div class="relative z-31">
+                    @include('partials.about')
+                </div>
             </div>
         </div>
 
-        {{-- about us --}}
-        <div class="relative min-h-screen pb-24 flex items-center justify-center" id="about">
+
+        {{-- schedule --}}
+        <div class="relative min-h-screen pb-24 flex items-center justify-center" id="tor">
             <div class="relative z-31">
-                @include('partials.about')
+                @include('partials.schedule')
+            </div>
+        </div>
+
+
+        {{-- submission --}}
+        <div class="relative  flex items-center justify-center" id="timeline">
+            <div class="relative z-31">
+                @include('partials.submission')
+            </div>
+        </div>
+
+        {{-- ticket --}}
+        <div class="relative flex items-center justify-center" id="faq">
+            <div class="relative z-31">
+                @include('partials.ticket')
             </div>
         </div>
     </div>
-
-
-    {{-- schedule --}}
-    <div class="relative min-h-screen pb-24 flex items-center justify-center" id="tor">
-        <div class="relative z-31">
-            @include('partials.schedule')
-        </div>
-    </div>
-
-
-    {{-- submission --}}
-    <div class="relative min-h-screen pb-24 flex items-center justify-center" id="timeline">
-        <div class="relative z-31">
-            @include('partials.submission')
-        </div>
-    </div>
-
-    {{-- ticket --}}
-    <div class="relative min-h-screen pb-24 flex items-center justify-center" id="faq">
-        <div class="relative z-31">
-            @include('partials.ticket')
-        </div>
-    </div>
-</div>
 @endsection
