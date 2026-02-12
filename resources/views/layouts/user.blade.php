@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{-- <title>{{ $title }}</title> --}}
     <title>PIFF 2026 | @yield('title', $title ?? 'Welcome')</title>
-    {{-- <link rel="icon" href="{{ asset('assets/logo/logo_pce_polos.png') }}" type="image/x-icon" /> --}}
+    <link rel="icon" href="{{ asset('assets/logo/logo_browser_piff.png') }}" type="image/x-icon" />
 
     {{-- TailwindCSS --}}
     <script src="https://cdn.tailwindcss.com/3.4.5"></script>
@@ -107,7 +107,7 @@
         /* Warna utama */
         :root {
             --primary-white: #fef7f7;
-            --black:#000;
+            --black: #000;
             --blue: #27b4f7;
             --yellow: #fec401;
             --red: #ff362d;
@@ -149,6 +149,7 @@
         .font-inter-regular {
             font-family: 'InterRegular', sans-serif;
         }
+
         @font-face {
             font-family: 'InterLight';
             src: url('{{ asset('assets/fonts/Inter_18pt-Light.ttf') }}') format('truetype');
