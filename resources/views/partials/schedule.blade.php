@@ -183,6 +183,7 @@
     $(function() {
         const $section = $('#scheduleSection');
         const $track = $('#scheduleTrack');
+        const $dragArea = $('#scheduleTrack');
         const $cards = $('.schedule-card');
         const totalCards = $cards.length;
         const GAP = 32;
@@ -193,6 +194,8 @@
         let currentX = 0;
         let dragOffset = 0;
         let resizeTimer;
+        let autoScrollInterval;
+        let isAutoScrollActive = true;
 
         const getCardWidth = () => window.innerWidth < 768 ? 260 : 350;
 
@@ -214,17 +217,44 @@
             updateCards();
         }
 
+        function startAutoScroll() {
+            if (autoScrollInterval) clearInterval(autoScrollInterval);
+            autoScrollInterval = setInterval(() => {
+                if (!isAutoScrollActive) return;
+                
+                if (currentIndex < totalCards - 1) {
+                    currentIndex++;
+                } else {
+                    currentIndex = 0;
+                }
+                snapToCard();
+            }, 3000);
+        }
+
+        function stopAutoScroll() {
+            isAutoScrollActive = false;
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+            }
+        }
+
+        function resumeAutoScroll() {
+            isAutoScrollActive = true;
+            startAutoScroll();
+        }
+
         gsap.set($track[0], { x: getTargetX(0) });
         updateCards();
+        startAutoScroll();
 
-        // Debounced resize
         $(window).on('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(snapToCard, 150);
         });
 
-        // Drag handlers
         function onDragStart(clientX) {
+            stopAutoScroll();
             isDragging = true;
             startX = clientX;
             currentX = gsap.getProperty($track[0], 'x');
@@ -244,16 +274,17 @@
             if (dragOffset < -threshold && currentIndex < totalCards - 1) currentIndex++;
             else if (dragOffset > threshold && currentIndex > 0) currentIndex--;
             snapToCard();
+            resumeAutoScroll();
         }
 
-        $section.on('mousedown', e => onDragStart(e.clientX));
+        $dragArea.on('mousedown', e => onDragStart(e.clientX));
         $(document).on('mousemove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.clientX); } });
         $(document).on('mouseup', onDragEnd);
 
-        $section.on('touchstart', e => onDragStart(e.touches[0].clientX));
-        $section.on('touchmove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.touches[0].clientX); } });
-        $section.on('touchend', onDragEnd);
-        $section.on('dragstart', e => e.preventDefault());
+        $dragArea.on('touchstart', e => onDragStart(e.touches[0].clientX));
+        $dragArea.on('touchmove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.touches[0].clientX); } });
+        $dragArea.on('touchend', onDragEnd);
+        $dragArea.on('dragstart', e => e.preventDefault());
     });
 </script>
 @endpush
