@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->group(function(){
     Route::get('/',function(){
