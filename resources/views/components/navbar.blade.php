@@ -3,17 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIFF 2026 - Final Navbar (Fixed Width)</title>
+    <title>PIFF 2026 - Final Navbar (Hover Only Animation)</title>
     <style>
-        /* --- 1. VARIABEL & RESET --- */
-        :root {
-            --black: #000000;
-            --primary-white: #ffffff;
-            --highlight: #ff362d;      
-            --highlight-dark: #8a0e08; 
-            --neon-blue: #00ccff;      
-        }
-
         body {
             margin: 0;
             padding: 0;
@@ -75,26 +66,25 @@
             height: 2px;
             bottom: 0;
             left: 0;
-            background-color: var(--highlight);
+            background-color: red;
             transition: width 0.3s ease;
         }
         .nav-links-main li a:not(.submit-btn):hover::after {
             width: 100%;
         }
 
-        /* --- 3. TOMBOL SUBMIT (FIXED WIDTH) --- */
+        /* --- 3. TOMBOL SUBMIT (HOVER ONLY EFFECT) --- */
         
         .submit-btn {
             position: relative;
             display: inline-block;
             
-            /* --- REVISI: PAKSA LEBAR --- */
-            min-width: 170px;     /* Lebar tombol dipaksa 250px */
-            text-align: center;   /* Teks di tengah */
-            padding: 15px 0;      /* Padding atas bawah saja */
+            min-width: 170px;
+            text-align: center;
+            padding: 15px 0;
             
             color: var(--primary-white);
-            background-color: var(--highlight); 
+            background-color: red; 
             text-decoration: none;
             font-weight: bold;
             text-transform: uppercase;
@@ -104,31 +94,36 @@
             transition: 0.5s; 
             border-radius: 4px;
             border: none;
-            white-space: nowrap; /* Mencegah teks turun baris */
+            white-space: nowrap;
         }
 
         .submit-btn:hover {
-            background-color: var(--highlight-dark);
+            background-color: darkred;
             box-shadow: 0 0 20px rgba(255, 54, 45, 0.4);
             transform: scale(1.05);
         }
 
-        .submit-btn:hover span {
-            opacity: 0;
-            transition: 0.3s;
-        }
+        /* --- LOGIKA BARU: GANTI DISINI --- */
 
+        /* 1. Default: Garis Sembunyi (Opacity 0) */
         .submit-btn span {
             position: absolute;
             display: block;
+            opacity: 0;          /* Hilang saat tidak di-hover */
+            transition: opacity 0.3s ease-in-out; /* Muncul halus */
         }
 
-        /* --- ANIMASI LAMBAT (4 Detik) --- */
+        /* 2. Hover: Garis Muncul (Opacity 1) */
+        .submit-btn:hover span {
+            opacity: 1;          /* Muncul saat hover */
+        }
+
+        /* --- ANIMASI (TETAP JALAN DI BACKGROUND) --- */
 
         .submit-btn span:nth-child(1) {
             top: 0; left: -100%; width: 100%; height: 3px;
-            background: linear-gradient(90deg, transparent, var(--neon-blue));
-            animation: btn-anim1 4s linear infinite; 
+            background: linear-gradient(90deg, transparent, white);
+            animation: btn-anim1 2s linear infinite; 
         }
         @keyframes btn-anim1 {
             0% { left: -100%; }
@@ -137,9 +132,9 @@
 
         .submit-btn span:nth-child(2) {
             top: -100%; right: 0; width: 3px; height: 100%;
-            background: linear-gradient(180deg, transparent, var(--neon-blue));
-            animation: btn-anim2 4s linear infinite; 
-            animation-delay: 1s; 
+            background: linear-gradient(180deg, transparent, white);
+            animation: btn-anim2 2s linear infinite; 
+            animation-delay: 0.5s; 
         }
         @keyframes btn-anim2 {
             0% { top: -100%; }
@@ -148,9 +143,9 @@
 
         .submit-btn span:nth-child(3) {
             bottom: 0; right: -100%; width: 100%; height: 3px;
-            background: linear-gradient(270deg, transparent, var(--neon-blue));
-            animation: btn-anim3 4s linear infinite; 
-            animation-delay: 2s; 
+            background: linear-gradient(270deg, transparent, white);
+            animation: btn-anim3 2s linear infinite; 
+            animation-delay: 1s; 
         }
         @keyframes btn-anim3 {
             0% { right: -100%; }
@@ -159,9 +154,9 @@
 
         .submit-btn span:nth-child(4) {
             bottom: -100%; left: 0; width: 3px; height: 100%;
-            background: linear-gradient(360deg, transparent, var(--neon-blue));
-            animation: btn-anim4 4s linear infinite; 
-            animation-delay: 3s; 
+            background: linear-gradient(360deg, transparent, white);
+            animation: btn-anim4 2s linear infinite; 
+            animation-delay: 1.5s; 
         }
         @keyframes btn-anim4 {
             0% { bottom: -100%; }
