@@ -1,10 +1,18 @@
 @push('styles')
 <style>
     .schedule-title {
-        font-size: clamp(2.5rem, 7.5vw, 4rem);
+        font-size: clamp(2.25rem, 7.5vw, 4rem);
         font-weight: 700;
         letter-spacing: 0.05em;
         line-height: 1.1;
+        margin-bottom: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .schedule-title {
+            font-size: clamp(2.5rem, 7.5vw, 4rem);
+            margin-bottom: 3rem;
+        }
     }
 
     .schedule-section {
@@ -16,63 +24,99 @@
         justify-content: center;
         background: var(--black);
         overflow: hidden;
-        cursor: grab;
+        padding: 0.25rem;
     }
 
-    .schedule-section:active {
-        cursor: grabbing;
+    .schedule-section > div {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    @media (min-width: 768px) {
+        .schedule-section {
+            padding: 4rem 1rem;
+        }
     }
 
     .schedule-track {
         display: flex;
-        gap: 2rem;
+        flex-direction: column;
+        gap: 0.65rem;
         position: relative;
-        user-select: none;
+        align-items: center;
+        width: 100%;
+        max-width: 98%;
+    }
+
+    @media (min-width: 768px) {
+        .schedule-track {
+            flex-direction: row;
+            gap: 2rem;
+            max-width: none;
+        }
     }
 
     .schedule-card {
-        min-width: 260px;
-        width: 260px;
+        width: 100%;
         background: rgba(255, 255, 255, 0.1);
         border: 2px solid var(--primary-white);
-        border-radius: 16px;
+        border-radius: 8px;
         overflow: hidden;
-        opacity: 0.6;
-        transform: scale(0.9);
+        opacity: 0;
+        transform: translateY(150vh) scale(0.9);
         transition: all 0.4s ease;
+        will-change: transform, opacity;
+        display: flex;
+        flex-direction: row;
+        height: 120px;
     }
 
     @media (min-width: 768px) {
         .schedule-card {
             min-width: 350px;
             width: 350px;
+            border-radius: 16px;
+            flex-direction: column;
+            height: auto;
         }
     }
 
     .schedule-card.active {
-        opacity: 1;
-        transform: scale(1);
         border-color: var(--yellow);
         box-shadow: 0 0 40px var(--yellow);
     }
 
+    .schedule-card.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
     .card-head {
-        padding: 1rem;
+        padding: 0.6rem;
         background: rgba(128, 128, 128, 0.3);
-        border-bottom: 2px solid var(--primary-white);
+        border-right: 2px solid var(--primary-white);
+        width: calc(100% - 120px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     @media (min-width: 768px) {
         .card-head {
             padding: 1.5rem;
+            border-right: none;
+            border-bottom: 2px solid var(--primary-white);
+            width: 100%;
         }
     }
 
     .card-date {
-        font-size: 0.7rem;
+        font-size: 0.55rem;
         color: var(--primary-white);
         font-weight: 400;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.15rem;
         letter-spacing: 0.03em;
         line-height: 1.2;
     }
@@ -80,18 +124,25 @@
     @media (min-width: 768px) {
         .card-date {
             font-size: 0.85rem;
+            margin-bottom: 0.25rem;
         }
     }
 
     .card-date sup {
-        font-size: 0.5rem;
+        font-size: 0.4rem;
         color: var(--primary-white);
         font-weight: 400;
         letter-spacing: 0.03em;
     }
 
+    @media (min-width: 768px) {
+        .card-date sup {
+            font-size: 0.5rem;
+        }
+    }
+
     .card-title {
-        font-size: 1.5rem;
+        font-size: 0.9rem;
         font-weight: 600;
         color: var(--primary-white);
         letter-spacing: 0.05em;
@@ -105,27 +156,29 @@
     }
 
     .card-body {
-        width: 260px;
-        height: 260px;
+        width: 120px;
+        height: 120px;
+        min-width: 120px;
+        min-height: 120px;
         background: var(--primary-white);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--black);
-        font-size: 1rem;
+        display: block;
         overflow: hidden;
+        flex-shrink: 0;
     }
 
     @media (min-width: 768px) {
         .card-body {
             width: 350px;
             height: 350px;
+            min-width: 350px;
+            min-height: 350px;
         }
     }
 
     .card-body img {
         width: 100%;
         height: 100%;
+        display: block;
         object-fit: cover;
         object-position: center;
     }
@@ -180,111 +233,51 @@
 
 @push('scripts')
 <script>
-    $(function() {
-        const $section = $('#scheduleSection');
-        const $track = $('#scheduleTrack');
-        const $dragArea = $('#scheduleTrack');
-        const $cards = $('.schedule-card');
-        const totalCards = $cards.length;
-        const GAP = 32;
+    gsap.registerPlugin(ScrollTrigger);
 
-        let currentIndex = 0;
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-        let dragOffset = 0;
-        let resizeTimer;
-        let autoScrollInterval;
-        let isAutoScrollActive = true;
+    $(window).on('load', function () {
 
-        const getCardWidth = () => window.innerWidth < 768 ? 260 : 350;
-
-        function getTargetX(index) {
-            const cardWidth = getCardWidth();
-            return ($section.outerWidth() - cardWidth) / 2 - index * (cardWidth + GAP);
-        }
-
-        function updateCards() {
-            $cards.removeClass('active').eq(currentIndex).addClass('active');
-        }
-
-        function snapToCard() {
-            gsap.to($track[0], {
-                x: getTargetX(currentIndex),
-                duration: 0.5,
-                ease: 'power3.out'
-            });
-            updateCards();
-        }
-
-        function startAutoScroll() {
-            if (autoScrollInterval) clearInterval(autoScrollInterval);
-            autoScrollInterval = setInterval(() => {
-                if (!isAutoScrollActive) return;
-                
-                if (currentIndex < totalCards - 1) {
-                    currentIndex++;
-                } else {
-                    currentIndex = 0;
-                }
-                snapToCard();
-            }, 3000);
-        }
-
-        function stopAutoScroll() {
-            isAutoScrollActive = false;
-            if (autoScrollInterval) {
-                clearInterval(autoScrollInterval);
-                autoScrollInterval = null;
+        let tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#scheduleSection",
+                start: "top top",
+                end: "+=3000",
+                pin: true,
+                scrub: 1,
             }
-        }
-
-        function resumeAutoScroll() {
-            isAutoScrollActive = true;
-            startAutoScroll();
-        }
-
-        gsap.set($track[0], { x: getTargetX(0) });
-        updateCards();
-        startAutoScroll();
-
-        $(window).on('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(snapToCard, 150);
         });
 
-        function onDragStart(clientX) {
-            stopAutoScroll();
-            isDragging = true;
-            startX = clientX;
-            currentX = gsap.getProperty($track[0], 'x');
-            gsap.killTweensOf($track[0]);
-        }
+        tl.to("#scheduleTrack .schedule-card:nth-child(1)", {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out"
+        });
 
-        function onDragMove(clientX) {
-            if (!isDragging) return;
-            dragOffset = clientX - startX;
-            gsap.set($track[0], { x: currentX + dragOffset });
-        }
+        tl.to("#scheduleTrack .schedule-card:nth-child(2)", {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out"
+        });
 
-        function onDragEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            const threshold = (getCardWidth() + GAP) * 0.3;
-            if (dragOffset < -threshold && currentIndex < totalCards - 1) currentIndex++;
-            else if (dragOffset > threshold && currentIndex > 0) currentIndex--;
-            snapToCard();
-            resumeAutoScroll();
-        }
+        tl.to("#scheduleTrack .schedule-card:nth-child(3)", {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out"
+        });
 
-        $dragArea.on('mousedown', e => onDragStart(e.clientX));
-        $(document).on('mousemove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.clientX); } });
-        $(document).on('mouseup', onDragEnd);
+        tl.to(".schedule-card", {
+            y: "-150vh",
+            opacity: 0,
+            duration: 1.5,
+            stagger: 0.1
+        }, "+=0.5");
 
-        $dragArea.on('touchstart', e => onDragStart(e.touches[0].clientX));
-        $dragArea.on('touchmove', e => { if (isDragging) { e.preventDefault(); onDragMove(e.touches[0].clientX); } });
-        $dragArea.on('touchend', onDragEnd);
-        $dragArea.on('dragstart', e => e.preventDefault());
     });
 </script>
 @endpush
