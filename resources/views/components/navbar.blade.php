@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIFF 2026 - Final Navbar (Hover Only Animation)</title>
+    <title>PIFF 2026 - FINAL FIX</title>
     <style>
+        /* --- 1. RESET & BASIC --- */
         body {
             margin: 0;
             padding: 0;
@@ -14,6 +15,13 @@
             overflow-x: hidden;
         }
 
+        :root {
+            --black: #000000;
+            --primary-white: #ffffff;
+            --main-red: #ff0000;
+            --dark-red: #8b0000;
+        }
+
         /* --- 2. STYLING NAVBAR --- */
         #navigation-bar {
             background-color: var(--black);
@@ -21,7 +29,6 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 5%;
-            
             position: fixed;
             top: 0; left: 0;
             width: 100%;
@@ -31,15 +38,71 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        .logo-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: block;
-            object-fit: cover;
-            cursor: pointer;
+        /* =========================================
+           3. STYLING LOGO (PERBAIKAN: COMET & NO BLEED)
+           ========================================= */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            height: 100%;
         }
 
+        .logo-wrapper {
+            position: relative;
+            display: flex; /* Ganti inline-block ke flex biar center presisi */
+            justify-content: center;
+            align-items: center;
+            padding: 10px 15px; 
+            text-decoration: none;
+            transition: transform 0.3s ease;
+            
+            /* INI KUNCI SUPAYA GARIS TIDAK KELUAR NAVBAR */
+            overflow: hidden; 
+        }
+
+        .logoPiff2026 {
+            display: block;
+            width: 150px; 
+            height: auto;
+        }
+
+        .logo-wrapper:hover {
+            transform: scale(1.1); 
+        }
+
+        .logo-wrapper span {
+            position: absolute;
+            display: block;
+        }
+
+        /* SETTING GARIS LOGO (EFEK KOMET/FADE) 
+           Saya tambahkan 'transparent' lebih banyak di gradient agar buntutnya pudar
+        */
+        .logo-wrapper span:nth-child(2) { /* Atas */
+            top: 0; left: -100%; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, transparent 50%, var(--primary-white));
+            animation: border-anim1 2s linear infinite;
+        }
+        .logo-wrapper span:nth-child(3) { /* Kanan */
+            top: -100%; right: 0; width: 2px; height: 100%;
+            background: linear-gradient(180deg, transparent, transparent 50%, var(--primary-white));
+            animation: border-anim2 2s linear infinite; animation-delay: 0.5s;
+        }
+        .logo-wrapper span:nth-child(4) { /* Bawah */
+            bottom: 0; right: -100%; width: 100%; height: 2px;
+            background: linear-gradient(270deg, transparent, transparent 50%, var(--primary-white));
+            animation: border-anim3 2s linear infinite; animation-delay: 1s;
+        }
+        .logo-wrapper span:nth-child(5) { /* Kiri */
+            bottom: -100%; left: 0; width: 2px; height: 100%;
+            background: linear-gradient(360deg, transparent, transparent 50%, var(--primary-white));
+            animation: border-anim4 2s linear infinite; animation-delay: 1.5s;
+        }
+
+
+        /* =========================================
+           4. STYLING MENU LINKS
+           ========================================= */
         .nav-links-main {
             display: flex;
             list-style: none;
@@ -66,105 +129,76 @@
             height: 2px;
             bottom: 0;
             left: 0;
-            background-color: red;
+            background-color: var(--main-red);
             transition: width 0.3s ease;
         }
         .nav-links-main li a:not(.submit-btn):hover::after {
             width: 100%;
         }
 
-        /* --- 3. TOMBOL SUBMIT (HOVER ONLY EFFECT) --- */
-        
+        /* =========================================
+           5. TOMBOL SUBMIT (TIDAK DIUBAH - SESUAI REQUEST)
+           ========================================= */
         .submit-btn {
             position: relative;
             display: inline-block;
-            
             min-width: 170px;
             text-align: center;
             padding: 15px 0;
-            
             color: var(--primary-white);
-            background-color: red; 
+            background-color: var(--main-red); 
             text-decoration: none;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
-            
             overflow: hidden; 
-            transition: 0.5s; 
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
             border-radius: 4px;
             border: none;
             white-space: nowrap;
         }
 
         .submit-btn:hover {
-            background-color: darkred;
-            box-shadow: 0 0 20px rgba(255, 54, 45, 0.4);
-            transform: scale(1.05);
+            background-color: var(--dark-red);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+            transform: scale(1.1); 
         }
 
-        /* --- LOGIKA BARU: GANTI DISINI --- */
-
-        /* 1. Default: Garis Sembunyi (Opacity 0) */
         .submit-btn span {
             position: absolute;
             display: block;
-            opacity: 0;          /* Hilang saat tidak di-hover */
-            transition: opacity 0.3s ease-in-out; /* Muncul halus */
         }
 
-        /* 2. Hover: Garis Muncul (Opacity 1) */
-        .submit-btn:hover span {
-            opacity: 1;          /* Muncul saat hover */
-        }
-
-        /* --- ANIMASI (TETAP JALAN DI BACKGROUND) --- */
-
-        .submit-btn span:nth-child(1) {
+        /* Gradient Submit Button tetap ORIGINAL (Solid) */
+        .submit-btn span:nth-child(1) { /* Atas */
             top: 0; left: -100%; width: 100%; height: 3px;
-            background: linear-gradient(90deg, transparent, white);
-            animation: btn-anim1 2s linear infinite; 
+            background: linear-gradient(90deg, transparent, var(--primary-white));
+            animation: border-anim1 2s linear infinite; 
         }
-        @keyframes btn-anim1 {
-            0% { left: -100%; }
-            50%, 100% { left: 100%; }
-        }
-
-        .submit-btn span:nth-child(2) {
+        .submit-btn span:nth-child(2) { /* Kanan */
             top: -100%; right: 0; width: 3px; height: 100%;
-            background: linear-gradient(180deg, transparent, white);
-            animation: btn-anim2 2s linear infinite; 
-            animation-delay: 0.5s; 
+            background: linear-gradient(180deg, transparent, var(--primary-white));
+            animation: border-anim2 2s linear infinite; animation-delay: 0.5s; 
         }
-        @keyframes btn-anim2 {
-            0% { top: -100%; }
-            50%, 100% { top: 100%; }
-        }
-
-        .submit-btn span:nth-child(3) {
+        .submit-btn span:nth-child(3) { /* Bawah */
             bottom: 0; right: -100%; width: 100%; height: 3px;
-            background: linear-gradient(270deg, transparent, white);
-            animation: btn-anim3 2s linear infinite; 
-            animation-delay: 1s; 
+            background: linear-gradient(270deg, transparent, var(--primary-white));
+            animation: border-anim3 2s linear infinite; animation-delay: 1s; 
         }
-        @keyframes btn-anim3 {
-            0% { right: -100%; }
-            50%, 100% { right: 100%; }
-        }
-
-        .submit-btn span:nth-child(4) {
+        .submit-btn span:nth-child(4) { /* Kiri */
             bottom: -100%; left: 0; width: 3px; height: 100%;
-            background: linear-gradient(360deg, transparent, white);
-            animation: btn-anim4 2s linear infinite; 
-            animation-delay: 1.5s; 
-        }
-        @keyframes btn-anim4 {
-            0% { bottom: -100%; }
-            50%, 100% { bottom: 100%; }
+            background: linear-gradient(360deg, transparent, var(--primary-white));
+            animation: border-anim4 2s linear infinite; animation-delay: 1.5s; 
         }
 
+        /* KEYFRAMES (Dipakai Bersama) */
+        @keyframes border-anim1 { 0% { left: -100%; } 50%, 100% { left: 100%; } }
+        @keyframes border-anim2 { 0% { top: -100%; } 50%, 100% { top: 100%; } }
+        @keyframes border-anim3 { 0% { right: -100%; } 50%, 100% { right: 100%; } }
+        @keyframes border-anim4 { 0% { bottom: -100%; } 50%, 100% { bottom: 100%; } }
 
-        /* --- 4. RESPONSIVE / MOBILE STYLE --- */
+
+        /* --- 6. RESPONSIVE --- */
         .burger { display: none; cursor: pointer; z-index: 1001; }
         .burger div { width: 25px; height: 3px; background-color: var(--primary-white); margin: 5px; transition: all 0.3s ease; }
 
@@ -179,10 +213,8 @@
             }
             .nav-links-main li { margin: 20px 0; opacity: 0; width: 100%; text-align: center; }
             .nav-links-main li a { font-size: 20px; display: block; }
-            
             .submit-btn { margin-top: 20px; padding: 15px 0; min-width: 200px; }
             .nav-links-main li .submit-btn { display: inline-block; width: auto; }
-
             .burger { display: block; }
         }
 
@@ -197,7 +229,10 @@
 
     <nav id="navigation-bar">
         <div class="logo-container">
-            <img class="logo-circle" src="https://via.placeholder.com/50" alt="PIFF 2026">
+            <a href="#" class="logo-wrapper">
+                <img src="{{ asset('assets/logo/logo_piff.png') }}" alt="PIFF 2026" class="logoPiff2026">
+                <span></span><span></span><span></span><span></span>
+            </a>
         </div>
 
         <ul class="nav-links-main">
@@ -207,7 +242,8 @@
             
             <li>
                 <a href="#" class="submit-btn">
-                    <span></span> <span></span> <span></span> <span></span> SUBMIT FILMS
+                    <span></span><span></span><span></span><span></span> 
+                    SUBMIT FILMS
                 </a>
             </li>
         </ul>
