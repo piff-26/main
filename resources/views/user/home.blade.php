@@ -37,7 +37,7 @@
 
 
         {{-- schedule --}}
-        <div class="relative min-h-screen pb-24 flex items-center justify-center" id="tor">
+        <div class="relative min-h-screen pb-24 flex items-center justify-center" id="schedule">
             <div class="relative z-31">
                 @include('partials.schedule')
             </div>
@@ -45,14 +45,14 @@
 
 
         {{-- submission --}}
-        <div class="relative  flex items-center justify-center" id="timeline">
+        <div class="relative  flex items-center justify-center" id="submission">
             <div class="relative z-31">
                 @include('partials.submission')
             </div>
         </div>
 
         {{-- ticket --}}
-        <div class="relative flex items-center justify-center" id="faq">
+        <div class="relative flex items-center justify-center" id="ticket">
             <div class="relative z-31">
                 @include('partials.ticket')
             </div>

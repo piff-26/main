@@ -275,7 +275,7 @@
         requestAnimationFrame(raf);
 
         // Global functions untuk kontrol Lenis
-        // (antisipasi buat timeline)
+        // (antisipasi buat submission)
         window.disableLenis = function() {
             lenisActive = false;
             lenis.stop();
