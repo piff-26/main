@@ -77,13 +77,17 @@
                 cursor: pointer;
                 z-index: 2;
                 /* Pastikan berada DI ATAS border yang berputar */
+                width: 100%;
+                max-width: 380px;
+                aspect-ratio: 4 / 5;
             }
 
             /* Gambar di dalam kartu */
             .holographic-card img {
                 display: block;
                 width: 100%;
-                height: auto;
+                height: 100%;
+                object-fit: cover;
                 transition: transform 0.5s ease;
             }
 
@@ -160,8 +164,7 @@
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
                     <div class="spinning-border-box">
                         <div class="holographic-card">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7s072xWOgucRxv97T-V3HyNhF0rrXgujDFQ&s"
-                                alt="GAP IN A MINUTE">
+                            <img src="{{ asset('assets/img/poster_submission_1.jpg') }}" alt="GAP IN A MINUTE">
                         </div>
                     </div>
                 </div>
@@ -170,8 +173,7 @@
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
                     <div class="spinning-border-box">
                         <div class="holographic-card">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7s072xWOgucRxv97T-V3HyNhF0rrXgujDFQ&s"
-                                alt="STUDENT GAP STANDERS">
+                            <img src="{{ asset('assets/img/poster_submission_2.jpg') }}" alt="STUDENT GAP STANDERS">
                         </div>
                     </div>
                 </div>
@@ -180,8 +182,7 @@
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
                     <div class="spinning-border-box">
                         <div class="holographic-card">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7s072xWOgucRxv97T-V3HyNhF0rrXgujDFQ&s"
-                                alt="VOICES IN THE GAP">
+                            <img src="{{ asset('assets/img/poster_submission_3.jpg') }}" alt="VOICES IN THE GAP">
                         </div>
                     </div>
                 </div>
