@@ -212,7 +212,7 @@
 
 <body>
 
-    {{-- @include('components.loader') --}}
+    @include('components.loader')
     @include('components.navbar')
 
 
