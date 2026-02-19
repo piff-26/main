@@ -174,7 +174,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const loader = document.getElementById('cinema-loader');
-        const MIN_DURATION = 4000;
+        const MIN_DURATION = 2000;
         const ZOOM_DURATION = 1500;
         let isPageLoaded = false;
         window.addEventListener('load', () => {
