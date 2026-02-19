@@ -24,45 +24,35 @@
         style="
             --x: 50%;
             --y: 50%;
-            --r: 850px;
+            --r: 950px;
             background: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0%, rgba(0,0,0,0.98) 35%, black 100%);
-            animation: spotlight-sequence 4s cubic-bezier(0.45, 0, 0.55, 1) forwards;
         ">
     </div>
 </div>
 
 <style>
-    /* --- animasi glow pulse --- */
     @keyframes pulse-glow {
 
         0%,
         100% {
-            /* Keadaan Redup (Glow tipis) */
             filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
         }
 
         50% {
-            /* Keadaan Terang (Glow tebal & luas) */
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 1.0)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 80px rgba(255, 255, 255, 0.4));
         }
     }
 
-    /* Terapkan animasi ke SVG utama */
     #main-logo {
-        /* Durasi 3 detik, berulang selamanya, gerakannya halus (ease-in-out) */
         animation: pulse-glow 3s ease-in-out infinite;
     }
 
-    /* Saat zoom aktif, matikan animasi glow agar transisi ke garis lebih mulus */
     .zoom-active #main-logo {
         animation: none;
         filter: none;
-        /* Hapus filter drop-shadow saat jadi garis */
         transition: filter 0.5s ease;
     }
 
-
-    /* CSS Flashlight (Radius dikembalikan ke 850px/250px agar kontras) */
     @property --x {
         syntax: '<percentage>';
         inherits: false;
@@ -78,82 +68,103 @@
     @property --r {
         syntax: '<length>';
         inherits: false;
-        initial-value: 850px;
+        initial-value: 950px;
     }
 
     @keyframes spotlight-sequence {
         0% {
             --x: 50%;
             --y: 50%;
-            --r: 850px;
         }
 
+        /* Tengah */
         25% {
-            --x: 75%;
-            --y: 55%;
-            --r: 850px;
-        }
-
-        50% {
-            --x: 25%;
-            --y: 40%;
-            --r: 850px;
-        }
-
-        75% {
-            --x: 50%;
+            --x: 80%;
             --y: 60%;
-            --r: 850px;
         }
 
-        100% {
-            --x: 38%;
-            --y: 48%;
-            --r: 850px;
+        /* Kanan Bawah */
+        50% {
+            --x: 20%;
+            --y: 40%;
         }
+
+        /* Kiri Atas */
+        75% {
+            --x: 70%;
+            --y: 30%;
+        }
+
+        /* Kanan Atas */
+        100% {
+            --x: 30%;
+            --y: 70%;
+        }
+
+    }
+
+    #flashlight-overlay {
+        animation: spotlight-sequence 5s ease-in-out infinite alternate;
     }
 
     @media (max-width: 768px) {
-        @keyframes spotlight-sequence {
-            0% {
-                --x: 50%;
-                --y: 50%;
-            }
-
-            25% {
-                --x: 80%;
-                --y: 50%;
-            }
-
-            50% {
-                --x: 20%;
-                --y: 50%;
-            }
-
-            100% {
-                --x: 25%;
-                --y: 48%;
-                --r: 200px;
-            }
+        #flashlight-overlay {
+            --r: 250px;
         }
     }
 
-    /* CSS Transisi Akhir (Zoom) */
+
+    /* --- transisi akhir (.zoom-active) --- */
     .zoom-active #logo-wrapper {
         transform: scale(600);
         transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1);
     }
 
+    /* Mobile Zoom Adjustment */
+    @media (max-width: 768px) {
+        #logo-wrapper {
+            transform-origin: 20.3% 33.5% !important;
+        }
+
+        .zoom-active #logo-wrapper {
+            transform: scale(400);
+        }
+    }
+
+    /* Fade Out Curtains */
     .zoom-active #black-curtain {
         opacity: 0;
         transition: opacity 1s ease-in-out;
     }
 
     .zoom-active #flashlight-overlay {
+        /* Matikan animasi loop "mencari" */
+        animation: none;
+
+        /* Paksa pindah ke posisi Segitiga (Desktop) */
+        --x: 38%;
+        --y: 48%;
+
+        /* Fade out opacity */
         opacity: 0;
-        transition: opacity 1s ease-in-out;
+
+        /* Transisi:
+           - Opacity 1s (menghilang)
+           - --x & --y 0.8s (meluncur ke posisi lock segitiga)
+        */
+        transition: opacity 1s ease-in-out, --x 0.8s ease-out, --y 0.8s ease-out;
     }
 
+    /* Override Posisi Lock untuk Mobile */
+    @media (max-width: 768px) {
+        .zoom-active #flashlight-overlay {
+            --x: 25%;
+            /* Posisi Lock Mobile */
+            --y: 48%;
+        }
+    }
+
+    /* Logo Style Change */
     .logo-path {
         transition: all 0.5s ease;
     }
@@ -165,6 +176,7 @@
         vector-effect: non-scaling-stroke;
     }
 
+    /* Hide Text */
     .zoom-active #loading-text {
         opacity: 0;
         transition: opacity 0.3s;
