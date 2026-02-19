@@ -1,4 +1,32 @@
 <footer class="bg-black text-white font-sans">
+    <style>
+        .footer-social-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 5px 0;
+        }
+
+        .footer-social-link span {
+            position: relative;
+        }
+
+        .footer-social-link span::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #ff0000;
+            transition: width 0.3s ease;
+        }
+
+        .footer-social-link:hover span::after {
+            width: 100%;
+        }
+    </style>
     <div class="max-w-7xl mx-auto px-6 py-12">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
 
@@ -13,16 +41,16 @@
                 </div>
 
                 {{-- Social Media & Email --}}
-                <div class="space-y-3 text-lg font-inter-bold mb-8">
+                <div class="flex flex-col space-y-3 text-lg font-inter-bold mb-8">
                     {{-- Instagram --}}
                     <a href="https://instagram.com/piff.pcu" target="_blank"
-                        class="flex items-center gap-3 hover:text-gray-300 transition">
+                        class="footer-social-link hover:text-gray-300 transition">
                         <img src="{{ asset('assets/icons/icon_instagram.png') }}" alt="Instagram" class="w-8 h-8">
                         <span>@piff.pcu</span>
                     </a>
 
                     {{-- Email --}}
-                    <a href="mailto:piff.pcu@gmail.com" class="flex items-center gap-3 hover:text-gray-300 transition">
+                    <a href="mailto:piff.pcu@gmail.com" class="footer-social-link hover:text-gray-300 transition">
                         <img src="{{ asset('assets/icons/icon_email.png') }}" alt="Email" class="w-8 h-8">
                         <span>piff.pcu@gmail.com</span>
                     </a>
