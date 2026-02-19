@@ -8,7 +8,7 @@
             margin-bottom: 0.5rem;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 1280px) {
             .schedule-title {
                 font-size: clamp(2.5rem, 7.5vw, 4rem);
                 margin-bottom: 3rem;
@@ -34,7 +34,7 @@
             align-items: center;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 1280px) {
             .schedule-section {
                 padding: 4rem 1rem;
             }
@@ -50,7 +50,7 @@
             max-width: 98%;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 1280px) {
             .schedule-track {
                 flex-direction: row;
                 gap: 2rem;
@@ -64,16 +64,19 @@
             border: 2px solid var(--primary-white);
             border-radius: 8px;
             overflow: hidden;
-            opacity: 0;
-            transform: translateY(150vh) scale(0.9);
-            transition: all 0.4s ease;
-            will-change: transform, opacity;
+            opacity: 1;
             display: flex;
             flex-direction: row;
             height: 120px;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .schedule-card {
+                height: 200px;
+            }
+        }
+
+        @media (min-width: 1280px) {
             .schedule-card {
                 min-width: 350px;
                 width: 350px;
@@ -103,7 +106,14 @@
             justify-content: center;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .card-head {
+                padding: 1.2rem;
+                width: calc(100% - 200px);
+            }
+        }
+
+        @media (min-width: 1280px) {
             .card-head {
                 padding: 1.5rem;
                 border-right: none;
@@ -121,7 +131,14 @@
             line-height: 1.2;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .card-date {
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
             .card-date {
                 font-size: 0.85rem;
                 margin-bottom: 0.25rem;
@@ -135,7 +152,13 @@
             letter-spacing: 0.03em;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .card-date sup {
+                font-size: 0.6rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
             .card-date sup {
                 font-size: 0.5rem;
             }
@@ -149,7 +172,13 @@
             line-height: 1.1;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .card-title {
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
             .card-title {
                 font-size: 2rem;
             }
@@ -166,7 +195,16 @@
             flex-shrink: 0;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .card-body {
+                width: 200px;
+                height: 200px;
+                min-width: 200px;
+                min-height: 200px;
+            }
+        }
+
+        @media (min-width: 1280px) {
             .card-body {
                 width: 350px;
                 height: 350px;
@@ -238,47 +276,33 @@
 
         $(window).on('load', function() {
 
+            gsap.set(".schedule-card", {
+                y: 100, 
+                opacity: 0,
+                scale: 0.9
+            });
+
             let tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#scheduleSection",
-                    start: "top top",
-                    end: "+=3000",
-                    pin: true,
-                    scrub: 1,
+                    start: "top top", // Mulai saat bagian atas section ketemu atas layar
+                    end: "+=2000", // Panjang area scroll (durasi animasi)
+                    pin: true, // Kunci section agar background diam
+                    scrub: 1, // Animasi halus mengikuti jari
+                    invalidateOnRefresh: true // Hitung ulang jika refresh/resize
                 }
             });
 
-            tl.to("#scheduleTrack .schedule-card:nth-child(1)", {
-                y: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 1,
-                ease: "power3.out"
-            });
-
-            tl.to("#scheduleTrack .schedule-card:nth-child(2)", {
-                y: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 1,
-                ease: "power3.out"
-            });
-
-            tl.to("#scheduleTrack .schedule-card:nth-child(3)", {
-                y: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 1,
-                ease: "power3.out"
-            });
-
             tl.to(".schedule-card", {
-                y: "-150vh",
-                opacity: 0,
-                duration: 1.5,
-                stagger: 0.1
-            }, "+=0.5");
+                y: 0, // Kembali ke posisi asli CSS
+                opacity: 1, // Jadi terlihat
+                scale: 1, // Ukuran normal
+                duration: 1, // Durasi relatif per kartu
+                stagger: 2, // Jeda antar kartu (semakin besar angka, semakin jauh jarak scroll antar kartu)
+                ease: "power2.out"
+            });
 
+            ScrollTrigger.refresh();
         });
     </script>
 @endpush
