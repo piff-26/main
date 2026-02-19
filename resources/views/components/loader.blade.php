@@ -140,7 +140,7 @@
 
     /* CSS Transisi Akhir (Zoom) */
     .zoom-active #logo-wrapper {
-        transform: scale(300);
+        transform: scale(600);
         transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1);
     }
 
