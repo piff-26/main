@@ -285,24 +285,32 @@
             let tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: "#scheduleSection",
-                    start: "top top", // Mulai saat bagian atas section ketemu atas layar
-                    end: "+=2000", // Panjang area scroll (durasi animasi)
-                    pin: true, // Kunci section agar background diam
-                    scrub: 1, // Animasi halus mengikuti jari
-                    invalidateOnRefresh: true // Hitung ulang jika refresh/resize
+                    start: "top top",
+                    end: "+=2000",
+                    pin: true,
+                    scrub: 1,
+                    invalidateOnRefresh: true
                 }
             });
 
             tl.to(".schedule-card", {
-                y: 0, // Kembali ke posisi asli CSS
-                opacity: 1, // Jadi terlihat
-                scale: 1, // Ukuran normal
-                duration: 1, // Durasi relatif per kartu
-                stagger: 2, // Jeda antar kartu (semakin besar angka, semakin jauh jarak scroll antar kartu)
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                stagger: 2,
                 ease: "power2.out"
             });
 
             ScrollTrigger.refresh();
+
+            let resizeTimer;
+            $(window).on('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    ScrollTrigger.refresh();
+                }, 250);
+            });
         });
     </script>
 @endpush
