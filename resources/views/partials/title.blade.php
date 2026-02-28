@@ -33,12 +33,38 @@
         background: var(--primary-white);
         width: 100%;
     }
+
+    :root {
+        --line-gap: 0.75rem;
+    }
+
+    .text-container {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    @media (min-width: 768px) {
+        .text-container {
+            margin-left: clamp(8rem, 20vw, 30rem);
+            margin-right: clamp(8rem, 20vw, 30rem);
+        }
+    }
+
+    .line-dynamic {
+        position: absolute;
+        height: 2px;
+        background: var(--primary-white);
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        z-index: 2;
+    }
 </style>
 @endpush
 
 <div class="relative w-full h-screen overflow-hidden">
     <div class="title-content flex items-center justify-center h-full">
-        <div class="w-full md:mx-20 lg:mx-32 xl:mx-40">
+        <div class="w-full text-container">
             <!-- Baris 1 -->
             <div class="grid grid-cols-3 items-center mb-2">
                 <!-- Kiri -->
@@ -61,21 +87,29 @@
             </div>
 
             <!-- Baris 2 -->
-            <div class="grid grid-cols-3 items-center mb-2">
+            <div class="grid grid-cols-3 items-center mb-2 relative">
+
+                <div class="line-dynamic"></div>
+
                 <!-- Kiri -->
                 <div class="flex justify-start items-center">
-                    <div class="big-text text-[--primary-white] font-montech-black gap-text" data-text="GAP">GAP</div>
+                    <div class="big-text text-[--primary-white] font-montech-black gap-text">
+                        GAP
+                    </div>
                 </div>
 
                 <!-- Tengah -->
                 <div class="flex items-center justify-center">
-                    <span class="small-text text-[--primary-white] font-inter-semibold">SBY, IDN</span>
+                    <span class="small-text text-[--primary-white] font-inter-semibold mid-text bg-black px-2">
+                        SBY, IDN
+                    </span>
                 </div>
 
                 <!-- Kanan -->
                 <div class="flex items-center justify-end">
-                    <div class="divider-line mr-6 sm:mr-16 md:mr-18 lg:mr-28 xl:mr-32"></div>
-                    <span class="small-text text-[--primary-white] font-inter-semibold whitespace-nowrap">MAY 29–30</span>
+                    <span class="small-text text-[--primary-white] font-inter-semibold whitespace-nowrap right-text bg-black px-2">
+                        MAY 29–30
+                    </span>
                 </div>
             </div>
 
@@ -103,10 +137,21 @@
     $(window).on('load', function() {
         // Scramble Text Animation
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const texts = [
-            { el: $('.the-text'), text: 'THE', delay: 300 },
-            { el: $('.gap-text'), text: 'GAP', delay: 800 },
-            { el: $('.standers-text'), text: 'STANDERS', delay: 1300 }
+        const texts = [{
+                el: $('.the-text'),
+                text: 'THE',
+                delay: 300
+            },
+            {
+                el: $('.gap-text'),
+                text: 'GAP',
+                delay: 800
+            },
+            {
+                el: $('.standers-text'),
+                text: 'STANDERS',
+                delay: 1300
+            }
         ];
 
         function scramble(item) {
@@ -118,7 +163,7 @@
                     if (++frame % 4 !== 0) return;
                     const progress = this.progress();
                     const reveal = Math.floor(progress * item.text.length);
-                    item.el.text(item.text.split('').map((c, i) => 
+                    item.el.text(item.text.split('').map((c, i) =>
                         i < reveal ? c : chars[Math.floor(Math.random() * chars.length)]
                     ).join(''));
                 },
@@ -126,11 +171,38 @@
             });
         }
 
+        function updateLine() {
+            const $mid = $('.mid-text');
+            const $right = $('.right-text');
+            const $line = $('.line-dynamic');
+            const $row = $line.parent();
+
+            if (!$mid.length || !$right.length) return;
+
+            const gap = 2;
+
+            const midRect = $mid[0].getBoundingClientRect();
+            const rightRect = $right[0].getBoundingClientRect();
+            const rowRect = $row[0].getBoundingClientRect();
+
+            const left = midRect.right - rowRect.left + gap;
+            const width = rightRect.left - rowRect.left - gap - left;
+
+            gsap.set($line, {
+                left,
+                width: Math.max(0, width)
+            });
+        }
+
+        updateLine();
+
+        $(window).on('resize', updateLine);
+
         // Initial
         texts.forEach(item => setTimeout(() => scramble(item), item.delay));
 
         // Loop
-        setInterval(() => texts.forEach((item, i) => 
+        setInterval(() => texts.forEach((item, i) =>
             setTimeout(() => scramble(item), i * 500)
         ), 4000);
     });
