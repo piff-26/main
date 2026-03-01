@@ -27,6 +27,8 @@
                 overflow: hidden;
                 /* Memotong gradien yang berputar agar berbentuk kotak tumpul */
                 z-index: 1;
+                perspective: 1000px;
+                cursor: pointer;
             }
 
             /* Layer Berputar (Conic Gradient) */
@@ -70,7 +72,8 @@
                 background: #000;
                 border-radius: 15px;
                 filter: blur(5px);
-                /* Memberi efek blur pada glow */
+                transition: opacity 0.5s ease;
+                opacity: 1;
             }
 
 
@@ -79,18 +82,28 @@
             .holographic-card {
                 position: relative;
                 display: block;
-                overflow: hidden;
                 border-radius: 15px;
-                /* Harus sedikit lebih kecil dari radius container luar */
                 background-color: #111;
-                /* Penting! Background gelap untuk menutupi tengah putaran */
-                transition: all 0.5s ease;
+                transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
                 cursor: pointer;
+                pointer-events: auto;
                 z-index: 2;
-                /* Pastikan berada DI ATAS border yang berputar */
-                width: 100%;
-                max-width: 380px;
+
+                width: 300px;
+                max-width: 90vw;
                 aspect-ratio: 4 / 5;
+
+                perspective: 1000px;
+                transform-style: preserve-3d;
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+                transform-style: preserve-3d;
+            }
+
+            @media (min-width: 1025px) {
+                .holographic-card {
+                    width: 400px;
+                }
             }
 
             /* Gambar di dalam kartu */
@@ -138,8 +151,6 @@
                         transparent);
             }
 
-            /* --- Hover Effects --- */
-            /* Saat wrapper terluar di-hover, efek di kartu dalam aktif */
             .spinning-border-box:hover .holographic-card {
                 transform: scale(1.05);
                 /* Membesar */
@@ -150,6 +161,55 @@
             /* Menjalankan kilau "swoosh" */
             .spinning-border-box:hover .holographic-card::before {
                 left: 100%;
+            }
+
+            .spinning-border-box.flipped .holographic-card {
+                transform: rotateY(180deg);
+            }
+
+            .spinning-border-box.flipped::before {
+                animation-play-state: paused;
+                opacity: 0.2;
+            }
+
+            .flip-card-front,
+            .flip-card-back {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                backface-visibility: hidden;
+                border-radius: 15px;
+                overflow: hidden;
+                pointer-events: auto;
+            }
+
+            .flip-card-back {
+                background-color: #111;
+                transform: rotateY(180deg);
+            }
+
+            .flip-card-front img,
+            .flip-card-back img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+            .spinning-border-box.flipped::after {
+                opacity: 0;
+                transition-delay: 0s;
+            }
+
+            .holographic-card {
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+            }
+
+            .spinning-border-box:not(.flipped)::after {
+                transition-delay: 0.4s;
+                opacity: 1;
             }
         </style>
     @endpush
@@ -188,31 +248,49 @@
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row items-center justify-center mt-10 md:mt-7 gap-6 md:gap-10">
+            <div class="flex flex-col lg:flex-row items-center justify-center mt-10 md:mt-7 gap-6 md:gap-10">
 
                 <div data-aos="fade-right" data-aos-duration="3000"
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
-                    <div class="spinning-border-box" id="spinning-border-box-1">
+                    <div class="spinning-border-box" id="spinning-border-box-1" onclick="flipCard(this)">
                         <div class="holographic-card" id="holographic-card-1">
-                            <img src="{{ asset('assets/img/poster_submission_1.png') }}" alt="GAP IN A MINUTE">
+                            <div class="flip-card-front">
+                                <img src="{{ asset('assets/img/poster_submission_1.png') }}" alt="GAP IN A MINUTE">
+                            </div>
+                            <div class="flip-card-back">
+                                <img src="{{ asset('assets/img/poster_submission_1_2.png') }}"
+                                    alt="GAP IN A MINUTE INFO">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div data-aos="fade-up" data-aos-duration="3000"
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
-                    <div class="spinning-border-box" id="spinning-border-box-2">
+                    <div class="spinning-border-box" id="spinning-border-box-2" onclick="flipCard(this)">
                         <div class="holographic-card" id="holographic-card-2">
-                            <img src="{{ asset('assets/img/poster_submission_2.png') }}" alt="STUDENT GAP STANDERS">
+                            <div class="flip-card-front">
+                                <img src="{{ asset('assets/img/poster_submission_2.png') }}" alt="STUDENT GAP STANDERS">
+                            </div>
+                            <div class="flip-card-back">
+                                <img src="{{ asset('assets/img/poster_submission_2_2.png') }}"
+                                    alt="STUDENT GAP STANDERS INFO">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div data-aos="fade-left" data-aos-duration="3000"
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
-                    <div class="spinning-border-box" id="spinning-border-box-3">
+                    <div class="spinning-border-box" id="spinning-border-box-3" onclick="flipCard(this)">
                         <div class="holographic-card" id="holographic-card-3">
-                            <img src="{{ asset('assets/img/poster_submission_3.png') }}" alt="VOICES IN THE GAP">
+                            <div class="flip-card-front">
+                                <img src="{{ asset('assets/img/poster_submission_3.png') }}" alt="VOICES IN THE GAP">
+                            </div>
+                            <div class="flip-card-back">
+                                <img src="{{ asset('assets/img/poster_submission_3_2.png') }}"
+                                    alt="VOICES IN THE GAP INFO">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -223,6 +301,11 @@
     </div>
 
     @push('scripts')
+        <script>
+            function flipCard(element) {
+                element.classList.toggle('flipped');
+            }
+        </script>
         <!-- <script>
             gsap.registerPlugin(ScrollTrigger);
 
