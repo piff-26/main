@@ -250,7 +250,7 @@
                     <div class="card-title font-montech-bold">SCREENING</div>
                 </div>
                 <div class="card-body">
-                    <img src="{{ asset('assets/img/schedule_1.jpg') }}" alt="Opening & Screening">
+                    <img src="{{ asset('assets/img/schedule_2.jpg') }}" alt="Opening & Screening">
                 </div>
             </div>
 
@@ -262,7 +262,7 @@
                     <div class="card-title font-montech-bold">AWARDING</div>
                 </div>
                 <div class="card-body">
-                    <img src="{{ asset('assets/img/schedule_1.jpg') }}" alt="Talkshow & Awarding">
+                    <img src="{{ asset('assets/img/schedule_3.jpg') }}" alt="Talkshow & Awarding">
                 </div>
             </div>
 
@@ -277,7 +277,7 @@
         $(window).on('load', function() {
 
             gsap.set(".schedule-card", {
-                y: 100, 
+                y: 100,
                 opacity: 0,
                 scale: 0.9
             });
