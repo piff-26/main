@@ -42,9 +42,20 @@
                 background-repeat: no-repeat;
                 background-position: 0 0;
                 /* Membuat gradien melingkar. Ubah #00ffff ke warna lain jika mau */
-                background-image: conic-gradient(transparent, yellow, transparent 30%);
                 /* Animasi berputar terus menerus */
                 animation: border-spin 3s linear infinite;
+            }
+
+            #spinning-border-box-1::before {
+                background-image: conic-gradient(transparent, rgb(38, 179, 248), transparent 30%);
+            }
+
+            #spinning-border-box-2::before {
+                background-image: conic-gradient(transparent, rgb(253, 195, 1), transparent 30%);
+            }
+
+            #spinning-border-box-3::before {
+                background-image: conic-gradient(transparent, rgb(255, 0, 0), transparent 30%);
             }
 
             /* Layer Tambahan untuk efek Glow di belakangnya (Optional, biar lebih halus) */
@@ -99,13 +110,32 @@
                 left: -100%;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(120deg,
-                        transparent,
-                        rgba(0, 255, 255, 0.5),
-                        /* Warna kilau hover */
-                        transparent);
                 transition: all 0.6s;
                 z-index: 3;
+            }
+
+            #holographic-card-1::before {
+                background: linear-gradient(120deg,
+                        transparent,
+                        rgba(38, 179, 248, 0.5),
+                        /* Warna kilau hover */
+                        transparent);
+            }
+
+            #holographic-card-2::before {
+                background: linear-gradient(120deg,
+                        transparent,
+                        rgba(253, 195, 1, 0.5),
+                        /* Warna kilau hover */
+                        transparent);
+            }
+
+            #holographic-card-3::before {
+                background: linear-gradient(120deg,
+                        transparent,
+                        rgba(204, 50, 44, 0.5),
+                        /* Warna kilau hover */
+                        transparent);
             }
 
             /* --- Hover Effects --- */
@@ -162,27 +192,27 @@
 
                 <div data-aos="fade-right" data-aos-duration="3000"
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
-                    <div class="spinning-border-box">
-                        <div class="holographic-card">
-                            <img src="{{ asset('assets/img/poster_submission_1.jpg') }}" alt="GAP IN A MINUTE">
+                    <div class="spinning-border-box" id="spinning-border-box-1">
+                        <div class="holographic-card" id="holographic-card-1">
+                            <img src="{{ asset('assets/img/poster_submission_1.png') }}" alt="GAP IN A MINUTE">
                         </div>
                     </div>
                 </div>
 
                 <div data-aos="fade-up" data-aos-duration="3000"
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
-                    <div class="spinning-border-box">
-                        <div class="holographic-card">
-                            <img src="{{ asset('assets/img/poster_submission_2.jpg') }}" alt="STUDENT GAP STANDERS">
+                    <div class="spinning-border-box" id="spinning-border-box-2">
+                        <div class="holographic-card" id="holographic-card-2">
+                            <img src="{{ asset('assets/img/poster_submission_2.png') }}" alt="STUDENT GAP STANDERS">
                         </div>
                     </div>
                 </div>
 
                 <div data-aos="fade-left" data-aos-duration="3000"
                     class="submission-photo-animation w-full md:w-auto flex justify-center">
-                    <div class="spinning-border-box">
-                        <div class="holographic-card">
-                            <img src="{{ asset('assets/img/poster_submission_3.jpg') }}" alt="VOICES IN THE GAP">
+                    <div class="spinning-border-box" id="spinning-border-box-3">
+                        <div class="holographic-card" id="holographic-card-3">
+                            <img src="{{ asset('assets/img/poster_submission_3.png') }}" alt="VOICES IN THE GAP">
                         </div>
                     </div>
                 </div>
