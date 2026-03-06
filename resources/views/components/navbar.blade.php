@@ -384,7 +384,7 @@
             <li><a href="{{ route('user.home') }}#ticket">TICKETS</a></li>
 
             <li>
-                <a href="#" class="submit-btn">
+                <a href="{{route('user.submit')}}" class="submit-btn">
                     SUBMIT FILMS
                 </a>
             </li>
