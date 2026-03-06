@@ -20,4 +20,8 @@ class UserController extends BaseController
     {
         return view('user.regist.anggota');
     }
+
+    public function submitView(){
+        return view('user.submit');
+    }
 }
