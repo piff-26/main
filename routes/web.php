@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
+Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/test', function () {
