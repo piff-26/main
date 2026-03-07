@@ -5,7 +5,6 @@
     <a class="mb-3 flex flex-col items-center justify-center border-b-2 border-solid border-gray-100 py-6 outline-none"
         href="#" data-te-ripple-init data-te-ripple-color="primary">
         <div class="flex items-center justify-center space-x-3 mb-3">
-            {{-- <img src="{{ asset('assets/utils/icons/logo.png') }}" class="h-8" alt="pce" loading="lazy" /> --}}
         </div>
         <span class="text-center font-bold">Petra International Film Festival <br>2026</span>
     </a>
@@ -13,8 +12,43 @@
         <li class="relative">
             <a id="overview"
                 class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="">
+                data-te-sidenav-link-ref href="{{ route('admin.dashboard') }}">
                 <span>Dashboard</span>
+            </a>
+        </li>
+
+        <li class="relative">
+            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                data-te-sidenav-link-ref href="{{ route('admin.transaction') }}">
+                <span>Transaction</span>
+            </a>
+        </li>
+
+        <li class="relative">
+            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                data-te-sidenav-link-ref href="{{ route('admin.event') }}">
+                <span>Event</span>
+            </a>
+        </li>
+
+        <li class="relative">
+            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                data-te-sidenav-link-ref href="{{ route('admin.monitor') }}">
+                <span>Monitor</span>
+            </a>
+        </li>
+
+        <li class="relative">
+            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                data-te-sidenav-link-ref href="{{ route('admin.insight') }}">
+                <span>Insight</span>
+            </a>
+        </li>
+
+        <li class="relative">
+            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                data-te-sidenav-link-ref href="{{ route('admin.ticketScan') }}">
+                <span>Ticket Scan</span>
             </a>
         </li>
 
@@ -61,24 +95,51 @@
                 <li class="relative pt-4">
                     <span class="px-6 py-4 text-[0.6rem] font-bold uppercase text-gray-600 ">Overview</span>
                     <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="" data-te-nav-link-ref>
+                        href="{{ route('admin.dashboard') }}" data-te-nav-link-ref>
                         <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                        href="{{ route('admin.transaction') }}" data-te-nav-link-ref>
+                        <span>Transaction</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                        href="{{ route('admin.event') }}" data-te-nav-link-ref>
+                        <span>Event</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                        href="{{ route('admin.monitor') }}" data-te-nav-link-ref>
+                        <span>Monitor</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                        href="{{ route('admin.insight') }}" data-te-nav-link-ref>
+                        <span>Insight</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                        href="{{ route('admin.ticketScan') }}" data-te-nav-link-ref>
+                        <span>Ticket Scan</span>
                     </a>
                 </li>
 
             </ul>
         </div>
 
-        <!-- Right elements -->
         <div class="relative flex items-center">
-            <!-- Logout Icon -->
             <a class="pl-2 my-auto sm:mb-0 sm:mr-4 text-secondary-500 transition duration-200 hover:text-secondary-400 hover:ease-in-out focus:text-secondary-400 disabled:text-black/30 motion-reduce:transition-none"
-                href="">
+                href="{{ route('logout') }}">
                 <span class="[&>svg]:w-5">
                     <svg class="w-[24px] h-[24px] fill-[#ff6b6b]" viewBox="0 0 512 512"
                         xmlns="http://www.w3.org/2000/svg">
 
-                        <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
                         <path
                             d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
                         </path>

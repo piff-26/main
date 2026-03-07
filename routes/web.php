@@ -25,5 +25,25 @@ Route::prefix('admin')->group(function(){
     
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard',[AdminController::class,'index'])->name('admin.dashboard');
+        Route::get('/transaction',function(){
+            return view('admin.transaction.transaction');
+        })->name('admin.transaction');
+        Route::get('/transaction/detail',function(){
+            return view('admin.transaction.transactionDetail');
+        })->name('admin.transaction');
+
+         Route::get('/event',function(){
+            return view('admin.event');
+        })->name('admin.event');
+
+        Route::get('/monitor',function(){
+            return view('admin.monitor');
+        })->name('admin.monitor');
+        Route::get('/insight',function(){
+            return view('admin.insight');
+        })->name('admin.insight');
+        Route::get('/ticketscan',function(){
+            return view('admin.ticketScan');
+        })->name('admin.ticketScan');
     });
 });
