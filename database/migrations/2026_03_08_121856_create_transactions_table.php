@@ -1,0 +1,48 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('invoice_code')->unique();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            
+            $table->string('buyer_name')->nullable();
+            $table->string('buyer_phone')->nullable();
+            $table->string('city')->nullable();
+            $table->enum('source_info', ['Social Media', 'Website resmi', 'Iklan', 'Poster', 'Teman', 'Dosen'])->nullable();
+            
+            $table->foreignId('voucher_id')->nullable()->constrained('vouchers')->nullOnDelete();
+            $table->double('discount_amount')->default(0);
+            $table->double('total_amount')->default(0);
+            
+            $table->string('payment_method')->default('QRIS');
+            $table->enum('transaction_status', ['draft', 'pending', 'paid', 'failed', 'expired'])->default('draft');
+            $table->string('payment_url')->nullable();
+            $table->string('snap_token')->nullable();
+            $table->string('payment_reference')->nullable();
+            $table->timestamp('paid_at')->nullable();
+            $table->string('cancel_reason')->nullable();
+            
+            $table->boolean('agree_tnc')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('transactions');
+    }
+};
