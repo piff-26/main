@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <title>E-Ticket {{ $transaction->invoice_code }}</title>
     <style>
-        /* Setup basic font dan margin untuk PDF */
-        body { font-family: 'Helvetica', sans-serif; margin: 0; padding: 0; }
-        .page-break { page-break-after: always; }
+        /* Setup Dasar DomPDF */
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        /* Untuk memisahkan halaman */
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* Helper classes */
         .text-center { text-align: center; }
-        /* Tambahkan CSS styling lainnya di sini (hindari flexbox/grid karena DomPDF kurang support) */
+        .w-100 { width: 100%; }
+        table { border-collapse: collapse; width: 100%; }
     </style>
 </head>
 <body>
@@ -19,8 +31,9 @@
         <div class="page-break"></div>
         
         @php
-            // Misal nama kategori di DB: "Platinum", maka akan memanggil file "platinum.blade.php"
-            $designFile = 'pdf.tickets.designs.' . strtolower($ticket->ticketCategory->name);
+            // Memanggil file desain berdasarkan nama kategori (contoh: platinum.blade.php)
+            $categoryName = strtolower($ticket->ticketCategory->name);
+            $designFile = 'pdf.tickets.designs.' . $categoryName;
         @endphp
 
         @if(View::exists($designFile))
