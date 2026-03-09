@@ -12,25 +12,25 @@
             
             <div class="mb-3">
                 <label>Nama Lengkap</label>
-                <input type="text" wire:model="buyer_name" class="form-control">
+                <input type="text" wire:model.blur="buyer_name" class="form-control">
                 @error('buyer_name') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-3">
                 <label>Nomor WhatsApp</label>
-                <input type="text" wire:model="buyer_phone" class="form-control">
+                <input type="text" wire:model.blur="buyer_phone" class="form-control">
                 @error('buyer_phone') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-3">
                 <label>Kota Asal</label>
-                <input type="text" wire:model="city" class="form-control">
+                <input type="text" wire:model.blur="city" class="form-control">
                 @error('city') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-3">
                 <label>Tahu PIFF dari mana?</label>
-                <select wire:model="source_info" class="form-control">
+                <select wire:model.blur="source_info" class="form-control">
                     <option value="">-- Pilih --</option>
                     <option value="Social Media">Social Media</option>
                     <option value="Website resmi">Website Resmi</option>
