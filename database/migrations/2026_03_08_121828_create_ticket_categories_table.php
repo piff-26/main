@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->double('price');
             $table->integer('quota')->nullable();
+            $table->integer('sold_count')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
