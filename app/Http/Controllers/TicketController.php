@@ -9,28 +9,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class TicketController extends BaseController
 {
-    public function downloadETicket($invoiceCode)
-    {
-        // Ambil data transaksi beserta tiket dan kategori tiketnya
-        $transaction = Transaction::with(['tickets.ticketCategory', 'user'])
-            ->where('invoice_code', $invoiceCode)
-            ->firstOrFail();
-
-        // Pastikan hanya yang sudah lunas yang bisa cetak tiket
-        if ($transaction->transaction_status !== 'paid') {
-            abort(403, 'Transaksi belum lunas.');
-        }
-
-        // Generate PDF menggunakan view master 'bundle'
-        $pdf = Pdf::loadView('pdf.tickets.bundle', compact('transaction'));
-
-        // ukuran kertas
-        $pdf->setPaper('A4', 'portrait');
-
-        // Download file PDF
-        return $pdf->download("E-Ticket-{$invoiceCode}.pdf");
-    }
-
     public function processCheckIn($ticketCode)
     {
         $ticket = Ticket::where('ticket_code', $ticketCode)->first();
