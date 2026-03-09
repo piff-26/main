@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaction;
-use App\Models\TransactionDetail;
+use App\Models\TransactionItem;
 use App\Models\TicketCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -46,7 +46,7 @@ class TransactionController extends BaseController
             ]);
 
             // Simpan detail keranjangnya
-            TransactionDetail::create([
+            TransactionItem::create([
                 'transaction_id' => $transaction->id,
                 'ticket_category_id' => $category->id,
                 'quantity' => $request->qty,
