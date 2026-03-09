@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TicketController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
@@ -12,6 +13,7 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('logged-in')->group(function () {
     Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
+    Route::get('/my-transaction', [UserController::class, 'myTransactions'])->name('user.mytransactions');
 });
 
 Route::get('/test', function () {
@@ -50,5 +52,8 @@ Route::prefix('admin')->group(function(){
         Route::get('/ticketscan',function(){
             return view('admin.ticketScan');
         })->name('admin.ticketScan');
+
+
+        Route::get('/checkin/{ticket_code}', [TicketController::class, 'processCheckIn'])->name('admin.ticket.checkin');
     });
 });
