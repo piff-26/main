@@ -25,4 +25,48 @@ class AdminController extends BaseController
     {
         return view('admin.dashboard', ['title' => 'Dashboard']);
     }
+
+    // Manage Events
+    public function listEvents()
+    {
+        // Ambil semua events dari database
+        // $events = Event::all();
+        
+        return view('admin.event', [
+            'title' => 'Manage Events',
+            // 'events' => $events
+        ]);
+    }
+
+    public function createEvent()
+    {
+        return view('admin.event-create', [
+            'title' => 'Create Event'
+        ]);
+    }
+
+    public function transaction()
+    {
+        return view('admin.transaction.transaction', ['title' => 'Transactions']);
+    }
+
+    public function transactionDetail()
+    {
+        return view('admin.transaction.transactionDetail', ['title' => 'Transaction Detail']);
+    }
+
+    public function monitor()
+    {
+        return view('admin.monitor', ['title' => 'Monitor']);
+    }
+
+    public function insight()
+    {
+        return view('admin.insight', ['title' => 'Insight']);
+    }
+
+    public function ticketScan()
+    {
+        return view('admin.ticketScan', ['title' => 'Ticket Scan']);
+    }
 }
