@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\TicketCategory;
 
-class EventController extends Controller
+class EventController extends BaseController
 {
     public function show($slug)
     {

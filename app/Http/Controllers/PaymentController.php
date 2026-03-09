@@ -9,7 +9,7 @@ use Midtrans\Snap;
 use App\Models\Ticket;
 use Illuminate\Support\Str;
 
-class PaymentController extends Controller
+class PaymentController extends BaseController
 {
     public function show($invoice_code)
     {
