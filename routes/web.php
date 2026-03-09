@@ -4,10 +4,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::middleware('logged-in')->group(function () {
+    Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
+});
 
 Route::get('/test', function () {
     return view('user.test');
@@ -30,7 +35,7 @@ Route::prefix('admin')->group(function(){
         })->name('admin.transaction');
         Route::get('/transaction/detail',function(){
             return view('admin.transaction.transactionDetail');
-        })->name('admin.transaction');
+        })->name('admin.transaction.detail');
 
          Route::get('/event',function(){
             return view('admin.event');
