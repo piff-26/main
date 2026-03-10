@@ -128,12 +128,24 @@ class PaymentController extends BaseController
                 // Generate Tiket
                 foreach ($transaction->transactionItems as $item) {
                     for ($i = 0; $i < $item->quantity; $i++) {
-                        // Generate tiket sebanyak quantity yang dibeli
-                        Ticket::create([
+                        
+                        //Create tiket dengan kode sementara
+                        $ticket = Ticket::create([
                             'transaction_id' => $transaction->id,
                             'ticket_category_id' => $item->ticket_category_id,
-                            'ticket_code' => 'PIFF-' . strtoupper(Str::random(10)), // Contoh: PIFF-A8B9C10D2E
+                            'ticket_code' => 'TEMP-' . Str::random(10), // Kode sementara agar tidak error Unique
                         ]);
+
+                        // Ambil slug kategori, jadikan uppercase
+                        $categorySlug = strtoupper($item->ticketCategory->slug);
+                        
+                        // Susun format baru dan Update tiket tersebut
+                        $newTicketCode = "PIFF-{$categorySlug}-" . strtoupper(Str::random(3)) . $ticket->id;
+                        
+                        $ticket->update([
+                            'ticket_code' => $newTicketCode
+                        ]);
+                        
                     }
                 }
             }
