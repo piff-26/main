@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Ticket;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class UserController extends BaseController
@@ -23,5 +25,27 @@ class UserController extends BaseController
 
     public function submitView(){
         return view('user.submit');
+    }
+
+
+    public function myTransactions()
+    {
+        $userId = session('user_id');
+
+        if (!$userId) {
+            return redirect()->route('user.home')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Ambil transaksi milik user yang sudah lunas
+        $transactions = Transaction::where('user_id', $userId)
+            ->where('transaction_status', 'paid')
+            ->with(['tickets.ticketCategory.event']) 
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('user.transactions', [
+            'title' => 'Riwayat Transaksi & Tiket',
+            'transactions' => $transactions
+        ]);
     }
 }

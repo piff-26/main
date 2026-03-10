@@ -4,18 +4,18 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TransactionHistoryController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/test', function () {
-    return view('user.test');
-});
-
 Route::prefix('admin')->group(function(){
     Route::get('/',function(){
-        return redirect()->route('admin.dashboard');
+        return redirect()->route('admin.login');
     });
 
     Route::get('login',[AdminController::class,'loginView'])->name('admin.login');
@@ -25,28 +25,44 @@ Route::prefix('admin')->group(function(){
     
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard',[AdminController::class,'index'])->name('admin.dashboard');
-        Route::get('/transaction',function(){
-            return view('admin.transaction.transaction');
-        })->name('admin.transaction');
-        Route::get('/transaction/detail',function(){
-            return view('admin.transaction.transactionDetail');
-        })->name('admin.transaction');
-
-         Route::get('/event',function(){
-            return view('admin.event');
-        })->name('admin.event');
-
-        Route::get('/monitor',function(){
-            return view('admin.monitor');
-        })->name('admin.monitor');
-        Route::get('/insight',function(){
-            return view('admin.insight');
-        })->name('admin.insight');
-        Route::get('/ticketscan',function(){
-            return view('admin.ticketScan');
-        })->name('admin.ticketScan');
-        Route::get('/managevouchers',function(){
-            return view('admin.manageVouchers');
-        })->name('admin.manageVouchers');
+        Route::get('/transaction',[AdminController::class,'transaction'])->name('admin.transaction');
+        Route::get('/transaction/detail',[AdminController::class,'transactionDetail'])->name('admin.transaction.detail');
+        Route::get('/event',[AdminController::class, 'listEvents'])->name('admin.event');
+        Route::get('/monitor',[AdminController::class,'monitor'])->name('admin.monitor');
+        Route::get('/insight',[AdminController::class,'insight'])->name('admin.insight');
+        Route::get('/ticketscan',[AdminController::class,'ticketScan'])->name('admin.ticketScan');
+        Route::get('/checkin/{ticket_code}', [TicketController::class, 'processCheckIn'])->name('admin.ticket.checkin');
     });
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
+    
+    // transactions
+    Route::get('/transaction-history', [UserController::class, 'myTransactions'])->name('user/transactions-history');
+    Route::get('/transaction/{invoice_code}/download', [TransactionHistoryController::class, 'downloadETicket'])->name('ticket.download');
+
+    // alur transaction
+    // Pilih event
+    Route::get('/{event_slug}', [TransactionController::class, 'step1'])->name('step1');
+    Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
+
+    // Isi Biodata
+    Route::get('/{invoice_code}/biodata', [TransactionController::class, 'step2'])->name('step2');
+    Route::post('/{invoice_code}/biodata', [TransactionController::class, 'storeStep2'])->name('storeStep2');
+
+    // Konfirmasi & Voucher
+    Route::get('/{invoice_code}/confirm', [TransactionController::class, 'step3'])->name('step3');
+    Route::post('/{invoice_code}/apply-voucher', [TransactionController::class, 'applyVoucher'])->name('applyVoucher');
+
+    // Pembayaran
+    Route::get('/{invoice_code}/payment', [TransactionController::class, 'step4'])->name('step4');
+
+    // Selesai
+    Route::get('/{invoice_code}/success', [TransactionController::class, 'step5'])->name('step5');
+
+});
+
+Route::get('/test', function () {
+    return view('user.test');
 });

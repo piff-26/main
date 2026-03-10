@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\BaseController;
 
 class AuthController extends BaseController
 {
