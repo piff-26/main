@@ -45,5 +45,8 @@ Route::prefix('admin')->group(function(){
         Route::get('/ticketscan',function(){
             return view('admin.ticketScan');
         })->name('admin.ticketScan');
+        Route::get('/managevouchers',function(){
+            return view('admin.manageVouchers');
+        })->name('admin.manageVouchers');
     });
 });
