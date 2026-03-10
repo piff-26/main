@@ -2,219 +2,249 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice {{ $transaction->invoice_code }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; background: #fff; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 30px; }
         
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #fff;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
+        /* Header with gradient */
         .header {
-            background: linear-gradient(135deg, #27b4f7 0%, #1e90ff 100%);
+            background: linear-gradient(135deg, #27b4f7 0%, #1a8cd8 100%);
             color: white;
-            padding: 30px;
-            border-radius: 10px 10px 0 0;
-            text-align: center;
-            margin-bottom: 0;
-        }
-        
-        .header h1 {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-        
-        .header .subtitle {
-            font-size: 18px;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-        
-        .header .event-info {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        
-        .invoice-info {
-            background: #f8f9fa;
-            padding: 20px 30px;
-            border-left: 4px solid #27b4f7;
+            padding: 40px 30px;
+            border-radius: 12px;
             margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .invoice-info h2 {
-            color: #27b4f7;
-            font-size: 24px;
-            margin-bottom: 10px;
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
         }
+        .header-content { position: relative; z-index: 1; }
+        .header h1 { font-size: 42px; font-weight: 700; margin-bottom: 8px; letter-spacing: 3px; }
+        .header .tagline { font-size: 16px; opacity: 0.95; margin-bottom: 5px; font-weight: 500; }
+        .header .year { font-size: 14px; opacity: 0.85; }
         
-        .invoice-meta {
+        /* Invoice Info Bar */
+        .invoice-bar {
+            background: #f8f9fa;
+            padding: 20px 25px;
+            border-radius: 8px;
+            border-left: 5px solid #27b4f7;
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+        .invoice-bar .invoice-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #27b4f7;
+        }
+        .invoice-bar .dates {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+        }
+        .invoice-bar .dates strong { color: #333; }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-draft { background: #fef3c7; color: #92400e; }
+        .status-failed { background: #f3f4f6; color: #1f2937; }
+        .status-expired { background: #fee2e2; color: #991b1b; }
+        
+        /* Info Cards */
+        .info-cards {
+            display: flex;
+            gap: 20px;
             margin-bottom: 30px;
         }
-        
-        .buyer-info, .payment-info {
+        .info-card {
             flex: 1;
-            padding: 20px;
             background: #fff;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin: 0 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
         }
-        
-        .buyer-info h3, .payment-info h3 {
+        .info-card h3 {
             color: #27b4f7;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #27b4f7;
+            letter-spacing: 1px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .info-label { font-weight: 600; color: #666; }
+        .info-value { color: #333; text-align: right; }
+        
+        /* Items Table */
+        .items-section {
+            margin-bottom: 30px;
+        }
+        .section-title {
             font-size: 16px;
+            font-weight: 700;
+            color: #333;
             margin-bottom: 15px;
             padding-bottom: 8px;
             border-bottom: 2px solid #27b4f7;
         }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            color: #666;
-        }
-        
-        .info-value {
-            color: #333;
-        }
-        
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
             background: #fff;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        
-        .items-table th {
-            background: #27b4f7;
+        .items-table thead {
+            background: linear-gradient(135deg, #27b4f7 0%, #1a8cd8 100%);
             color: white;
+        }
+        .items-table th {
             padding: 15px;
             text-align: left;
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
         .items-table td {
-            padding: 15px;
+            padding: 18px 15px;
             border-bottom: 1px solid #e9ecef;
-            font-size: 14px;
+            font-size: 13px;
         }
+        .items-table tbody tr:last-child td { border-bottom: none; }
+        .items-table tbody tr:hover { background: #f8f9fa; }
+        .event-name { font-weight: 700; color: #333; margin-bottom: 3px; }
+        .category-name { color: #666; font-size: 12px; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .price { font-weight: 700; color: #27b4f7; }
         
-        .items-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .items-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        .text-right {
-            text-align: right;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
+        /* Total Section */
         .total-section {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 25px;
-            border-radius: 8px;
-            border-left: 4px solid #27b4f7;
+            border-radius: 10px;
+            border: 2px solid #27b4f7;
+            margin-bottom: 30px;
         }
-        
         .total-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 16px;
+            margin-bottom: 12px;
+            font-size: 15px;
         }
-        
+        .total-row.discount { color: #dc3545; }
         .total-row.final {
-            border-top: 2px solid #27b4f7;
+            border-top: 3px solid #27b4f7;
             padding-top: 15px;
             margin-top: 15px;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 22px;
+            font-weight: 700;
             color: #27b4f7;
         }
         
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-paid {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .footer {
-            margin-top: 40px;
+        /* Confirmation Box */
+        .confirmation-box {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 25px;
             text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #666;
+            margin-bottom: 30px;
+        }
+        .confirmation-box .icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+        }
+        .confirmation-box .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #155724;
+            margin-bottom: 8px;
+        }
+        .confirmation-box .message {
+            font-size: 13px;
+            color: #155724;
+            line-height: 1.6;
         }
         
+        /* Footer */
+        .footer {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 40px;
+        }
         .footer .logo {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 700;
             color: #27b4f7;
             margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .footer .university {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .footer .thank-you {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+            margin: 15px 0 10px 0;
+        }
+        .footer .note {
+            font-size: 11px;
+            color: #999;
+            margin-top: 15px;
+            font-style: italic;
         }
         
-        .qr-section {
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            background: #fff;
-            border: 2px dashed #27b4f7;
-            border-radius: 8px;
-        }
-        
-        .price {
-            font-weight: bold;
-            color: #27b4f7;
+        /* Decorative Elements */
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #27b4f7, transparent);
+            margin: 30px 0;
         }
     </style>
 </head>
@@ -222,135 +252,148 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>INVOICE</h1>
-            <div class="subtitle">Petra International Film Festival 2026</div>
-            <div class="event-info">Official Ticket Invoice</div>
-        </div>
-        
-        <!-- Invoice Info -->
-        <div class="invoice-info">
-            <h2>{{ $transaction->invoice_code }}</h2>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>Issue Date:</strong> {{ $transaction->created_at->format('d F Y, H:i') }}<br>
-                    @if($transaction->paid_at)
-                    <strong>Paid Date:</strong> {{ $transaction->paid_at->format('d F Y, H:i') }}
-                    @endif
-                </div>
-                <div>
-                    <span class="status-badge {{ $transaction->transaction_status === 'paid' ? 'status-paid' : 'status-pending' }}">
-                        {{ strtoupper($transaction->transaction_status) }}
-                    </span>
-                </div>
+            <div class="header-content">
+                <h1>PIFF 2026</h1>
+                <div class="tagline">Petra International Film Festival</div>
+                <div class="year">Official Transaction Invoice</div>
             </div>
         </div>
         
-        <!-- Buyer & Payment Info -->
-        <div class="invoice-meta">
-            <div class="buyer-info">
+        <!-- Invoice Bar -->
+        <div class="invoice-bar">
+            <div>
+                <div class="invoice-number">{{ $transaction->invoice_code }}</div>
+                @php
+                    $statusClass = 'status-draft';
+                    $statusText = strtoupper($transaction->transaction_status);
+                    
+                    if ($transaction->transaction_status === 'paid') {
+                        $statusClass = 'status-paid';
+                    } elseif ($transaction->transaction_status === 'failed') {
+                        $statusClass = 'status-failed';
+                    } elseif ($transaction->transaction_status === 'expired') {
+                        $statusClass = 'status-expired';
+                    }
+                @endphp
+                <span class="status-badge {{ $statusClass }}">
+                    {{ $statusText }}
+                </span>
+            </div>
+            <div class="dates">
+                <div><strong>Issued:</strong> {{ $transaction->created_at->format('d M Y, H:i') }}</div>
+                @if($transaction->paid_at)
+                <div><strong>Paid:</strong> {{ $transaction->paid_at->format('d M Y, H:i') }}</div>
+                @endif
+            </div>
+        </div>
+        
+        <!-- Info Cards -->
+        <div class="info-cards">
+            <div class="info-card">
                 <h3>Buyer Information</h3>
                 <div class="info-row">
-                    <span class="info-label">Name:</span>
-                    <span class="info-value">{{ $transaction->buyer_name }}</span>
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ $transaction->buyer_name ?? $transaction->user->name }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Email:</span>
+                    <span class="info-label">Email</span>
                     <span class="info-value">{{ $transaction->user->email }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Phone:</span>
-                    <span class="info-value">{{ $transaction->buyer_phone }}</span>
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">{{ $transaction->buyer_phone ?? '-' }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">City:</span>
-                    <span class="info-value">{{ $transaction->city }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Source:</span>
-                    <span class="info-value">{{ $transaction->source_info }}</span>
+                    <span class="info-label">City</span>
+                    <span class="info-value">{{ $transaction->city ?? '-' }}</span>
                 </div>
             </div>
             
-            <div class="payment-info">
+            <div class="info-card">
                 <h3>Payment Details</h3>
                 <div class="info-row">
-                    <span class="info-label">Method:</span>
+                    <span class="info-label">Method</span>
                     <span class="info-value">{{ $transaction->payment_method }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Status:</span>
+                    <span class="info-label">Status</span>
                     <span class="info-value">{{ ucfirst($transaction->transaction_status) }}</span>
                 </div>
-                @if($transaction->payment_reference)
-                <div class="info-row">
-                    <span class="info-label">Reference:</span>
-                    <span class="info-value">{{ $transaction->payment_reference }}</span>
-                </div>
-                @endif
                 @if($transaction->voucher)
                 <div class="info-row">
-                    <span class="info-label">Voucher:</span>
-                    <span class="info-value">{{ $transaction->voucher->code }}</span>
+                    <span class="info-label">Voucher</span>
+                    <span class="info-value" style="color: #8b5cf6; font-weight: 700;">{{ $transaction->voucher->code }}</span>
                 </div>
                 @endif
+                <div class="info-row">
+                    <span class="info-label">Source</span>
+                    <span class="info-value">{{ $transaction->source_info ?? '-' }}</span>
+                </div>
             </div>
         </div>
         
-        <!-- Items Table -->
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th>Event & Category</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-right">Unit Price</th>
-                    <th class="text-right">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $subtotal = 0; @endphp
-                @foreach($transaction->transactionItems as $item)
-                @php 
-                    $itemSubtotal = $item->price * $item->quantity;
-                    $subtotal += $itemSubtotal;
-                @endphp
-                <tr>
-                    <td>
-                        <strong>{{ $item->ticketCategory->event->name }}</strong><br>
-                        <small style="color: #666;">{{ $item->ticketCategory->name }}</small>
-                    </td>
-                    <td class="text-center">{{ $item->quantity }}</td>
-                    <td class="text-right price">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                    <td class="text-right price">Rp {{ number_format($itemSubtotal, 0, ',', '.') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div class="divider"></div>
+        
+        <!-- Items Section -->
+        <div class="items-section">
+            <div class="section-title">Order Details</div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Event & Ticket Category</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-right">Unit Price</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $subtotal = 0; @endphp
+                    @foreach($transaction->transactionItems as $item)
+                    @php 
+                        $itemSubtotal = $item->price * $item->quantity;
+                        $subtotal += $itemSubtotal;
+                    @endphp
+                    <tr>
+                        <td>
+                            <div class="event-name">{{ $item->ticketCategory->event->name }}</div>
+                            <div class="category-name">{{ $item->ticketCategory->name }}</div>
+                        </td>
+                        <td class="text-center">{{ $item->quantity }}</td>
+                        <td class="text-right price">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                        <td class="text-right price">Rp {{ number_format($itemSubtotal, 0, ',', '.') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
         
         <!-- Total Section -->
         <div class="total-section">
             <div class="total-row">
-                <span>Subtotal:</span>
+                <span>Subtotal</span>
                 <span class="price">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
             </div>
-            @if($transaction->discount_amount > 0)
-            <div class="total-row">
-                <span>Discount:</span>
-                <span style="color: #dc3545;">-Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</span>
+            @if($transaction->voucher && $transaction->discount_amount > 0)
+            <div class="total-row discount">
+                <span>Discount ({{ $transaction->voucher->code }})</span>
+                <span>-Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</span>
             </div>
             @endif
             <div class="total-row final">
-                <span>TOTAL AMOUNT:</span>
+                <span>TOTAL AMOUNT</span>
                 <span>Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
             </div>
         </div>
         
-        <!-- QR Code Section (if paid) -->
+        <!-- Confirmation Box (if paid) -->
         @if($transaction->transaction_status === 'paid')
-        <div class="qr-section">
-            <div style="font-weight: bold; color: #27b4f7; margin-bottom: 10px;">✓ PAYMENT CONFIRMED</div>
-            <div style="font-size: 12px; color: #666;">
-                Your tickets have been generated and sent to your email.<br>
-                Please present this invoice and your tickets at the event entrance.
+        <div class="confirmation-box">
+            <div class="icon">OK</div>
+            <div class="title">Payment Confirmed</div>
+            <div class="message">
+                Your payment has been successfully processed.<br>
+                Tickets have been generated and sent to your email address.<br>
+                Please present this invoice at the event entrance.
             </div>
         </div>
         @endif
@@ -358,11 +401,10 @@
         <!-- Footer -->
         <div class="footer">
             <div class="logo">PIFF 2026</div>
-            <div>Petra Christian University - Surabaya, Indonesia</div>
-            <div>Thank you for your participation in Petra International Film Festival 2026!</div>
-            <div style="margin-top: 10px; font-size: 10px;">
-                This is a computer-generated invoice. No signature required.
-            </div>
+            <div class="university">Petra Christian University</div>
+            <div class="university">Surabaya, Indonesia</div>
+            <div class="thank-you">Thank you for your participation!</div>
+            <div class="note">This is a computer-generated invoice. No signature required.</div>
         </div>
     </div>
 </body>
