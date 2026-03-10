@@ -6,11 +6,11 @@
         <div class="bg-white px-6 py-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Transaction Detail</h1>
-                <p class="text-sm text-gray-600 mt-1">Invoice: <span id="invoiceCode" class="font-semibold">INV-2026-001</span></p>
+                <p class="text-sm text-gray-600 mt-1">Invoice: <span id="invoiceCode" class="font-semibold">{{ $transaction->invoice_code }}</span></p>
             </div>
             <div class="flex gap-2">
                 <button id="btnRefundCancel" class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold">
-                    <i class="fas fa-undo mr-2"></i><span id="refundCancelText">Refund</span>
+                    <i class="fas fa-undo mr-2"></i><span id="refundCancelText">{{ $transaction->transaction_status === 'paid' ? 'Refund' : 'Cancel' }}</span>
                 </button>
                 <a href="/admin/transaction" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold">
                     <i class="fas fa-arrow-left mr-2"></i>Back
@@ -30,35 +30,35 @@
                     <i class="fas fa-user text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-600">Name</div>
-                        <div class="text-base font-semibold text-gray-900">John Doe</div>
+                        <div class="text-base font-semibold text-gray-900">{{ $transaction->buyer_name ?? $transaction->user->name }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-phone text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-600">Phone</div>
-                        <div class="text-base font-semibold text-gray-900">081234567890</div>
+                        <div class="text-base font-semibold text-gray-900">{{ $transaction->buyer_phone ?? '-' }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-envelope text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-600">Email</div>
-                        <div class="text-base font-semibold text-gray-900">john@example.com</div>
+                        <div class="text-base font-semibold text-gray-900">{{ $transaction->user->email }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-map-marker-alt text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-600">City</div>
-                        <div class="text-base font-semibold text-gray-900">Surabaya</div>
+                        <div class="text-base font-semibold text-gray-900">{{ $transaction->city ?? '-' }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-info-circle text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-600">Source Info</div>
-                        <div class="text-base font-semibold text-gray-900">Website</div>
+                        <div class="text-base font-semibold text-gray-900">{{ $transaction->source_info ?? '-' }}</div>
                     </div>
                 </div>
             </div>
@@ -74,35 +74,45 @@
                     <i class="fas fa-file-invoice text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-500">Invoice Code</div>
-                        <div class="text-base font-medium text-gray-900">INV-2026-001</div>
+                        <div class="text-base font-medium text-gray-900">{{ $transaction->invoice_code }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-credit-card text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-500">Payment Method</div>
-                        <div class="text-base font-medium text-gray-900">QRIS</div>
+                        <div class="text-base font-medium text-gray-900">{{ $transaction->payment_method }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-check-circle text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-500">Status</div>
-                        <div><span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Paid</span></div>
+                        <div>
+                            @if($transaction->transaction_status === 'paid')
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                            @elseif($transaction->transaction_status === 'draft')
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800">Draft</span>
+                            @elseif($transaction->transaction_status === 'expired')
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">Expired</span>
+                            @else
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">{{ ucfirst($transaction->transaction_status) }}</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-calendar-plus text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-500">Created At</div>
-                        <div class="text-base font-medium text-gray-900">2026-05-01 10:30:00</div>
+                        <div class="text-base font-medium text-gray-900">{{ $transaction->created_at->format('Y-m-d H:i:s') }}</div>
                     </div>
                 </div>
                 <div class="flex items-start">
                     <i class="fas fa-calendar-check text-gray-400 mt-1 mr-3"></i>
                     <div>
                         <div class="text-sm text-gray-500">Paid At</div>
-                        <div class="text-base font-medium text-gray-900">2026-05-01 10:35:00</div>
+                        <div class="text-base font-medium text-gray-900">{{ $transaction->paid_at ? $transaction->paid_at->format('Y-m-d H:i:s') : '-' }}</div>
                     </div>
                 </div>
             </div>
@@ -126,18 +136,20 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200" id="orderItems">
+                    @foreach($transaction->transactionItems as $item)
                     <tr>
-                        <td class="px-4 py-3 text-sm text-gray-900">Regular</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">PIFF Day 1</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">1</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">Rp 20,000</td>
-                        <td class="px-4 py-3 text-sm font-semibold text-gray-900">Rp 20,000</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ $item->ticketCategory->name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ $item->ticketCategory->event->name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ $item->quantity }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-900">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
                     </tr>
+                    @endforeach
                 </tbody>
                 <tfoot class="bg-gray-50" id="orderSummary">
                     <tr>
                         <td colspan="4" class="px-4 py-3 text-base font-bold text-gray-900 text-right">Total</td>
-                        <td class="px-4 py-3 text-base font-bold text-gray-900">Rp 20,000</td>
+                        <td class="px-4 py-3 text-base font-bold text-gray-900">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -161,20 +173,28 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200" id="ticketsList">
+                    @foreach($transaction->tickets as $ticket)
                     <tr>
-                        <td class="px-4 py-3 text-sm font-mono text-gray-900">TKT-2026-001-001</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">Regular</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Checked In</span></td>
-                        <td class="px-4 py-3 text-sm text-gray-500">2026-05-29 09:45:00</td>
+                        <td class="px-4 py-3 text-sm font-mono text-gray-900">{{ $ticket->ticket_code }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ $ticket->ticketCategory->name }}</td>
                         <td class="px-4 py-3">
-                            <button class="text-blue-600 hover:text-blue-800 mr-2" title="Download QR">
+                            @if($ticket->is_checked_in)
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Checked In</span>
+                            @else
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Not Checked In</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-500">{{ $ticket->checked_in_at ? $ticket->checked_in_at->format('Y-m-d H:i:s') : '-' }}</td>
+                        <td class="px-4 py-3">
+                            <button class="text-blue-600 hover:text-blue-800 mr-2 btn-download-qr" data-code="{{ $ticket->ticket_code }}" title="Download QR">
                                 <i class="fas fa-qrcode"></i>
                             </button>
-                            <button class="text-green-600 hover:text-green-800" title="Send Email">
+                            <button class="text-green-600 hover:text-green-800 btn-send-email" data-code="{{ $ticket->ticket_code }}" title="Send Email">
                                 <i class="fas fa-envelope"></i>
                             </button>
                         </td>
                     </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -183,13 +203,61 @@
 
 @section('script')
 <script>
+const transactionData = {
+    invoice_code: '{{ $transaction->invoice_code }}',
+    buyer_name: '{{ $transaction->buyer_name ?? $transaction->user->name }}',
+    event_name: '{{ $transaction->transactionItems->first()?->ticketCategory?->event?->name ?? "-" }}',
+    total_amount: {{ $transaction->total_amount }},
+    payment_method: '{{ $transaction->payment_method }}',
+    transaction_status: '{{ $transaction->transaction_status }}'
+};
+
 $(document).ready(function() {
     // Fade in animation
     $('.bg-white').hide().fadeIn(600);
     
+    // Download QR Code
+    $(document).on('click', '.btn-download-qr', function() {
+        const ticketCode = $(this).data('code');
+        Toastify({
+            text: "Downloading QR Code for " + ticketCode,
+            duration: 2000,
+            gravity: "top",
+            position: "right",
+            style: { background: "#27b4f7", color: "#fff" }
+        }).showToast();
+        // TODO: Implement QR download functionality
+        // window.open(`/admin/ticket/${ticketCode}/qr`, '_blank');
+    });
+    
+    // Send Email
+    $(document).on('click', '.btn-send-email', function() {
+        const ticketCode = $(this).data('code');
+        Swal.fire({
+            title: 'Send Ticket Email',
+            text: `Send ticket ${ticketCode} to customer email?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Send',
+            confirmButtonColor: '#27b4f7'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Toastify({
+                    text: "Email sent successfully",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    style: { background: "#10b981", color: "#fff" }
+                }).showToast();
+                // TODO: Implement email sending functionality
+                // $.post(`/admin/ticket/${ticketCode}/send-email`);
+            }
+        });
+    });
+    
     // Refund/Cancel Button
     $('#btnRefundCancel').on('click', function() {
-        const status = 'paid'; // From dummy data
+        const status = transactionData.transaction_status;
         const action = status === 'paid' ? 'refund' : 'cancel';
         const actionText = action === 'refund' ? 'refund' : 'cancel';
         const actionTitle = action === 'refund' ? 'Refund Transaction' : 'Cancel Transaction';
@@ -201,16 +269,16 @@ $(document).ready(function() {
                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full ${action === 'refund' ? 'bg-yellow-100' : 'bg-red-100'} mb-4">
                         <i class="fas ${action === 'refund' ? 'fa-undo text-yellow-600' : 'fa-ban text-red-600'} text-xl"></i>
                     </div>
-                    <p class="text-gray-600 mb-4">Are you sure you want to ${actionText} transaction <strong>INV-2026-001</strong>?</p>
+                    <p class="text-gray-600 mb-4">Are you sure you want to ${actionText} transaction <strong>${transactionData.invoice_code}</strong>?</p>
                     
                     <div class="bg-blue-50 p-4 rounded-lg mb-4 text-left">
                         <h4 class="font-semibold text-blue-800 mb-2">Transaction Details:</h4>
                         <div class="space-y-1 text-sm text-blue-700">
-                            <p><strong>Buyer:</strong> John Doe</p>
-                            <p><strong>Event:</strong> PIFF Day 1</p>
-                            <p><strong>Amount:</strong> Rp 20,000</p>
-                            <p><strong>Payment:</strong> QRIS</p>
-                            <p><strong>Status:</strong> Paid</p>
+                            <p><strong>Buyer:</strong> ${transactionData.buyer_name}</p>
+                            <p><strong>Event:</strong> ${transactionData.event_name}</p>
+                            <p><strong>Amount:</strong> Rp ${transactionData.total_amount.toLocaleString('id-ID')}</p>
+                            <p><strong>Payment:</strong> ${transactionData.payment_method}</p>
+                            <p><strong>Status:</strong> ${transactionData.transaction_status}</p>
                         </div>
                     </div>
                     
@@ -249,13 +317,18 @@ $(document).ready(function() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: action === 'refund' ? 'Refund Processed!' : 'Transaction Cancelled!',
-                    confirmButtonColor: '#27b4f7',
-                    timer: 2000
-                }).then(() => {
-                    window.location.href = '/admin/transaction';
+                $.ajax({
+                    url: `/admin/transaction/${transactionData.invoice_code}`,
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    success: function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: transactionData.transaction_status === 'paid' ? 'Refund Processed!' : 'Transaction Cancelled!',
+                            confirmButtonColor: '#27b4f7',
+                            timer: 2000
+                        }).then(() => window.location.href = '/admin/transaction');
+                    }
                 });
             }
         });

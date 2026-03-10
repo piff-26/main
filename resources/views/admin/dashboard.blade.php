@@ -97,20 +97,15 @@
 @section('script')
 <script>
 const dashboardData = {
-    totalRevenue: 1580000, // Based on seeder: 20k*200 + 79k*15 + 59k*10 + 49k*5
-    ticketsSold: 230, // Total sold tickets
-    totalTickets: 1200, // Total quota from seeder: 600+100+200+300
-    totalTransactions: 30,
-    totalCheckin: 92, // 40% of sold tickets
-    totalUsers: 20,
-    paidTransactions: 21,
-    failedTransactions: 9,
-    ticketCategories: [
-        { name: 'Regular', sold: 200 }, // Day 1
-        { name: 'Platinum', sold: 15 }, // Day 2
-        { name: 'Gold', sold: 10 }, // Day 2
-        { name: 'Silver', sold: 5 } // Day 2
-    ]
+    totalRevenue: {{ $totalRevenue }},
+    ticketsSold: {{ $ticketsSold }},
+    totalTickets: {{ $totalTickets }},
+    totalTransactions: {{ $totalTransactions }},
+    totalCheckin: {{ $totalCheckin }},
+    totalUsers: {{ $totalUsers }},
+    paidTransactions: {{ $paidTransactions }},
+    failedTransactions: {{ $failedTransactions }},
+    ticketCategories: {!! json_encode($ticketCategories) !!}
 };
 
 $(document).ready(function() {
@@ -155,60 +150,70 @@ $(document).ready(function() {
 
     setTimeout(() => $('.chart-container').animate({ opacity: 1 }, 800), 500);
 
-    new Chart(document.getElementById('pieChart'), {
-        type: 'doughnut',
-        data: {
-            labels: dashboardData.ticketCategories.map(cat => cat.name),
-            datasets: [{
-                data: dashboardData.ticketCategories.map(cat => cat.sold),
-                backgroundColor: ['#27b4f7', '#8b5cf6', '#fec401', '#6b7280'],
-                borderWidth: 0,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: context => context.label + ': ' + context.parsed + ' tickets'
+    // Check if data exists before creating charts
+    if (dashboardData.ticketCategories && dashboardData.ticketCategories.length > 0) {
+        new Chart(document.getElementById('pieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: dashboardData.ticketCategories.map(cat => cat.name),
+                datasets: [{
+                    data: dashboardData.ticketCategories.map(cat => cat.sold),
+                    backgroundColor: ['#27b4f7', '#8b5cf6', '#fec401', '#6b7280'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: context => context.label + ': ' + context.parsed + ' tickets'
+                        }
                     }
-                }
-            },
-            animation: { duration: 1500 }
-        }
-    });
-
-    new Chart(document.getElementById('barChart'), {
-        type: 'bar',
-        data: {
-            labels: dashboardData.ticketCategories.map(cat => cat.name),
-            datasets: [
-                {
-                    label: 'Checked In',
-                    data: [80, 6, 4, 2], // Total 92 sesuai dengan statistik
-                    backgroundColor: '#10b981',
-                    borderRadius: 5
                 },
-                {
-                    label: 'Not Checked In',
-                    data: [120, 9, 6, 3], // Sisa dari yang belum check-in
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: 5
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { stacked: true, grid: { display: false } },
-                y: { stacked: true, beginAtZero: true }
+                animation: { duration: 1500 }
+            }
+        });
+    } else {
+        $('#pieChart').parent().html('<div class="text-center text-gray-500 py-8"><i class="fas fa-chart-pie text-4xl mb-2"></i><p>No data available</p></div>');
+    }
+
+    const checkinData = {!! json_encode($checkinByCategory) !!};
+    if (checkinData && checkinData.length > 0) {
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: checkinData.map(cat => cat.name),
+                datasets: [
+                    {
+                        label: 'Checked In',
+                        data: checkinData.map(cat => cat.checked_in),
+                        backgroundColor: '#10b981',
+                        borderRadius: 5
+                    },
+                    {
+                        label: 'Not Checked In',
+                        data: checkinData.map(cat => cat.not_checked_in),
+                        backgroundColor: '#e5e7eb',
+                        borderRadius: 5
+                    }
+                ]
             },
-            plugins: { legend: { position: 'bottom' } },
-            animation: { duration: 1500 }
-        }
-    });
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true, grid: { display: false } },
+                    y: { stacked: true, beginAtZero: true }
+                },
+                plugins: { legend: { position: 'bottom' } },
+                animation: { duration: 1500 }
+            }
+        });
+    } else {
+        $('#barChart').parent().html('<div class="text-center text-gray-500 py-8"><i class="fas fa-chart-bar text-4xl mb-2"></i><p>No data available</p></div>');
+    }
 });
 </script>
 @endsection

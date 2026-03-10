@@ -16,8 +16,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Event</label>
                 <select id="filterEvent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                     <option value="">All Events</option>
-                    <option value="PIFF Day 1">PIFF Day 1</option>
-                    <option value="PIFF Day 2">PIFF Day 2</option>
+                    @foreach($events as $event)
+                        <option value="{{ $event }}">{{ $event }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
@@ -34,19 +35,29 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Method</label>
                 <select id="filterPayment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                     <option value="">All Methods</option>
-                    <option value="QRIS">QRIS</option>
-                    <option value="BCA">BCA</option>
-                    <option value="Gopay">Gopay</option>
+                    @foreach($paymentMethods as $method)
+                        <option value="{{ $method }}">{{ $method }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
                 <select id="filterCity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                     <option value="">All Cities</option>
-                    <option value="Surabaya">Surabaya</option>
-                    <option value="Jakarta">Jakarta</option>
-                    <option value="Bandung">Bandung</option>
+                    @foreach($cities as $city)
+                        <option value="{{ $city }}">{{ $city }}</option>
+                    @endforeach
                 </select>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                <input type="date" id="filterDateStart" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                <input type="date" id="filterDateEnd" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
             </div>
         </div>
         <div class="mt-4 flex gap-2">
@@ -74,9 +85,11 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">City</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Voucher</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid At</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
                     </tr>
                 </thead>
@@ -88,66 +101,14 @@
 
 @section('script')
 <script>
-const transactionsData = [
-    {
-        invoice_code: 'INV-2026-001',
-        event_name: 'PIFF Day 1',
-        buyer_name: 'John Doe',
-        email: 'john@example.com',
-        buyer_phone: '081234567890',
-        city: 'Surabaya',
-        total_amount: 20000,
-        voucher_code: '-',
-        payment_method: 'QRIS',
-        transaction_status: 'paid',
-        created_at: '2026-05-01 10:30',
-        paid_at: '2026-05-01 10:35'
-    },
-    {
-        invoice_code: 'INV-2026-002',
-        event_name: 'PIFF Day 2',
-        buyer_name: 'Jane Smith',
-        email: 'jane@example.com',
-        buyer_phone: '081234567891',
-        city: 'Jakarta',
-        total_amount: 79000,
-        voucher_code: '-',
-        payment_method: 'BCA',
-        transaction_status: 'paid',
-        created_at: '2026-05-01 11:15',
-        paid_at: '2026-05-01 11:20'
-    },
-    {
-        invoice_code: 'INV-2026-003',
-        event_name: 'PIFF Day 2',
-        buyer_name: 'Bob Wilson',
-        email: 'bob@example.com',
-        buyer_phone: '081234567892',
-        city: 'Bandung',
-        total_amount: 59000,
-        voucher_code: '-',
-        payment_method: 'Gopay',
-        transaction_status: 'draft',
-        created_at: '2026-05-01 12:00',
-        paid_at: '-'
-    },
-    {
-        invoice_code: 'INV-2026-004',
-        event_name: 'PIFF Day 1',
-        buyer_name: 'Alice Brown',
-        email: 'alice@example.com',
-        buyer_phone: '081234567893',
-        city: 'Surabaya',
-        total_amount: 20000,
-        voucher_code: '-',
-        payment_method: 'QRIS',
-        transaction_status: 'failed',
-        created_at: '2026-05-01 13:30',
-        paid_at: '-'
-    }
-];
+const transactionsData = {!! json_encode($transactions) !!};
 
 $(document).ready(function() {
+    // Custom sorting for currency
+    $.fn.dataTable.ext.type.order['currency-pre'] = function(data) {
+        return parseFloat(data.replace(/[^0-9,-]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+    };
+
     const table = $('#transactionTable').DataTable({
         data: transactionsData,
         columns: [
@@ -157,6 +118,7 @@ $(document).ready(function() {
             { data: 'email' },
             { data: 'city' },
             { data: 'total_amount', render: (data) => `<span class="font-semibold">Rp ${data.toLocaleString('id-ID')}</span>` },
+            { data: 'voucher_code', render: (data) => data === '-' ? '<span class="text-gray-400">-</span>' : `<span class="px-2 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-800">${data}</span>` },
             { data: 'payment_method' },
             { 
                 data: 'transaction_status', 
@@ -171,8 +133,10 @@ $(document).ready(function() {
                 }
             },
             { data: 'created_at' },
+            { data: 'paid_at', render: (data) => data === '-' ? '<span class="text-gray-400">-</span>' : data },
             { 
-                data: null, 
+                data: null,
+                orderable: false,
                 render: (data) => `
                     <a href="/admin/transaction/detail/${data.invoice_code}" class="text-blue-600 hover:text-blue-800 mr-2" title="View Details">
                         <i class="fas fa-eye"></i>
@@ -192,8 +156,11 @@ $(document).ready(function() {
                 `
             }
         ],
+        columnDefs: [
+            { targets: 5, type: 'currency' }
+        ],
         pageLength: 10,
-        order: [[8, 'desc']],
+        order: [[9, 'desc']],
         drawCallback: function() {
             $('.btn-export-pdf').off('click').on('click', function() {
                 const invoice = $(this).data('invoice');
@@ -258,11 +225,20 @@ $(document).ready(function() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Refund Processed!',
-                    confirmButtonColor: '#27b4f7',
-                    timer: 2000
+                $.ajax({
+                    url: `/admin/transaction/${invoiceCode}`,
+                    method: 'DELETE',
+                    success: function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Refund Processed!',
+                            confirmButtonColor: '#27b4f7',
+                            timer: 2000
+                        }).then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to process refund', confirmButtonColor: '#ef4444' });
+                    }
                 });
             }
         });
@@ -322,11 +298,20 @@ $(document).ready(function() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Transaction Cancelled!',
-                    confirmButtonColor: '#27b4f7',
-                    timer: 2000
+                $.ajax({
+                    url: `/admin/transaction/${invoiceCode}`,
+                    method: 'DELETE',
+                    success: function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Transaction Cancelled!',
+                            confirmButtonColor: '#27b4f7',
+                            timer: 2000
+                        }).then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to cancel transaction', confirmButtonColor: '#ef4444' });
+                    }
                 });
             }
         });
@@ -384,19 +369,37 @@ $(document).ready(function() {
         const status = $('#filterStatus').val();
         const payment = $('#filterPayment').val();
         const city = $('#filterCity').val();
+        const dateStart = $('#filterDateStart').val();
+        const dateEnd = $('#filterDateEnd').val();
 
         table.columns().search('');
         
         if (event) table.column(1).search(event);
-        if (status) table.column(7).search(status);
-        if (payment) table.column(6).search(payment);
+        if (status) table.column(8).search(status);
+        if (payment) table.column(7).search(payment);
         if (city) table.column(4).search(city);
+        
+        // Date range filter
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            const createdAt = data[9]; // Created At column
+            if (!dateStart && !dateEnd) return true;
+            
+            const rowDate = new Date(createdAt);
+            const start = dateStart ? new Date(dateStart) : null;
+            const end = dateEnd ? new Date(dateEnd) : null;
+            
+            if (start && end) return rowDate >= start && rowDate <= end;
+            if (start) return rowDate >= start;
+            if (end) return rowDate <= end;
+            return true;
+        });
         
         table.draw();
     });
 
     $('#btnResetFilter').on('click', function() {
-        $('#filterEvent, #filterStatus, #filterPayment, #filterCity').val('');
+        $('#filterEvent, #filterStatus, #filterPayment, #filterCity, #filterDateStart, #filterDateEnd').val('');
+        $.fn.dataTable.ext.search.pop();
         table.columns().search('').draw();
     });
 });

@@ -20,44 +20,25 @@
 
 @section('script')
 <script>
-const eventsData = [
-    {
-        id: 1,
-        name: 'Screening Session-Student Gap Standers',
-        date: '29 May 2026',
-        startTime: '09:30',
-        endTime: '12:00',
-        location: 'Auditorium Gedung Q, Petra Christian University',
-        ticketCategories: [
-            { name: 'Regular', price: 20000, sold: 200, quota: 600 }
-        ],
-        stats: {
-            revenue: 4000000,
-            ticketsSold: 200,
-            transactions: 20,
-            checkins: 80
-        }
-    },
-    {
-        id: 2,
-        name: 'Final Day and Talkshow With Bayu Skak',
-        date: '30 May 2026',
-        startTime: '12:00',
-        endTime: '15:00',
-        location: 'Auditorium Gedung Q, Petra Christian University',
-        ticketCategories: [
-            { name: 'Platinum', price: 79000, sold: 15, quota: 100 },
-            { name: 'Gold', price: 59000, sold: 10, quota: 200 },
-            { name: 'Silver', price: 49000, sold: 5, quota: 300 }
-        ],
-        stats: {
-            revenue: 1830000,
-            ticketsSold: 30,
-            transactions: 10,
-            checkins: 12
-        }
-    }
-];
+const eventsData = {!! json_encode($events->map(function($event) {
+    return [
+        'id' => $event->id,
+        'name' => $event->name,
+        'date' => $event->event_date->format('d M Y'),
+        'startTime' => $event->start_time->format('H:i'),
+        'endTime' => $event->end_time ? $event->end_time->format('H:i') : '',
+        'location' => $event->location,
+        'ticketCategories' => $event->ticketCategories->map(function($cat) {
+            return [
+                'name' => $cat->name,
+                'price' => $cat->price,
+                'sold' => $cat->sold_count,
+                'quota' => $cat->quota
+            ];
+        }),
+        'stats' => $event->stats
+    ];
+})) !!};
 
 $(document).ready(function() {
     function renderEvents() {
@@ -243,10 +224,6 @@ $(document).ready(function() {
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
                         <input id="eventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter location">
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                        <textarea id="eventDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter event description"></textarea>
-                    </div>
                 </div>
             `,
             width: '600px',
@@ -255,33 +232,49 @@ $(document).ready(function() {
             cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
             confirmButtonColor: '#27b4f7',
             cancelButtonColor: '#6b7280',
-            customClass: {
-                confirmButton: 'font-semibold',
-                cancelButton: 'font-semibold'
-            },
+            customClass: { confirmButton: 'font-semibold', cancelButton: 'font-semibold' },
             preConfirm: () => {
                 const name = $('#eventName').val();
                 const date = $('#eventDate').val();
                 const startTime = $('#startTime').val();
                 const endTime = $('#endTime').val();
                 const location = $('#eventLocation').val();
-                const description = $('#eventDescription').val();
                 
                 if (!name || !date || !startTime || !endTime || !location) {
                     Swal.showValidationMessage('Please fill all required fields');
                     return false;
                 }
                 
-                return { name, date, startTime, endTime, location, description };
+                // Validate date is not in the past
+                const selectedDate = new Date(date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate < today) {
+                    Swal.showValidationMessage('Event date cannot be in the past');
+                    return false;
+                }
+                
+                // Validate end time is after start time
+                if (endTime <= startTime) {
+                    Swal.showValidationMessage('End time must be after start time');
+                    return false;
+                }
+                
+                return { name, event_date: date, start_time: startTime, end_time: endTime, location };
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-
-                    confirmButtonColor: '#27b4f7',
-                    timer: 2000
+                $.ajax({
+                    url: '/admin/event',
+                    method: 'POST',
+                    data: result.value,
+                    success: function() {
+                        Swal.fire({ icon: 'success', title: 'Success!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to create event', confirmButtonColor: '#ef4444' });
+                    }
                 });
             }
         });
@@ -291,8 +284,12 @@ $(document).ready(function() {
     $(document).on('click', '.btn-edit', function() {
         const eventId = $(this).data('id');
         const event = eventsData.find(e => e.id === eventId);
-        
         if (!event) return;
+        
+        // Convert date format from 'd M Y' to 'Y-m-d'
+        const dateParts = event.date.split(' ');
+        const months = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
+        const dateValue = `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`;
         
         Swal.fire({
             title: '<span class="font-bold">Edit Event</span>',
@@ -300,32 +297,25 @@ $(document).ready(function() {
                 <div class="text-left space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Event Name</label>
-                        <input id="editEventName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="${event.name}">
+                        <input id="editEventName" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.name}">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Event Date</label>
-                        <input id="editEventDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="2026-05-${eventId === 1 ? '29' : '30'}">
+                        <input id="editEventDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${dateValue}">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Start Time</label>
-                            <input id="editStartTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="${event.startTime}">
+                            <input id="editStartTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.startTime}">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">End Time</label>
-                            <input id="editEndTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="${event.endTime}">
+                            <input id="editEndTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.endTime}">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <input id="editEventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="${event.location}">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                        <textarea id="editEventDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter event description"></textarea>
-                    </div>
-                    <div class="bg-yellow-50 p-3 rounded-lg">
-                        <p class="text-xs text-yellow-800"><i class="fas fa-info-circle mr-1"></i>Current tickets sold: ${event.stats.ticketsSold}</p>
+                        <input id="editEventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.location}">
                     </div>
                 </div>
             `,
@@ -334,33 +324,28 @@ $(document).ready(function() {
             confirmButtonText: '<i class="fas fa-save mr-2"></i>Save Changes',
             cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
             confirmButtonColor: '#27b4f7',
-            cancelButtonColor: '#6b7280',
-            customClass: {
-                confirmButton: 'font-semibold',
-                cancelButton: 'font-semibold'
-            },
             preConfirm: () => {
-                const name = $('#editEventName').val();
-                const date = $('#editEventDate').val();
-                const startTime = $('#editStartTime').val();
-                const endTime = $('#editEndTime').val();
-                const location = $('#editEventLocation').val();
-                const description = $('#editEventDescription').val();
-                
-                if (!name || !date || !startTime || !endTime || !location) {
-                    Swal.showValidationMessage('Please fill all required fields');
-                    return false;
-                }
-                
-                return { name, date, startTime, endTime, location, description };
+                return {
+                    name: $('#editEventName').val(),
+                    event_date: $('#editEventDate').val(),
+                    start_time: $('#editStartTime').val(),
+                    end_time: $('#editEndTime').val(),
+                    location: $('#editEventLocation').val()
+                };
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    confirmButtonColor: '#27b4f7',
-                    timer: 2000
+                $.ajax({
+                    url: `/admin/event/${eventId}`,
+                    method: 'PUT',
+                    data: result.value,
+                    success: function() {
+                        Swal.fire({ icon: 'success', title: 'Success!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to update event', confirmButtonColor: '#ef4444' });
+                    }
                 });
             }
         });
@@ -373,37 +358,25 @@ $(document).ready(function() {
         
         Swal.fire({
             title: '<span class="font-bold">Delete Event</span>',
-            html: `
-                <div class="text-center">
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                    </div>
-                    <p class="text-gray-600 mb-4">Are you sure you want to delete <strong>"${eventName}"</strong>?</p>
-                    <div class="bg-red-50 p-3 rounded-lg mb-4">
-                        <p class="text-sm text-red-800">
-                            <i class="fas fa-warning mr-2"></i>
-                            This action cannot be undone. All associated ticket categories and transactions will also be affected.
-                        </p>
-                    </div>
-                </div>
-            `,
-            width: '500px',
+            html: `<p class="text-gray-600 mb-4">Are you sure you want to delete <strong>"${eventName}"</strong>?</p>`,
+            icon: 'warning',
             showCancelButton: true,
             confirmButtonText: '<i class="fas fa-trash mr-2"></i>Yes, Delete',
             cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#6b7280',
-            customClass: {
-                confirmButton: 'font-semibold',
-                cancelButton: 'font-semibold'
-            }
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Deleted!',
-                    confirmButtonColor: '#27b4f7',
-                    timer: 2000
+                $.ajax({
+                    url: `/admin/event/${eventId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        Swal.fire({ icon: 'success', title: 'Deleted!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to delete event', confirmButtonColor: '#ef4444' });
+                    }
                 });
             }
         });
