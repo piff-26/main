@@ -32,7 +32,14 @@ Route::prefix('admin')->group(function(){
         Route::get('/insight',[AdminController::class,'insight'])->name('admin.insight');
         Route::get('/ticketscan',[AdminController::class,'ticketScan'])->name('admin.ticketScan');
         Route::get('/checkin/{ticket_code}', [TicketController::class, 'processCheckIn'])->name('admin.ticket.checkin');
+
+        Route::get('/managevouchers', [AdminController::class, 'listVouchers'])->name('admin.manageVouchers');
+        // Route baru untuk handle Create dan Delete Voucher
+        Route::post('/managevouchers/store', [AdminController::class, 'storeVoucher'])->name('admin.voucher.store');
+        Route::delete('/managevouchers/{id}', [AdminController::class, 'destroyVoucher'])->name('admin.voucher.destroy');
+        Route::put('/managevouchers/{id}', [AdminController::class, 'updateVoucher'])->name('admin.voucher.update');
     });
+    
 });
 
 Route::middleware('auth')->group(function () {

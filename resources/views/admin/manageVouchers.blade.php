@@ -4,13 +4,25 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     
+    {{-- Alert Success --}}
+    @if(session('success'))
+    <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r-lg shadow-sm">
+        <div class="flex items-center">
+            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-bold">{{ session('success') }}</span>
+        </div>
+    </div>
+    @endif
+
     <div class="flex flex-col md:flex-row items-center justify-between bg-white px-8 py-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Manage Vouchers</h1>
-            <p class="text-gray-500 text-sm mt-1">Buat kode promo baru atau kelola voucher yang sudah ada.</p>
+            <p class="text-gray-500 text-sm mt-1">Kelola semua voucher termasuk yang sudah dinonaktifkan.</p>
         </div>
         
-        <button onclick="openModal('modalCreate')" class="mt-4 md:mt-0 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md">
+        <button onclick="openCreateModal()" class="mt-4 md:mt-0 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -32,37 +44,64 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    {{-- Loop data voucher di sini nantinya --}}
                     @forelse($vouchers ?? [] as $voucher)
-                    <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-6 py-4 font-mono font-bold text-indigo-600">{{ $voucher->code }}</td>
+                    <tr class="hover:bg-gray-50/50 transition-colors {{ $voucher->trashed() ? 'bg-gray-50 opacity-70' : '' }}">
+                        <td class="px-6 py-4 font-mono font-bold">
+                            <span class="{{ $voucher->trashed() ? 'text-gray-400' : 'text-indigo-600' }}">{{ $voucher->code }}</span>
+                            @if($voucher->trashed())
+                                <span class="ml-2 text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full uppercase font-bold">Disabled</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-sm font-semibold text-gray-800">
-                            {{ $voucher->discount_type == 'percentage' ? $voucher->discount_value.'%' : 'IDR '.number_format($voucher->discount_value) }}
+                            @if($voucher->discount_type == 'percentage')
+                                {{ $voucher->discount_percentage }}%
+                            @else
+                                IDR {{ number_format($voucher->discount_nominal, 0, ',', '.') }}
+                            @endif
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col items-center">
-                                <span class="text-sm text-gray-600 mb-1 font-medium">{{ $voucher->used_count }} / {{ $voucher->max_uses }}</span>
+                                <span class="text-sm text-gray-600 mb-1 font-medium">
+                                    {{ $voucher->used_count ?? 0 }} / {{ $voucher->max_uses ?? 0 }}
+                                </span>
                                 <div class="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                    <div class="bg-indigo-500 h-full" style="width: 20%"></div> {{-- Logika persen di sini --}}
+                                    @php
+                                        $max = $voucher->max_uses > 0 ? $voucher->max_uses : 1;
+                                        $percent = (($voucher->used_count ?? 0) / $max) * 100;
+                                    @endphp
+                                    <div class="bg-indigo-500 h-full" style="width: {{ $percent }}%"></div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="block text-sm text-gray-800 font-medium">{{ $voucher->event ?? 'Global' }}</span>
-                            <span class="text-[10px] text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded uppercase font-bold tracking-tighter">{{ $voucher->category_scope }}</span>
+                            {{-- Gunakan withTrashed() pada relasi jika model Event/Category juga pakai SoftDelete --}}
+                            <span class="block text-sm text-gray-800 font-medium">{{ $voucher->event->name ?? 'Global Event' }}</span>
+                            <span class="text-[10px] text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded uppercase font-bold tracking-tighter">
+                                {{ $voucher->ticketCategory->name ?? 'All Categories' }}
+                            </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $voucher->expired_at }}
+                            {{-- Pastikan expired_at sudah di-cast sebagai datetime di Model --}}
+                            @if($voucher->expired_at)
+                                {{ \Carbon\Carbon::parse($voucher->expired_at)->format('d M Y') }}
+                            @else
+                                -
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end items-center gap-3">
-                                <button class="text-blue-600 hover:text-blue-800 font-bold text-sm">Edit</button>
+                                @if(!$voucher->trashed())
+                                    <button type="button" onclick="editVoucher({{ json_encode($voucher) }})" class="text-blue-600 hover:text-blue-800 font-bold text-sm">Edit</button>
+                                @endif
                                 
-                                {{-- Form Action Kosong Siap Pakai --}}
-                                <form action="#" method="POST" onsubmit="return confirm('Apakah anda yakin?')">
+                                <form action="{{ route('admin.voucher.destroy', $voucher->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-800 font-bold text-sm">Disable</button>
+                                    @if($voucher->trashed())
+                                        <button type="submit" class="text-green-600 hover:text-green-800 font-bold text-sm">Enable</button>
+                                    @else
+                                        <button type="submit" onclick="return confirm('Disable voucher ini?')" class="text-red-600 hover:text-red-800 font-bold text-sm">Disable</button>
+                                    @endif
                                 </form>
                             </div>
                         </td>
@@ -78,55 +117,49 @@
     </div>
 </div>
 
+{{-- MODAL TETAP SAMA SEPERTI SEBELUMNYA --}}
 <div id="modalCreate" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all">
-        <form action="#" method="POST" class="p-8">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <form id="voucherForm" action="{{ route('admin.voucher.store') }}" method="POST" class="p-8">
             @csrf
+            <div id="methodField"></div>
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-800">New Voucher Code</h3>
-                <button type="button" onclick="closeModal('modalCreate')" class="text-gray-400 hover:text-gray-600">&times;</button>
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800">New Voucher Code</h3>
+                <button type="button" onclick="closeModal('modalCreate')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
-            
-            <div class="space-y-4 text-left">
+            {{-- Isi Input Form Anda --}}
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase tracking-tighter">Voucher Code</label>
-                    <input type="text" name="code" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="MISAL: HEMAT50">
+                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Voucher Code</label>
+                    <input type="text" name="code" id="input_code" required class="w-full border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase tracking-tighter">Discount Type</label>
-                        <select name="discount_type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none bg-white">
-                            <option value="fixed">Fixed Amount</option>
-                            <option value="percentage">Percentage</option>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Type</label>
+                        <select name="discount_type" id="input_type" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white">
+                            <option value="nominal">IDR</option>
+                            <option value="percentage">%</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase tracking-tighter">Value</label>
-                        <input type="number" name="discount_value" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none">
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Value</label>
+                        <input type="number" name="discount_value" id="input_value" required class="w-full border rounded-xl px-4 py-2.5">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase tracking-tighter">Max Uses</label>
-                        <input type="number" name="max_uses" placeholder="0 = Unlimited" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none">
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Max Uses</label>
+                        <input type="number" name="max_uses" id="input_max" required class="w-full border rounded-xl px-4 py-2.5">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase tracking-tighter">Expiry Date</label>
-                        <input type="date" name="expired_at" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none text-gray-500">
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Expiry</label>
+                        <input type="date" name="expired_at" id="input_expiry" required class="w-full border rounded-xl px-4 py-2.5">
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase tracking-tighter">Category Scope</label>
-                    <input type="text" name="category_scope" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none" placeholder="Workshop, Webinar, etc.">
-                </div>
             </div>
-
             <div class="mt-8 flex gap-3">
-                <button type="button" onclick="closeModal('modalCreate')" class="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition-colors">Cancel</button>
-                <button type="submit" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">Create Now</button>
+                <button type="button" onclick="closeModal('modalCreate')" class="flex-1 px-4 py-3 border rounded-xl font-bold">Cancel</button>
+                <button type="submit" id="submitBtn" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Save</button>
             </div>
         </form>
     </div>
@@ -135,12 +168,31 @@
 
 @section('script')
 <script>
-    function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function openCreateModal() {
+        document.getElementById('modalTitle').innerText = "New Voucher Code";
+        document.getElementById('voucherForm').action = "{{ route('admin.voucher.store') }}";
+        document.getElementById('methodField').innerHTML = "";
+        document.getElementById('voucherForm').reset();
+        openModal('modalCreate');
     }
 
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
+    function editVoucher(data) {
+        document.getElementById('modalTitle').innerText = "Edit Voucher";
+        document.getElementById('voucherForm').action = `/admin/managevouchers/${data.id}`;
+        document.getElementById('methodField').innerHTML = '@method("PUT")';
+        
+        document.getElementById('input_code').value = data.code;
+        document.getElementById('input_type').value = data.discount_type;
+        document.getElementById('input_value').value = (data.discount_type === 'nominal') ? data.discount_nominal : data.discount_percentage;
+        document.getElementById('input_max').value = data.max_uses;
+        
+        if(data.expired_at) {
+            document.getElementById('input_expiry').value = data.expired_at.split(' ')[0];
+        }
+        openModal('modalCreate');
     }
 </script>
 @endsection

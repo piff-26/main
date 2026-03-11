@@ -2,6 +2,8 @@
 @section('title', 'Insight')
 
 @section('content')
+<div class="container mx-auto px-4 py-8">
+    {{-- Header --}}
     <div class="w-full mb-8">
         <div class="flex flex-col md:flex-row items-center justify-between bg-white px-8 py-6 rounded-2xl shadow-sm border border-gray-100">
             <div>
@@ -22,7 +24,6 @@
             <h2 class="text-lg font-semibold text-gray-800 mb-1">City Distribution</h2>
             <p class="text-sm text-gray-500 mb-6">Top kota dengan jumlah pembeli terbanyak.</p>
             <div class="relative h-[300px]">
-                {{-- Canvas untuk Chart.js --}}
                 <canvas id="cityChart"></canvas>
             </div>
         </div>
@@ -46,7 +47,6 @@
                     <p class="text-[10px] text-gray-400 mt-1">{{ number_format($source->total) }} Orang</p>
                 </div>
                 @empty
-                {{-- Placeholder jika data kosong --}}
                 <div class="text-center py-10">
                     <p class="text-gray-400 italic text-sm">Belum ada data sumber informasi.</p>
                 </div>
@@ -54,6 +54,7 @@
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('script')
@@ -62,9 +63,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('cityChart').getContext('2d');
             
-            // Ambil data dari Controller (Atau gunakan dummy jika variabel kosong)
-            const labels = {!! json_encode($city_labels ?? ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Malang']) !!};
-            const dataValues = {!! json_encode($city_values ?? [0, 0, 0, 0, 0]) !!};
+            const labels = {!! json_encode($city_labels ?? ['No Data']) !!};
+            const dataValues = {!! json_encode($city_values ?? [0]) !!};
 
             new Chart(ctx, {
                 type: 'bar',
@@ -88,7 +88,7 @@
                         y: {
                             beginAtZero: true,
                             grid: { color: '#f3f4f6', drawBorder: false },
-                            ticks: { stepSize: 20 }
+                            ticks: { precision: 0 }
                         },
                         x: {
                             grid: { display: false }
