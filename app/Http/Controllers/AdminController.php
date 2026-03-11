@@ -11,7 +11,6 @@ use App\Models\TicketCategory;
 use App\Models\Ticket;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Voucher;
-use App\Models\Transaction; // Pastikan model ini sudah ada
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 
