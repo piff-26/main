@@ -2,20 +2,385 @@
 @section('title', 'Manage Events')
 
 @section('content')
-    <div class="w-full mb-8">
-        <div
-            class="flex flex-col md:flex-row items-center justify-between bg-white px-8 py-6 rounded-2xl shadow-sm border border-gray-100">
+    <div class="w-full mb-6">
+        <div class="bg-white px-6 py-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    Manage Events
-                </h1>
+                <h1 class="text-2xl font-bold text-gray-800">Manage Events</h1>
+                <p class="text-sm text-gray-600 mt-1">Create and manage event details</p>
             </div>
+            <button id="btnCreateEvent" class="px-4 py-2 text-white rounded-lg hover:shadow-md transition font-semibold" style="background-color: #27b4f7;">
+                <i class="fas fa-plus mr-2"></i>Create Event
+            </button>
         </div>
     </div>
 
-
+    {{-- Events List --}}
+    <div id="eventsList" class="grid grid-cols-1 gap-6"></div>
 @endsection
 
 @section('script')
-    <script></script>
+<script>
+const eventsData = {!! json_encode($events->map(function($event) {
+    return [
+        'id' => $event->id,
+        'name' => $event->name,
+        'date' => $event->event_date->format('d M Y'),
+        'startTime' => $event->start_time->format('H:i'),
+        'endTime' => $event->end_time ? $event->end_time->format('H:i') : '',
+        'location' => $event->location,
+        'ticketCategories' => $event->ticketCategories->map(function($cat) {
+            return [
+                'name' => $cat->name,
+                'price' => $cat->price,
+                'sold' => $cat->sold_count,
+                'quota' => $cat->quota
+            ];
+        }),
+        'stats' => $event->stats
+    ];
+})) !!};
+
+$(document).ready(function() {
+    function renderEvents() {
+        let html = '';
+        eventsData.forEach((event, index) => {
+            let categoriesHtml = '';
+            event.ticketCategories.forEach(cat => {
+                const percentage = (cat.sold / cat.quota * 100).toFixed(1);
+                categoriesHtml += `
+                    <div class="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-sm font-semibold text-gray-800">${cat.name}</div>
+                            <div class="text-sm font-bold" style="color: #27b4f7;">Rp ${cat.price.toLocaleString('id-ID')}</div>
+                        </div>
+                        <div class="text-xs text-gray-600">Sold: ${cat.sold} / ${cat.quota}</div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="h-2 rounded-full transition-all duration-500" style="width: ${percentage}%; background-color: #27b4f7;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 event-card" style="opacity: 0; transform: translateY(20px);">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h2 class="text-xl font-bold text-gray-800 mb-2">${event.name}</h2>
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                                    <div><i class="fas fa-calendar mr-2 text-gray-400"></i>${event.date}</div>
+                                    <div><i class="fas fa-clock mr-2 text-gray-400"></i>${event.startTime} - ${event.endTime}</div>
+                                    <div><i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>${event.location}</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-2 hover:bg-blue-50 rounded-lg transition btn-view" style="color: #27b4f7;" data-id="${event.id}" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition btn-edit" data-id="${event.id}" title="Edit Event">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="px-3 py-2 hover:bg-red-50 rounded-lg transition btn-delete" style="color: #ff362d;" data-id="${event.id}" data-name="${event.name}" title="Delete Event">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3">Ticket Categories</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                ${categoriesHtml}
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <div class="text-xs text-gray-600">Total Revenue</div>
+                                    <div class="text-lg font-bold text-gray-900">Rp ${event.stats.revenue.toLocaleString('id-ID')}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-600">Tickets Sold</div>
+                                    <div class="text-lg font-bold text-gray-900">${event.stats.ticketsSold}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-600">Transactions</div>
+                                    <div class="text-lg font-bold text-gray-900">${event.stats.transactions}</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-600">Check-ins</div>
+                                    <div class="text-lg font-bold text-gray-900">${event.stats.checkins}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        $('#eventsList').html(html);
+
+        $('.event-card').each(function(index) {
+            $(this).delay(index * 150).animate({
+                opacity: 1
+            }, 600).css('transform', 'translateY(0)');
+        });
+    }
+
+    renderEvents();
+
+    // Event handlers
+    $(document).on('click', '.btn-view', function() {
+        const eventId = $(this).data('id');
+        const event = eventsData.find(e => e.id === eventId);
+        
+        let categoriesHtml = '';
+        event.ticketCategories.forEach(cat => {
+            const percentage = (cat.sold / cat.quota * 100).toFixed(1);
+            categoriesHtml += `
+                <div class="bg-gray-50 p-3 rounded-lg mb-2">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-semibold text-sm">${cat.name}</span>
+                        <span class="font-bold text-sm" style="color: #27b4f7;">Rp ${cat.price.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div class="text-xs text-gray-600 mb-1">Sold: ${cat.sold} / ${cat.quota} (${percentage}%)</div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="h-1.5 rounded-full" style="width: ${percentage}%; background-color: #27b4f7;"></div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        Swal.fire({
+            title: `<span class="font-bold">${event.name}</span>`,
+            html: `
+                <div class="text-left space-y-4">
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <div class="text-sm text-gray-600 mb-2">
+                            <i class="fas fa-calendar mr-2" style="color: #27b4f7;"></i>${event.date}
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            <i class="fas fa-clock mr-2" style="color: #27b4f7;"></i>${event.startTime} - ${event.endTime}
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-map-marker-alt mr-2" style="color: #27b4f7;"></i>${event.location}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Ticket Categories</h4>
+                        ${categoriesHtml}
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                            <div class="text-xs text-gray-600">Revenue</div>
+                            <div class="font-bold text-lg" style="color: #27b4f7;">Rp ${event.stats.revenue.toLocaleString('id-ID')}</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                            <div class="text-xs text-gray-600">Tickets Sold</div>
+                            <div class="font-bold text-lg text-green-600">${event.stats.ticketsSold}</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                            <div class="text-xs text-gray-600">Transactions</div>
+                            <div class="font-bold text-lg text-purple-600">${event.stats.transactions}</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                            <div class="text-xs text-gray-600">Check-ins</div>
+                            <div class="font-bold text-lg" style="color: #fec401;">${event.stats.checkins}</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            width: '700px',
+            confirmButtonText: '<i class="fas fa-times mr-2"></i>Close',
+            confirmButtonColor: '#6b7280'
+        });
+    });
+
+    $('#btnCreateEvent').on('click', function() {
+        Swal.fire({
+            title: '<span class="font-bold">Create New Event</span>',
+            html: `
+                <div class="text-left space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Event Name</label>
+                        <input id="eventName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter event name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Event Date</label>
+                        <input id="eventDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Start Time</label>
+                            <input id="startTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">End Time</label>
+                            <input id="endTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                        <input id="eventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter location">
+                    </div>
+                </div>
+            `,
+            width: '600px',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-check mr-2"></i>Create Event',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+            confirmButtonColor: '#27b4f7',
+            cancelButtonColor: '#6b7280',
+            customClass: { confirmButton: 'font-semibold', cancelButton: 'font-semibold' },
+            preConfirm: () => {
+                const name = $('#eventName').val();
+                const date = $('#eventDate').val();
+                const startTime = $('#startTime').val();
+                const endTime = $('#endTime').val();
+                const location = $('#eventLocation').val();
+                
+                if (!name || !date || !startTime || !endTime || !location) {
+                    Swal.showValidationMessage('Please fill all required fields');
+                    return false;
+                }
+                
+                // Validate date is not in the past
+                const selectedDate = new Date(date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate < today) {
+                    Swal.showValidationMessage('Event date cannot be in the past');
+                    return false;
+                }
+                
+                // Validate end time is after start time
+                if (endTime <= startTime) {
+                    Swal.showValidationMessage('End time must be after start time');
+                    return false;
+                }
+                
+                return { name, event_date: date, start_time: startTime, end_time: endTime, location };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/admin/event',
+                    method: 'POST',
+                    data: result.value,
+                    success: function() {
+                        Swal.fire({ icon: 'success', title: 'Success!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to create event', confirmButtonColor: '#ef4444' });
+                    }
+                });
+            }
+        });
+    });
+
+    // Edit Event
+    $(document).on('click', '.btn-edit', function() {
+        const eventId = $(this).data('id');
+        const event = eventsData.find(e => e.id === eventId);
+        if (!event) return;
+        
+        // Convert date format from 'd M Y' to 'Y-m-d'
+        const dateParts = event.date.split(' ');
+        const months = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
+        const dateValue = `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`;
+        
+        Swal.fire({
+            title: '<span class="font-bold">Edit Event</span>',
+            html: `
+                <div class="text-left space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Event Name</label>
+                        <input id="editEventName" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.name}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Event Date</label>
+                        <input id="editEventDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${dateValue}">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Start Time</label>
+                            <input id="editStartTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.startTime}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">End Time</label>
+                            <input id="editEndTime" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.endTime}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                        <input id="editEventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.location}">
+                    </div>
+                </div>
+            `,
+            width: '600px',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-save mr-2"></i>Save Changes',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+            confirmButtonColor: '#27b4f7',
+            preConfirm: () => {
+                return {
+                    name: $('#editEventName').val(),
+                    event_date: $('#editEventDate').val(),
+                    start_time: $('#editStartTime').val(),
+                    end_time: $('#editEndTime').val(),
+                    location: $('#editEventLocation').val()
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/admin/event/${eventId}`,
+                    method: 'PUT',
+                    data: result.value,
+                    success: function() {
+                        Swal.fire({ icon: 'success', title: 'Success!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to update event', confirmButtonColor: '#ef4444' });
+                    }
+                });
+            }
+        });
+    });
+
+    // Delete Event
+    $(document).on('click', '.btn-delete', function() {
+        const eventId = $(this).data('id');
+        const eventName = $(this).data('name');
+        
+        Swal.fire({
+            title: '<span class="font-bold">Delete Event</span>',
+            html: `<p class="text-gray-600 mb-4">Are you sure you want to delete <strong>"${eventName}"</strong>?</p>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-trash mr-2"></i>Yes, Delete',
+            cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/admin/event/${eventId}`,
+                    method: 'DELETE',
+                    success: function() {
+                        Swal.fire({ icon: 'success', title: 'Deleted!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to delete event', confirmButtonColor: '#ef4444' });
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
 @endsection

@@ -26,8 +26,19 @@ Route::prefix('admin')->group(function(){
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard',[AdminController::class,'index'])->name('admin.dashboard');
         Route::get('/transaction',[AdminController::class,'transaction'])->name('admin.transaction');
-        Route::get('/transaction/detail',[AdminController::class,'transactionDetail'])->name('admin.transaction.detail');
+        Route::get('/transaction/detail/{invoice_code?}',[AdminController::class,'transactionDetail'])->name('admin.transaction.detail');
+        Route::get('/transaction/{invoice_code}/export-pdf',[AdminController::class,'exportTransactionPDF'])->name('admin.transaction.export-pdf');
         Route::get('/event',[AdminController::class, 'listEvents'])->name('admin.event');
+        Route::post('/event',[AdminController::class, 'storeEvent'])->name('admin.event.store');
+        Route::put('/event/{id}',[AdminController::class, 'updateEvent'])->name('admin.event.update');
+        Route::delete('/event/{id}',[AdminController::class, 'deleteEvent'])->name('admin.event.delete');
+        
+        Route::get('/category',[AdminController::class, 'listCategories'])->name('admin.category');
+        Route::post('/category',[AdminController::class, 'storeCategory'])->name('admin.category.store');
+        Route::put('/category/{id}',[AdminController::class, 'updateCategory'])->name('admin.category.update');
+        Route::delete('/category/{id}',[AdminController::class, 'deleteCategory'])->name('admin.category.delete');
+        
+        Route::delete('/transaction/{invoice_code}',[AdminController::class, 'cancelTransaction'])->name('admin.transaction.cancel');
         Route::get('/monitor',[AdminController::class,'monitor'])->name('admin.monitor');
         Route::get('/insight',[AdminController::class,'insight'])->name('admin.insight');
         Route::get('/ticketscan',[AdminController::class,'ticketScan'])->name('admin.ticketScan');
