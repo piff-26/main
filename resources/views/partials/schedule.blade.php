@@ -233,7 +233,7 @@
             <div class="schedule-card">
                 <div class="card-head">
                     <div class="card-date font-montech-medium">MARCH 1<sup class="font-montech-medium">ST</sup> – MAY
-                        10<sup class="font-montech-medium">TH</sup></div>
+                        4<sup class="font-montech-medium">TH</sup></div>
                     <div class="card-title font-montech-bold">OPEN</div>
                     <div class="card-title font-montech-bold">SUBMISSION</div>
                 </div>
