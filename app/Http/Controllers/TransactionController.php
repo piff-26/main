@@ -71,4 +71,35 @@ class TransactionController extends BaseController
         'event' => $event
     ]);
 }
+
+    public function step2($invoiceCode)
+    {
+        // Pastikan transaksi valid, milik user yang login, dan statusnya masih pending
+        $transaction = Transaction::where('invoice_code', $invoiceCode)
+            ->where('user_id', session('user_id'))
+            ->where('transaction_status', 'pending')
+            ->firstOrFail();
+
+        return view('user.transactions.step2-biodata', [
+            'title' => 'Isi Biodata - ' . $transaction->invoice_code,
+            'invoiceCode' => $invoiceCode,
+            'expiredAt' => $transaction->expired_at // Untuk info batas waktu
+        ]);
+    }
+
+    // App\Http\Controllers\TransactionController.php
+
+    public function step3($invoiceCode)
+    {
+        $transaction = Transaction::where('invoice_code', $invoiceCode)
+            ->where('user_id', session('user_id'))
+            ->where('transaction_status', 'pending')
+            ->firstOrFail();
+
+        return view('user.transactions.step3-confirm', [
+            'title' => 'Konfirmasi Pesanan - ' . $transaction->invoice_code,
+            'invoiceCode' => $invoiceCode,
+            'transaction' => $transaction
+        ]);
+    }
 }
