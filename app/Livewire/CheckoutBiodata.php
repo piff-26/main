@@ -26,17 +26,18 @@ class CheckoutBiodata extends Component
     public $discount_amount = 0;
     public $grand_total = 0;
 
-    public function mount($transactionId)
+    public function mount($invoice_code)
     {
-        // Ambil transaksi yang sedang draft beserta item keranjangnya
-        $this->transaction = Transaction::with('transactionItems.ticketCategory')->findOrFail($transactionId);
+    $this->transaction = Transaction::with('transactionItems.ticketCategory')
+        ->where('invoice_code', $invoice_code)
+        ->firstOrFail();
 
-        // Hitung harga asli sebelum diskon (Quantity * Price)
-        foreach ($this->transaction->transactionItems as $item) {
-            $this->original_total += ($item->quantity * $item->price);
-        }
+    // Hitung harga asli sebelum diskon (Quantity * Price)
+    foreach ($this->transaction->transactionItems as $item) {
+        $this->original_total += ($item->quantity * $item->price);
+    }
 
-        $this->grand_total = $this->original_total;
+    $this->grand_total = $this->original_total;
     }
 
     /**
