@@ -65,6 +65,7 @@ class PaymentController extends BaseController
                 'phone'      => $transaction->buyer_phone,
             ],
             'item_details' => $item_details,
+            'enabled_payments' => ['qris', 'gopay', 'shopeepay'],
         ];
 
         try {
