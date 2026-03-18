@@ -10,7 +10,7 @@ class AuthMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!session()->has('register_email')) {
-            return redirect()->route('user.home')->with('error', 'Please login first!');
+            return redirect()->route('user.login')->with('error', 'Please login first!');
         }
 
         return $next($request);
