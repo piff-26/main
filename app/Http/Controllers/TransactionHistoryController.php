@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class TransactionHistoryController extends BaseController
+class TransactionHistoryController extends Controller
 {
     public function downloadETicket($invoiceCode)
     {

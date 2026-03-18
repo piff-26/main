@@ -12,7 +12,7 @@ use App\Http\Controllers\BaseController;
 use App\Models\Event;
 use App\Models\User;
 
-class TransactionController extends BaseController
+class TransactionController extends Controller
 {
     public function storeStep1(Request $request, $eventSlug)
     {
