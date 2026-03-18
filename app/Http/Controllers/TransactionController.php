@@ -9,6 +9,7 @@ use App\Models\TicketCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Http\Controllers\BaseController;
+use App\Models\Event;
 use App\Models\User;
 
 class TransactionController extends BaseController
@@ -56,4 +57,18 @@ class TransactionController extends BaseController
             return redirect()->route('checkout.step2', $transaction->invoice_code);
         });
     }
+
+
+    public function step1($eventSlug)
+{
+    // Cari event berdasarkan slug, sekalian load kategori tiketnya
+    $event = Event::with(['ticketCategories' => function($query) {
+        $query->orderBy('price', 'asc'); // Urutkan dari termurah
+    }])->where('slug', $eventSlug)->firstOrFail();
+
+    return view('user.transactions.step1-category', [
+        'title' => 'Pilih Tiket - ' . $event->name,
+        'event' => $event
+    ]);
+}
 }
