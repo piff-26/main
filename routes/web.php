@@ -54,30 +54,33 @@ Route::prefix('admin')->group(function(){
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
     
-    // transactions
-    Route::get('/transaction-history', [UserController::class, 'myTransactions'])->name('user/transactions-history');
+    // menu user (Riwayat & Tiket)
+    Route::get('/transaction-history', [UserController::class, 'myTransactions'])->name('user.transactions-history');
+    
+
     Route::get('/transaction/{invoice_code}/download', [TransactionHistoryController::class, 'downloadETicket'])->name('ticket.download');
 
-    // alur transaction
-    // Pilih event
-    Route::get('/{event_slug}', [TransactionController::class, 'step1'])->name('step1');
-    Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
 
-    // Isi Biodata
-    Route::get('/{invoice_code}/biodata', [TransactionController::class, 'step2'])->name('step2');
-    Route::post('/{invoice_code}/biodata', [TransactionController::class, 'storeStep2'])->name('storeStep2');
+    Route::prefix('checkout')->name('checkout.')->group(function () {
+        
+        // Pilih Event & Kategori Tiket
+        Route::get('/{event_slug}', [TransactionController::class, 'step1'])->name('step1');
+        Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
 
-    // Konfirmasi & Voucher
-    Route::get('/{invoice_code}/confirm', [TransactionController::class, 'step3'])->name('step3');
-    Route::post('/{invoice_code}/apply-voucher', [TransactionController::class, 'applyVoucher'])->name('applyVoucher');
+        // Isi Biodata 
+        Route::get('/{invoice_code}/biodata', [TransactionController::class, 'step2'])->name('step2');
 
-    // Pembayaran
-    Route::get('/{invoice_code}/payment', [TransactionController::class, 'step4'])->name('step4');
+        // Konfirmasi Pesanan & Voucher 
+        Route::get('/{invoice_code}/confirm', [TransactionController::class, 'step3'])->name('step3');
 
-    // Selesai
-    Route::get('/{invoice_code}/success', [TransactionController::class, 'step5'])->name('step5');
+        // Pembayaran Midtrans Snap
+        Route::get('/{invoice_code}/payment', [PaymentController::class, 'show'])->name('payment');
+        
+    });
+
+    // Alias untuk payment
+    Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
 
 });
 
