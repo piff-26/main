@@ -13,6 +13,10 @@ Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/login', [AuthController::class, 'userLoginView'])->name('user.login');
+Route::get('/auth/google', [AuthController::class, 'userGoogleAuth'])->name('user.auth.google');
+Route::get('/auth/google/callback', [AuthController::class, 'userProcessLogin'])->name('user.auth.google.callback');
+
 Route::prefix('admin')->group(function(){
     Route::get('/',function(){
         return redirect()->route('admin.login');
