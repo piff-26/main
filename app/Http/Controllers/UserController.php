@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Ticket;
 use App\Models\Transaction;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
 class UserController extends BaseController
@@ -48,4 +49,15 @@ class UserController extends BaseController
             'transactions' => $transactions
         ]);
     }
+
+    public function ticketView()
+{
+    // Ambil semua event, urutkan dari yang terbaru
+    $events = Event::orderBy('created_at', 'desc')->get();
+
+    return view('user.ticket', [
+        'title' => 'Beli Tiket Event',
+        'events' => $events
+    ]);
+}
 }

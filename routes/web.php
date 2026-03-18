@@ -10,6 +10,7 @@ use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Controllers\TransactionController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
+Route::get('/ticket', [UserController::class, 'ticketView'])->name('user.ticket');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
