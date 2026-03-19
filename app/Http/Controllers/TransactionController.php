@@ -70,17 +70,31 @@ class TransactionController extends Controller
 
 
     public function step1($eventSlug)
-{
-    // Cari event berdasarkan slug, sekalian load kategori tiketnya
-    $event = Event::with(['ticketCategories' => function($query) {
-        $query->orderBy('price', 'asc'); // Urutkan dari termurah
-    }])->where('slug', $eventSlug)->firstOrFail();
+    {
+        $userId = session('user_id');
 
-    return view('user.transactions.category', [
-        'title' => 'Pilih Tiket - ' . $event->name,
-        'event' => $event
-    ]);
-}
+        if ($userId) {
+            $active = Transaction::where('user_id', $userId)
+                ->whereIn('transaction_status', ['draft', 'pending'])
+                ->where('expired_at', '>', now())
+                ->latest()
+                ->first();
+
+            if ($active) {
+                return redirect()->route('checkout.step2', $active->invoice_code)
+                    ->with('warning', 'Selesaikan transaksi sebelumnya terlebih dahulu.');
+            }
+        }
+
+        $event = Event::with(['ticketCategories' => function($query) {
+            $query->orderBy('price', 'asc');
+        }])->where('slug', $eventSlug)->firstOrFail();
+
+        return view('user.transactions.category', [
+            'title' => 'Pilih Tiket - ' . $event->name,
+            'event' => $event
+        ]);
+    }
 
     public function step2($invoiceCode)
     {
@@ -93,7 +107,7 @@ class TransactionController extends Controller
         return view('user.transactions.transaction', [
             'title' => 'Isi Biodata - ' . $transaction->invoice_code,
             'invoiceCode' => $invoiceCode,
-            'expiredAt' => $transaction->expired_at // Untuk info batas waktu
+            'expiredAt' => $transaction->expired_at ? $transaction->expired_at->setTimezone('Asia/Jakarta') : now()->setTimezone('Asia/Jakarta')->addMinutes(15),
         ]);
     }
 
