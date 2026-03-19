@@ -33,6 +33,9 @@ class CheckoutBiodata extends Component
     public $grand_total = 0;
 
     public $draftSavedTime;
+    public $agree_tnc = false;
+    public $tncRead = false;
+    public $tncError = '';
 
     public function mount($invoice_code)
     {
@@ -172,12 +175,19 @@ class CheckoutBiodata extends Component
      */
     public function processToPayment()
     {
+        $this->tncError = '';
+
         $this->validate([
-            'buyer_name' => 'required|string|max:255',
+            'buyer_name'  => 'required|string|max:255',
             'buyer_phone' => 'required|numeric',
-            'city' => 'required|string|max:255',
+            'city'        => 'required|string|max:255',
             'source_info' => 'required|string',
         ]);
+
+        if (!$this->agree_tnc) {
+            $this->tncError = 'Anda harus menyetujui Syarat dan Ketentuan terlebih dahulu.';
+            return;
+        }
 
         // Simpan total amount ke DB dan ubah status 
         $this->transaction->update([
@@ -211,7 +221,8 @@ class CheckoutBiodata extends Component
     {
         $this->transaction->update([
             'transaction_status' => 'paid',
-            'paid_at' => now(),
+            'paid_at'            => now(),
+            'agree_tnc'          => true,
         ]);
 
         if ($this->transaction->tickets()->count() === 0) {
