@@ -9,7 +9,9 @@ use App\Models\Ticket;
 use Illuminate\Support\Str;
 use App\Services\MidtransService;
 use App\Models\TransactionItem;
-use Illuminate\Support\Facades\DB;
+use App\Mail\ETicketMail;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutBiodata extends Component
 {
@@ -246,6 +248,13 @@ class CheckoutBiodata extends Component
         }
 
         $this->currentStep = 3;
+
+        // Kirim email e-ticket
+        $transaction = Transaction::with('transactionItems.ticketCategory', 'tickets.ticketCategory.event')->find($this->transaction->id);
+        $user = User::find($transaction->user_id);
+        if ($user && $user->email) {
+            Mail::to($user->email)->send(new ETicketMail($transaction));
+        }
     }
 
     public function render()
