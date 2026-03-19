@@ -17,42 +17,52 @@ class TransactionController extends Controller
     public function storeStep1(Request $request, $eventSlug)
     {
         $request->validate([
-            'category_id' => 'required|exists:ticket_categories,id',
-            // 'qty' => 'required|integer|min:1|max:5', // Batasi max beli
+            'items' => 'required|array',
+            'items.*' => 'integer|min:0|max:5',
         ]);
 
-        return DB::transaction(function () use ($request) {
-            
-            // Lock baris kategori ini di DB agar tidak bentrok
-            $category = TicketCategory::where('id', $request->category_id)->lockForUpdate()->first();
+        // Filter hanya item yang qty > 0
+        $selectedItems = collect($request->items)->filter(fn($qty) => $qty > 0);
 
-            // Cek apakah tiket masih tersedia
-            // Jika kolom quota boleh null (unlimited), kita lewati pengecekan.
-            // Jika tidak null, pastikan (yang sudah terjual/dihold + yang mau dibeli) tidak melebihi quota.
-            if ($category->quota !== null && ($category->sold_count + $request->qty > $category->quota)) {
-                return back()->with('error', 'Maaf, sisa tiket tidak mencukupi.');
+        if ($selectedItems->isEmpty()) {
+            return back()->with('error', 'Pilih minimal 1 tiket.');
+        }
+
+        return DB::transaction(function () use ($selectedItems) {
+
+            $totalAmount = 0;
+            $itemsToCreate = [];
+
+            foreach ($selectedItems as $categoryId => $qty) {
+                $category = TicketCategory::where('id', $categoryId)->lockForUpdate()->first();
+
+                if (!$category) continue;
+
+                if ($category->quota !== null && ($category->sold_count + $qty > $category->quota)) {
+                    return back()->with('error', "Sisa tiket {$category->name} tidak mencukupi.");
+                }
+
+                $category->increment('sold_count', $qty);
+                $totalAmount += $category->price * $qty;
+                $itemsToCreate[] = [
+                    'ticket_category_id' => $category->id,
+                    'quantity' => $qty,
+                    'price' => $category->price,
+                ];
             }
 
-            //Tambahkan ke Sold Count (Hold Kuota)
-            $category->increment('sold_count', $request->qty);
-
-            // Buat record Transaksi dengan status pending
             $invoiceCode = 'INV-' . strtoupper(Str::random(5));
             $transaction = Transaction::create([
                 'user_id' => session('user_id'),
                 'invoice_code' => $invoiceCode,
-                'total_amount' => $category->price * $request->qty, 
-                'transaction_status' => 'pending',
-                'expired_at' => now()->addMinutes(15), // Kunci selama 15 menit
+                'total_amount' => $totalAmount,
+                'transaction_status' => 'draft',
+                'expired_at' => now()->addMinutes(15),
             ]);
 
-            // Simpan detail keranjangnya
-            TransactionItem::create([
-                'transaction_id' => $transaction->id,
-                'ticket_category_id' => $category->id,
-                'quantity' => $request->qty,
-                'price' => $category->price
-            ]);
+            foreach ($itemsToCreate as $item) {
+                TransactionItem::create(array_merge($item, ['transaction_id' => $transaction->id]));
+            }
 
             return redirect()->route('checkout.step2', $transaction->invoice_code);
         });
@@ -77,7 +87,7 @@ class TransactionController extends Controller
         // Pastikan transaksi valid, milik user yang login, dan statusnya masih pending
         $transaction = Transaction::where('invoice_code', $invoiceCode)
             ->where('user_id', session('user_id'))
-            ->where('transaction_status', 'pending')
+            ->whereIn('transaction_status', ['draft', 'pending'])
             ->firstOrFail();
 
         return view('user.transactions.transaction', [
