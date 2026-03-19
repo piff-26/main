@@ -37,7 +37,7 @@ class TransactionController extends Controller
             $category->increment('sold_count', $request->qty);
 
             // Buat record Transaksi dengan status pending
-            $invoiceCode = 'INV-' . strtoupper(Str::random(8));
+            $invoiceCode = 'INV-' . strtoupper(Str::random(5));
             $transaction = Transaction::create([
                 'user_id' => session('user_id'),
                 'invoice_code' => $invoiceCode,
