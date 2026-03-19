@@ -5,6 +5,10 @@ namespace App\Livewire;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use Livewire\Component;
+use App\Models\Ticket;
+use Illuminate\Support\Str;
+use App\Services\MidtransService;
+use App\Models\TransactionItem;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutBiodata extends Component
@@ -210,7 +214,27 @@ class CheckoutBiodata extends Component
             'paid_at' => now(),
         ]);
 
-        $this->currentStep = 3; 
+        if ($this->transaction->tickets()->count() === 0) {
+            $transaction = Transaction::with('transactionItems.ticketCategory')->find($this->transaction->id);
+
+            foreach ($transaction->transactionItems as $item) {
+                for ($i = 0; $i < $item->quantity; $i++) {
+                    $ticket = Ticket::create([
+                        'transaction_id'     => $transaction->id,
+                        'ticket_category_id' => $item->ticket_category_id,
+                        'ticket_code'        => 'TEMP-' . Str::random(10),
+                    ]);
+
+                    $categorySlug = strtoupper($item->ticketCategory->slug);
+                    $invRandom = substr($transaction->invoice_code, 4); // ambil bagian setelah 'INV-'
+                    $newTicketCode = "INV-{$categorySlug}-{$invRandom}-" . strtoupper(Str::random(3));
+
+                    $ticket->update(['ticket_code' => $newTicketCode]);
+                }
+            }
+        }
+
+        $this->currentStep = 3;
     }
 
     public function render()
