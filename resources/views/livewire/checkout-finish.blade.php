@@ -116,6 +116,19 @@
                                 class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">TERAPKAN</button>
                         </div>
                     </div>
+
+                    {{-- TNC --}}
+                    <div class="mt-6 flex items-center gap-3">
+                        <input type="checkbox" id="agree_tnc" wire:model="agree_tnc" class="w-4 h-4 accent-[#ff5b1d]" {{ !$tncRead ? 'disabled' : '' }}>
+                        <label for="agree_tnc" class="text-sm text-slate-300">
+                            Saya menyetujui
+                            <button type="button" x-data x-on:click="$dispatch('open-tnc')"
+                                class="text-[#ff5b1d] underline hover:text-[#ff8c3a] transition">Syarat dan Ketentuan</button>
+                        </label>
+                    </div>
+                    @if($tncError)
+                        <span class="text-red-400 text-xs mt-1 block">{{ $tncError }}</span>
+                    @endif
                 </div>
 
                 <div class="w-full md:w-2/5">
@@ -229,10 +242,53 @@
         @endif
 
     </div>
+
+    {{-- TNC MODAL --}}
+    <div x-data="{ open: false, scrolled: false }"
+        x-on:open-tnc.window="open = true; scrolled = false"
+        x-show="open"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
+
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg flex flex-col" style="max-height: 80vh;">
+            <div class="px-6 py-4 border-b border-slate-700">
+                <h3 class="text-white font-bold text-lg tracking-wider">SYARAT DAN KETENTUAN</h3>
+            </div>
+
+            <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3"
+                x-ref="tncContent"
+                x-on:scroll="if($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 10) scrolled = true">
+                <p class="font-bold text-white">1. Ketentuan Pembelian Tiket</p>
+                <p>Tiket yang telah dibeli tidak dapat dikembalikan atau ditukar dalam kondisi apapun.</p>
+                <p class="font-bold text-white">2. Penggunaan Tiket</p>
+                <p>Tiket hanya berlaku untuk satu kali masuk. QR Code pada tiket tidak boleh digandakan atau dipindahtangankan.</p>
+                <p class="font-bold text-white">3. Identitas</p>
+                <p>Panitia berhak meminta identitas diri yang sesuai dengan data pemesan saat check-in.</p>
+                <p class="font-bold text-white">4. Perubahan Acara</p>
+                <p>Panitia berhak mengubah jadwal, lokasi, atau pembicara tanpa pemberitahuan sebelumnya.</p>
+                <p class="font-bold text-white">5. Privasi Data</p>
+                <p>Data pribadi yang Anda berikan akan digunakan hanya untuk keperluan acara PIFF 2026 dan tidak akan disebarkan kepada pihak ketiga.</p>
+                <p class="font-bold text-white">6. Keamanan</p>
+                <p>Panitia tidak bertanggung jawab atas kehilangan barang bawaan selama acara berlangsung.</p>
+                <p class="text-slate-500 text-xs mt-4">Scroll ke bawah untuk menyetujui.</p>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-700">
+                <button
+                    x-bind:disabled="!scrolled"
+                    x-bind:class="scrolled ? 'bg-[#ff5b1d] hover:bg-[#e04a10] cursor-pointer' : 'bg-slate-700 cursor-not-allowed opacity-50'"
+                    x-on:click="open = false; $wire.set('tncRead', true); $wire.set('agree_tnc', true);"
+                    class="w-full text-white font-bold py-3 rounded-xl transition">
+                    Saya Setuju
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-
-</div> @script
+@script
     <script>
         $wire.on('trigger-midtrans', (event) => {
             let token = event[0].snapToken;
@@ -254,4 +310,3 @@
         });
     </script>
 @endscript
-</div>
