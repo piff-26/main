@@ -9,10 +9,7 @@
     <link rel="icon" href="{{ asset('assets/logo/logo_browser_piff.png') }}" type="image/x-icon" />
 
     {{-- TailwindCSS --}}
-    <script src="https://cdn.tailwindcss.com/3.4.5"></script>
-
-    {{-- TW Elements CSS --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/tw-elements.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
     {{-- Fontawesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
@@ -256,9 +253,6 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
     <script src="https://unpkg.com/split-type"></script>
 
-    {{-- TW Elements JS --}}
-    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
-
     {{-- Toastify --}}
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
@@ -367,22 +361,10 @@
         </script>
     @endif
 
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                fontFamily: {
-                    lexend: ["Lexend", "sans-serif"],
-                    sans: ["Open Sans", "sans-serif"],
-                    body: ["Open Sans", "sans-serif"],
-                    mono: ["ui-monospace", "monospace"],
-                },
-            },
-            corePlugins: {
-                preflight: false,
-            },
-        };
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}">
     </script>
+
+    
 
     {{-- Panggilnya pakai push ygy --}}
     @stack('scripts')
