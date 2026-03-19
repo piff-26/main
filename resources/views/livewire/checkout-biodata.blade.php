@@ -1,114 +1,257 @@
-<div>
-    @if (session()->has('voucher_success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-check-circle me-2"></i> {{ session('voucher_success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="font-organetto relative w-full min-h-screen flex flex-col items-center py-[2rem] px-4">
+
+    <div
+        class="w-full max-w-6xl glass-card rounded-[2rem] p-6 md:p-8 relative bg-slate-900/40 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
+
+        <div wire:loading.flex wire:target="processToPayment, applyVoucher"
+            class="absolute inset-0 z-50 flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-[2rem]">
+            <div class="w-16 h-16 rounded-full border-4 border-[#ff5b1d]/30 border-t-[#ff5b1d] animate-spin"></div>
+            <span class="text-white text-lg font-bold tracking-widest mt-4 animate-pulse">MEMPROSES DATA...</span>
         </div>
-    @endif
-    @if (session()->has('error'))
-        <div class="alert alert-danger shadow-sm">{{ session('error') }}</div>
-    @endif
 
-    <div class="row">
-        <div class="col-md-7 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                    <h5 class="fw-bold mb-0">Informasi Pemesan</h5>
-                    <small class="text-muted">Data ini akan disimpan otomatis setiap Anda selesai mengetik.</small>
+        <div class="text-center mb-8 pt-4">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wider mb-2 uppercase">
+                @if ($currentStep == 1)
+                    Lengkapi Data Diri
+                @elseif($currentStep == 2)
+                    Selesaikan Pembayaran
+                @else
+                    Transaksi Berhasil
+                @endif
+            </h1>
+
+            {{-- Auto Save Notification (Hanya muncul di Step 1) --}}
+            @if ($currentStep == 1)
+                <div class="flex justify-center mt-4 h-8">
+                    <div x-data="{ show: false, time: '' }" x-show="show" x-transition.opacity.duration.300ms
+                        x-on:draft-saved.window="show = true; time = $event.detail[0]?.time ?? $event.detail.time; setTimeout(() => show = false, 2500);"
+                        style="display: none;"
+                        class="px-4 py-1.5 bg-green-500/20 border border-green-400/30 rounded-full backdrop-blur-sm flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                        <span class="text-green-300 text-xs font-bold uppercase tracking-wider">
+                            Draft Auto-Saved <span x-text="time"></span>
+                        </span>
+                    </div>
                 </div>
-                <div class="card-body">
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
-                        <input type="text" wire:model.blur="buyer_name" class="form-control" placeholder="Sesuai KTP/KTM">
-                        @error('buyer_name') <span class="text-danger small mt-1">{{ $message }}</span> @enderror
-                    </div>
+            @endif
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nomor WhatsApp <span class="text-danger">*</span></label>
-                        <input type="text" wire:model.blur="buyer_phone" class="form-control" placeholder="Contoh: 08123456789">
-                        @error('buyer_phone') <span class="text-danger small mt-1">{{ $message }}</span> @enderror
+            {{-- Progress Steps --}}
+            <div class="flex items-center justify-center space-x-4 mt-6">
+                @foreach ([1 => 'Biodata', 2 => 'Pembayaran', 3 => 'E-Ticket'] as $step => $label)
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
+                            {{ $currentStep >= $step ? 'bg-[#ff5b1d] text-white shadow-[0_0_15px_rgba(255,91,29,0.5)]' : 'bg-slate-800 text-slate-500' }}">
+                            {{ $step }}
+                        </div>
+                        <span
+                            class="text-[10px] mt-2 tracking-widest uppercase {{ $currentStep >= $step ? 'text-[#ff5b1d]' : 'text-slate-500' }}">{{ $label }}</span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Kota Asal <span class="text-danger">*</span></label>
-                        <input type="text" wire:model.blur="city" class="form-control" placeholder="Contoh: Surabaya">
-                        @error('city') <span class="text-danger small mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Tahu acara ini dari mana?</label>
-                        <select wire:model.blur="source_info" class="form-select">
-                            <option value="">-- Pilih Sumber Informasi --</option>
-                            <option value="Social Media">Social Media (IG/TikTok)</option>
-                            <option value="Website resmi">Website Resmi</option>
-                            <option value="Iklan">Iklan</option>
-                            <option value="Poster">Poster Kampus</option>
-                            <option value="Teman">Teman / Keluarga</option>
-                            <option value="Dosen">Dosen</option>
-                        </select>
-                        @error('source_info') <span class="text-danger small mt-1">{{ $message }}</span> @enderror
-                    </div>
-
-                </div>
+                    @if ($step < 3)
+                        <div
+                            class="w-16 h-1 rounded-full {{ $currentStep > $step ? 'bg-[#ff5b1d]' : 'bg-slate-800' }} mb-5">
+                        </div>
+                    @endif
+                @endforeach
             </div>
         </div>
 
-        <div class="col-md-5">
-            <div class="card shadow-sm border-0 position-sticky" style="top: 20px;">
-                <div class="card-header bg-white pt-4 pb-2 border-bottom">
-                    <h5 class="fw-bold mb-0">Ringkasan Pesanan</h5>
-                </div>
-                
-                <div class="card-body">
-                    <ul class="list-group list-group-flush mb-4">
-                        @foreach($transaction->transactionItems as $item)
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-0">{{ $item->ticketCategory->name }}</h6>
-                                    <small class="text-muted">{{ $item->quantity }}x Tiket</small>
-                                </div>
-                                <span>Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
-                            </li>
-                        @endforeach
-                        
-                        @if($discount_amount > 0)
-                            <li class="list-group-item px-0 d-flex justify-content-between text-success fw-semibold border-bottom-0">
-                                <span>Diskon Voucher</span>
-                                <span>- Rp {{ number_format($discount_amount, 0, ',', '.') }}</span>
-                            </li>
-                        @endif
-                    </ul>
+        @if ($currentStep == 1)
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="w-full md:w-3/5 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">NAMA LENGKAP
+                                *</label>
+                            <input type="text" wire:model.live.debounce.600ms="buyer_name"
+                                class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] focus:ring-1 focus:ring-[#ff5b1d] transition"
+                                placeholder="Sesuai KTP/KTM">
+                            @error('buyer_name')
+                                <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">WHATSAPP *</label>
+                            <input type="text" wire:model.live.debounce.600ms="buyer_phone"
+                                class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition"
+                                placeholder="08xxxxxxxxxx">
+                            @error('buyer_phone')
+                                <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">KOTA ASAL
+                                *</label>
+                            <input type="text" wire:model.live.debounce.600ms="city"
+                                class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition"
+                                placeholder="Contoh: Surabaya">
+                            @error('city')
+                                <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">SUMBER INFORMASI
+                                *</label>
+                            <select wire:model.live="source_info"
+                                class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition">
+                                <option value="" class="bg-slate-800">Pilih Sumber Info</option>
+                                <option value="Social Media" class="bg-slate-800">Social Media</option>
+                                <option value="Website resmi" class="bg-slate-800">Website Resmi</option>
+                                <option value="Teman" class="bg-slate-800">Teman</option>
+                            </select>
+                            @error('source_info')
+                                <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Kode Voucher (Opsional)</label>
-                        <div class="input-group">
-                            <input type="text" wire:model="voucher_code" class="form-control text-uppercase" placeholder="Masukkan kode" {{ $applied_voucher_id ? 'disabled' : '' }}>
-                            
-                            @if($applied_voucher_id)
-                                <button wire:click="removeVoucher" class="btn btn-outline-danger" type="button"><i class="fas fa-times"></i> Hapus</button>
-                            @else
-                                <button wire:click="applyVoucher" class="btn btn-secondary" type="button">Terapkan</button>
+                    <div class="mt-8 pt-6 border-t border-slate-700/50">
+                        <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">KODE VOUCHER
+                            (OPSIONAL)</label>
+                        <div class="flex gap-3">
+                            <input type="text" wire:model="voucher_code"
+                                class="flex-1 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white uppercase focus:border-[#ff5b1d] transition"
+                                placeholder="MASUKKAN KODE">
+                            <button wire:click.prevent="applyVoucher"
+                                class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">TERAPKAN</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-2/5">
+                    <div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 sticky top-6">
+                        <h3 class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3">RINGKASAN
+                            PESANAN</h3>
+
+                        <div class="space-y-4 mb-6">
+                            @foreach ($transaction->transactionItems as $item)
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-white font-semibold">{{ $item->ticketCategory->name }}</p>
+                                        <p class="text-slate-400 text-sm">{{ $item->quantity }}x Tiket</p>
+                                    </div>
+                                    <p class="text-white">Rp
+                                        {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</p>
+                                </div>
+                            @endforeach
+
+                            @if ($discount_amount > 0)
+                                <div
+                                    class="flex justify-between items-center text-green-400 pt-2 border-t border-slate-700/50">
+                                    <p class="font-semibold">Diskon Voucher</p>
+                                    <p>- Rp {{ number_format($discount_amount, 0, ',', '.') }}</p>
+                                </div>
                             @endif
                         </div>
-                        @error('voucher_code') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+
+                        <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-600">
+                            <p class="text-slate-300 font-bold">TOTAL BAYAR</p>
+                            <p class="text-2xl font-extrabold text-[#ff5b1d]">Rp
+                                {{ number_format($grand_total, 0, ',', '.') }}</p>
+                        </div>
+
+                        <button wire:click="processToPayment"
+                            class="w-full bg-[#ff5b1d] hover:bg-[#e04a10] text-white py-4 rounded-xl font-bold tracking-widest transition-all shadow-[0_0_20px_rgba(255,91,29,0.3)] hover:shadow-[0_0_30px_rgba(255,91,29,0.5)] transform hover:-translate-y-1">
+                            LANJUT PEMBAYARAN
+                        </button>
                     </div>
-
-                    <hr>
-
-                    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-                        <h5 class="fw-bold mb-0">Total Bayar</h5>
-                        <h4 class="text-primary fw-bold mb-0">Rp {{ number_format($grand_total, 0, ',', '.') }}</h4>
-                    </div>
-
-                    <button wire:click="processToPayment" class="btn btn-primary btn-lg w-100 fw-bold">
-                        <span wire:loading.remove wire:target="processToPayment">Lanjut ke Pembayaran</span>
-                        <span wire:loading wire:target="processToPayment">Memproses... <i class="fas fa-spinner fa-spin"></i></span>
-                    </button>
-                    
                 </div>
             </div>
-        </div>
-        
+
+        @elseif ($currentStep == 2)
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+                <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Menunggu Pembayaran</h2>
+                <p class="text-slate-400 mb-8 max-w-md">Selesaikan pembayaran Anda melalui *popup* yang muncul. Jika
+                    *popup* tidak muncul atau ter-close, klik tombol di bawah ini.</p>
+
+                <div class="text-3xl font-extrabold text-[#ff5b1d] mb-8">Rp
+                    {{ number_format($grand_total, 0, ',', '.') }}</div>
+
+                <div class="flex gap-4">
+                    <button wire:click="$set('currentStep', 1)"
+                        class="px-6 py-3 border border-slate-600 text-slate-300 rounded-xl hover:bg-slate-800 transition">Kembali</button>
+                    <button wire:click="reTriggerMidtrans"
+                        class="px-8 py-3 bg-[#ff5b1d] hover:bg-[#e04a10] text-white rounded-xl font-bold shadow-lg transition">Bayar
+                        Sekarang</button>
+
+                    {{-- Tombol simulasi untuk tes pindah ke step 3 (Hapus saat Production) --}}
+                    <button wire:click="paymentSuccess"
+                        class="px-4 py-3 bg-green-600 text-white rounded-xl text-xs">Simulasi Sukses (Dev)</button>
+                </div>
+            </div>
+
+        @elseif ($currentStep == 3)
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+                <div
+                    class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 border-4 border-green-500">
+                    <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-2">Pembayaran Berhasil!</h2>
+                <p class="text-slate-400 mb-8 max-w-md">Terima kasih, pembayaran untuk tiket Anda telah kami terima.
+                    Invoice: <span class="text-white font-mono">{{ $transaction->invoice_code }}</span></p>
+
+                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl w-full max-w-md mb-8">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-slate-400">Nama Lengkap</span>
+                        <span class="text-white font-semibold">{{ $transaction->buyer_name }}</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-slate-400">Total Tiket</span>
+                        <span class="text-white font-semibold">{{ $transaction->transactionItems->sum('quantity') }}
+                            Tiket</span>
+                    </div>
+                    <div class="flex justify-between pt-4 border-t border-slate-700 mt-2">
+                        <span class="text-slate-300 font-bold">Total Dibayar</span>
+                        <span class="text-green-400 font-bold">Rp
+                            {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ route('ticket.download', $transaction->invoice_code) }}" target="_blank"
+                    class="px-8 py-4 bg-gradient-to-r from-[#ff5b1d] to-[#ff8c3a] text-white rounded-xl font-bold shadow-[0_0_20px_rgba(255,91,29,0.4)] hover:shadow-[0_0_30px_rgba(255,91,29,0.6)] transition-all transform hover:-translate-y-1 flex items-center gap-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    DOWNLOAD E-TICKET (PDF)
+                </a>
+            </div>
+        @endif
+
     </div>
+</div>
+
+
+</div> @script
+    <script>
+        $wire.on('trigger-midtrans', (event) => {
+            let token = event[0].snapToken;
+
+            window.snap.pay(token, {
+                onSuccess: function(result) {
+                    $wire.paymentSuccess();
+                },
+                onPending: function(result) {
+                    alert("Menunggu pembayaran Anda!");
+                },
+                onError: function(result) {
+                    alert("Pembayaran gagal!");
+                },
+                onClose: function() {
+                    console.log('Popup ditutup tanpa menyelesaikan pembayaran');
+                }
+            });
+        });
+    </script>
+@endscript
 </div>
