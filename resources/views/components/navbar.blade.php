@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
+<style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: "Helvetica Now", "Helvetica", sans-serif;
-            background-color: #f4f4f4;
             padding-top: 100px;
-            overflow-x: hidden;
         }
 
         #navigation-bar {
@@ -364,11 +353,8 @@
             }
         }
     </style>
-</head>
 
-<body>
-
-    <div class="nav-overlay" id="navOverlay"></div>
+<div class="nav-overlay" id="navOverlay"></div>
 
     <nav id="navigation-bar">
         <div class="logo-container">
@@ -466,6 +452,3 @@
             });
         });
     </script>
-</body>
-
-</html>
