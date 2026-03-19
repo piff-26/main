@@ -239,6 +239,6 @@ class CheckoutBiodata extends Component
 
     public function render()
     {
-        return view('livewire.checkout-biodata');
+        return view('livewire.checkout-finish');
     }
 }
