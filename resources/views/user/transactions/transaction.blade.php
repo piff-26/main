@@ -17,7 +17,7 @@
         </div>
 
         <div class="max-w-3xl mx-auto">
-            @livewire('checkout-finish', ['invoice_code' => $invoiceCode])
+            @livewire('checkout-biodata', ['invoice_code' => $invoiceCode])
         </div>
 
     </div>
