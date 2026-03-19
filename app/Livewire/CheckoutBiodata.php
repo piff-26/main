@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 class CheckoutBiodata extends Component
 {
     public $transaction;
+
+    public $currentStep = 1;
     
     // Form Biodata
     public $buyer_name;
@@ -26,18 +28,70 @@ class CheckoutBiodata extends Component
     public $discount_amount = 0;
     public $grand_total = 0;
 
+    public $draftSavedTime;
+
     public function mount($invoice_code)
     {
-    $this->transaction = Transaction::with('transactionItems.ticketCategory')
-        ->where('invoice_code', $invoice_code)
-        ->firstOrFail();
+        // Mengambil data transaksi draft
+        $this->transaction = Transaction::with('transactionItems.ticketCategory')
+            ->where('invoice_code', $invoice_code)
+            ->firstOrFail();
 
-    // Hitung harga asli sebelum diskon (Quantity * Price)
-    foreach ($this->transaction->transactionItems as $item) {
-        $this->original_total += ($item->quantity * $item->price);
+        // Load data jika user kembali ke halaman ini (melanjutkan draft)
+        $this->buyer_name = $this->transaction->buyer_name;
+        $this->buyer_phone = $this->transaction->buyer_phone;
+        $this->city = $this->transaction->city;
+        $this->source_info = $this->transaction->source_info;
+        $this->discount_amount = $this->transaction->discount_amount;
+
+        // Kalkulasi Harga
+        foreach ($this->transaction->transactionItems as $item) {
+            $this->original_total += ($item->quantity * $item->price);
+        }
+        $this->calculateTotal();
     }
 
-    $this->grand_total = $this->original_total;
+
+    public function updated($propertyName, $value)
+    {
+        $allowedFields = ['buyer_name', 'buyer_phone', 'city', 'source_info'];
+        
+        if (in_array($propertyName, $allowedFields)) {
+            // Save langsung ke Database
+            Transaction::where('id', $this->transaction->id)->update([
+                $propertyName => $value
+            ]);
+
+            // Tembak event ke frontend (bawa data waktu)
+            $this->dispatch('draft-saved', time: now()->format('H:i:s'));
+        }
+    }
+
+    public function calculateTotal()
+    {
+        $this->grand_total = $this->original_total - $this->discount_amount;
+        // Pastikan total tidak minus
+        if($this->grand_total < 0) $this->grand_total = 0; 
+    }
+
+    public function nextStep()
+    {
+        $this->validate([
+            'buyer_name' => 'required|string|max:255',
+            'buyer_phone' => 'required|numeric',
+            'city' => 'required|string|max:255',
+            'source_info' => 'required|string',
+        ], [
+            'required' => ':attribute wajib diisi.',
+            'numeric' => 'Nomor telepon harus berupa angka.'
+        ]);
+
+        $this->currentStep = 2;
+    }
+
+    public function previousStep()
+    {
+        $this->currentStep = 1;
     }
 
     /**
@@ -93,6 +147,7 @@ class CheckoutBiodata extends Component
 
         $this->grand_total = $this->original_total - $this->discount_amount;
         $this->applied_voucher_id = $voucher->id;
+        $this->calculateTotal();
 
         session()->flash('voucher_success', 'Voucher berhasil diterapkan!');
     }
@@ -113,45 +168,49 @@ class CheckoutBiodata extends Component
      */
     public function processToPayment()
     {
-        // Validasi Biodata
         $this->validate([
             'buyer_name' => 'required|string|max:255',
-            'buyer_phone' => 'required|numeric|min_digits:9',
-            'city' => 'required|string|max:100',
-            'source_info' => 'required|in:Social Media,Website resmi,Iklan,Poster,Teman,Dosen',
-        ], [
-            'source_info.in' => 'Silakan pilih sumber info yang valid.'
+            'buyer_phone' => 'required|numeric',
+            'city' => 'required|string|max:255',
+            'source_info' => 'required|string',
         ]);
 
-        try {
-            DB::beginTransaction();
+        // Simpan total amount ke DB dan ubah status 
+        $this->transaction->update([
+            'total_amount' => $this->grand_total,
+            'transaction_status' => 'pending' // Update status siap bayar
+        ]);
 
-            // Update Data Transaksi
-            $this->transaction->update([
-                'buyer_name' => $this->buyer_name,
-                'buyer_phone' => $this->buyer_phone,
-                'city' => $this->city,
-                'source_info' => $this->source_info,
-                'voucher_id' => $this->applied_voucher_id,
-                'discount_amount' => $this->discount_amount,
-                'total_amount' => $this->grand_total,
-                'transaction_status' => 'pending', // Berubah dari draft jadi pending!
-            ]);
+        // TODO: Generate Midtrans Snap Token di sini jika belum ada
+        // $this->transaction->snap_token = MidtransService::getSnapToken($this->transaction);
+        // $this->transaction->save();
 
-            // Tambah used_count pada voucher (jika pakai voucher)
-            if ($this->applied_voucher_id) {
-                Voucher::where('id', $this->applied_voucher_id)->increment('used_count');
-            }
-
-            DB::commit();
-
-            // Redirect ke halaman / function Payment Gateway (Midtrans)
-            return redirect()->route('user.checkout.payment', $this->transaction->invoice_code);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            session()->flash('error', 'Terjadi kesalahan saat memproses data. Silakan coba lagi.');
+        // Pindah ke halaman pembayaran
+        $this->currentStep = 2;
+        
+        // Trigger Javascript untuk buka popup Midtrans
+        if ($this->transaction->snap_token) {
+            $this->dispatch('trigger-midtrans', snapToken: $this->transaction->snap_token);
         }
+    }
+
+    public function reTriggerMidtrans()
+    {
+        if ($this->transaction->snap_token) {
+            $this->dispatch('trigger-midtrans', snapToken: $this->transaction->snap_token);
+        } else {
+            $this->processToPayment();
+        }
+    }
+
+    public function paymentSuccess()
+    {
+        $this->transaction->update([
+            'transaction_status' => 'paid',
+            'paid_at' => now(),
+        ]);
+
+        $this->currentStep = 3; 
     }
 
     public function render()
