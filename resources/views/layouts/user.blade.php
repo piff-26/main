@@ -361,12 +361,23 @@
         </script>
     @endif
 
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}">
-    </script>
+    <script src="https://app.{{ env('MIDTRANS_IS_PRODUCTION') ? '' : 'sandbox.' }}midtrans.com/snap/snap.js"
+        data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 
-    
+
 
     {{-- Panggilnya pakai push ygy --}}
+    @if (session('toast_info'))
+        <script>
+            Toastify({
+                text: '{{ session('toast_info') }}',
+                duration: 3000,
+                gravity: 'top',
+                position: 'right',
+            }).showToast();
+        </script>
+    @endif
+
     @stack('scripts')
 
     {{-- Ini pakai include  --}}
