@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Voucher;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use App\Enums\TransactionStatusEnum;
 
 class AdminController extends BaseController
 {
@@ -31,14 +32,14 @@ class AdminController extends BaseController
 
     public function index()
     {
-        $totalRevenue = Transaction::where('transaction_status', 'paid')->sum('total_amount');
+        $totalRevenue = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)->sum('total_amount');
         $ticketsSold = Ticket::where('is_canceled', false)->count();
         $totalTickets = TicketCategory::sum('quota');
-        $totalTransactions = Transaction::whereIn('transaction_status', ['paid', 'failed', 'expired'])->count();
+        $totalTransactions = Transaction::whereIn('transaction_status', [TransactionStatusEnum::PAID->value, TransactionStatusEnum::FAILED->value, TransactionStatusEnum::EXPIRED->value])->count();
         $totalCheckin = Ticket::where('is_checked_in', true)->where('is_canceled', false)->count();
         $totalUsers = User::count();
-        $paidTransactions = Transaction::where('transaction_status', 'paid')->count();
-        $failedTransactions = Transaction::whereIn('transaction_status', ['failed', 'expired'])->count();
+        $paidTransactions = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)->count();
+        $failedTransactions = Transaction::whereIn('transaction_status', [TransactionStatusEnum::FAILED->value, TransactionStatusEnum::EXPIRED->value])->count();
         
         $ticketCategories = TicketCategory::selectRaw('name, sold_count as sold')->get();
         
@@ -55,7 +56,7 @@ class AdminController extends BaseController
     public function listEvents()
     {
         $events = Event::with('ticketCategories')->get()->map(function($event) {
-            $revenue = Transaction::where('transaction_status', 'paid')
+            $revenue = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)
                 ->whereHas('transactionItems.ticketCategory', function($q) use ($event) {
                     $q->where('event_id', $event->id);
                 })->sum('total_amount');
@@ -289,13 +290,13 @@ class AdminController extends BaseController
             $transaction = Transaction::where('invoice_code', $invoice_code)->firstOrFail();
             
             // Prevent canceling already completed or failed transactions
-            if (in_array($transaction->transaction_status, ['expired', 'failed'])) {
+            if (in_array($transaction->transaction_status, [TransactionStatusEnum::EXPIRED->value, TransactionStatusEnum::FAILED->value])) {
                 return response()->json(['success' => false, 'message' => 'Transaction already cancelled or failed'], 422);
             }
             
-            if ($transaction->transaction_status === 'paid') {
+            if ($transaction->transaction_status === TransactionStatusEnum::PAID->value) {
                 // Refund: Update transaction and cancel tickets
-                $transaction->update(['transaction_status' => 'expired']);
+                $transaction->update(['transaction_status' => TransactionStatusEnum::EXPIRED->value]);
                 $transaction->tickets()->update(['is_canceled' => true, 'canceled_at' => now()]);
                 
                 // Decrease sold_count for each ticket category
@@ -304,7 +305,7 @@ class AdminController extends BaseController
                 }
             } else {
                 // Cancel draft: Just update status
-                $transaction->update(['transaction_status' => 'expired']);
+                $transaction->update(['transaction_status' => TransactionStatusEnum::EXPIRED->value]);
             }
             
             return response()->json(['success' => true, 'message' => 'Transaction cancelled successfully']);
@@ -410,7 +411,7 @@ class AdminController extends BaseController
         // 1. City Distribution (Top 5)
         $cityData = Transaction::select('city', DB::raw('count(*) as total'))
             ->whereNotNull('city')
-            ->where('transaction_status', 'paid')
+            ->where('transaction_status', TransactionStatusEnum::PAID->value)
             ->groupBy('city')
             ->orderBy('total', 'desc')
             ->take(5)
@@ -420,11 +421,11 @@ class AdminController extends BaseController
         $city_values = $cityData->pluck('total')->toArray();
 
         // 2. Source Info (Percentage)
-        $totalPaid = Transaction::where('transaction_status', 'paid')->count();
+        $totalPaid = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)->count();
         
         $sources = Transaction::select('source_info as name', DB::raw('count(*) as total'))
             ->whereNotNull('source_info')
-            ->where('transaction_status', 'paid')
+            ->where('transaction_status', TransactionStatusEnum::PAID->value)
             ->groupBy('source_info')
             ->get()
             ->map(function ($item) use ($totalPaid) {

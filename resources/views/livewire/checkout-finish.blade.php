@@ -71,8 +71,11 @@
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">WHATSAPP *</label>
-                            <input type="text" wire:model.live.debounce.600ms="buyer_phone"
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">NOMOR TELEPON
+                                *</label>
+                            <input type="text" inputmode="numeric" pattern="\d*" required maxlength="15"
+                                wire:model.live.debounce.600ms="buyer_phone"
+                                oninput="this.value = this.value.replace(/\D/g, '')"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition"
                                 placeholder="08xxxxxxxxxx">
                             @error('buyer_phone')
@@ -95,9 +98,9 @@
                             <select wire:model.live="source_info"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition">
                                 <option value="" class="bg-slate-800">Pilih Sumber Info</option>
-                                <option value="Social Media" class="bg-slate-800">Social Media</option>
-                                <option value="Website resmi" class="bg-slate-800">Website Resmi</option>
-                                <option value="Teman" class="bg-slate-800">Teman</option>
+                                @foreach($sourceInfoOptions ?? [] as $option)
+                                    <option value="{{ $option }}" class="bg-slate-800">{{ $option }}</option>
+                                @endforeach
                             </select>
                             @error('source_info')
                                 <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
@@ -119,14 +122,16 @@
 
                     {{-- TNC --}}
                     <div class="mt-6 flex items-center gap-3">
-                        <input type="checkbox" id="agree_tnc" wire:model="agree_tnc" class="w-4 h-4 accent-[#ff5b1d]" {{ !$tncRead ? 'disabled' : '' }}>
+                        <input type="checkbox" id="agree_tnc" wire:model="agree_tnc" class="w-4 h-4 accent-[#ff5b1d]"
+                            {{ !$tncRead ? 'disabled' : '' }}>
                         <label for="agree_tnc" class="text-sm text-slate-300">
                             Saya menyetujui
                             <button type="button" x-data x-on:click="$dispatch('open-tnc')"
-                                class="text-[#ff5b1d] underline hover:text-[#ff8c3a] transition">Syarat dan Ketentuan</button>
+                                class="text-[#ff5b1d] underline hover:text-[#ff8c3a] transition">Syarat dan
+                                Ketentuan</button>
                         </label>
                     </div>
-                    @if($tncError)
+                    @if ($tncError)
                         <span class="text-red-400 text-xs mt-1 block">{{ $tncError }}</span>
                     @endif
                 </div>
@@ -170,7 +175,6 @@
                     </div>
                 </div>
             </div>
-
         @elseif ($currentStep == 2)
             <div class="flex flex-col items-center justify-center py-10 text-center">
                 <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
@@ -199,7 +203,6 @@
                         class="px-4 py-3 bg-green-600 text-white rounded-xl text-xs">Simulasi Sukses (Dev)</button>
                 </div>
             </div>
-
         @elseif ($currentStep == 3)
             <div class="flex flex-col items-center justify-center py-10 text-center">
                 <div
@@ -244,40 +247,39 @@
     </div>
 
     {{-- TNC MODAL --}}
-    <div x-data="{ open: false, scrolled: false }"
-        x-on:open-tnc.window="open = true; scrolled = false"
-        x-show="open"
-        x-cloak
+    <div x-data="{ open: false, scrolled: false }" x-on:open-tnc.window="open = true; scrolled = false" x-show="open" x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
         style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
 
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg flex flex-col" style="max-height: 80vh;">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg flex flex-col"
+            style="max-height: 80vh;">
             <div class="px-6 py-4 border-b border-slate-700">
                 <h3 class="text-white font-bold text-lg tracking-wider">SYARAT DAN KETENTUAN</h3>
             </div>
 
-            <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3"
-                x-ref="tncContent"
+            <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3" x-ref="tncContent"
                 x-on:scroll="if($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 10) scrolled = true">
                 <p class="font-bold text-white">1. Ketentuan Pembelian Tiket</p>
                 <p>Tiket yang telah dibeli tidak dapat dikembalikan atau ditukar dalam kondisi apapun.</p>
                 <p class="font-bold text-white">2. Penggunaan Tiket</p>
-                <p>Tiket hanya berlaku untuk satu kali masuk. QR Code pada tiket tidak boleh digandakan atau dipindahtangankan.</p>
+                <p>Tiket hanya berlaku untuk satu kali masuk. QR Code pada tiket tidak boleh digandakan atau
+                    dipindahtangankan.</p>
                 <p class="font-bold text-white">3. Identitas</p>
                 <p>Panitia berhak meminta identitas diri yang sesuai dengan data pemesan saat check-in.</p>
                 <p class="font-bold text-white">4. Perubahan Acara</p>
                 <p>Panitia berhak mengubah jadwal, lokasi, atau pembicara tanpa pemberitahuan sebelumnya.</p>
                 <p class="font-bold text-white">5. Privasi Data</p>
-                <p>Data pribadi yang Anda berikan akan digunakan hanya untuk keperluan acara PIFF 2026 dan tidak akan disebarkan kepada pihak ketiga.</p>
+                <p>Data pribadi yang Anda berikan akan digunakan hanya untuk keperluan acara PIFF 2026 dan tidak akan
+                    disebarkan kepada pihak ketiga.</p>
                 <p class="font-bold text-white">6. Keamanan</p>
                 <p>Panitia tidak bertanggung jawab atas kehilangan barang bawaan selama acara berlangsung.</p>
                 <p class="text-slate-500 text-xs mt-4">Scroll ke bawah untuk menyetujui.</p>
             </div>
 
             <div class="px-6 py-4 border-t border-slate-700">
-                <button
-                    x-bind:disabled="!scrolled"
-                    x-bind:class="scrolled ? 'bg-[#ff5b1d] hover:bg-[#e04a10] cursor-pointer' : 'bg-slate-700 cursor-not-allowed opacity-50'"
+                <button x-bind:disabled="!scrolled"
+                    x-bind:class="scrolled ? 'bg-[#ff5b1d] hover:bg-[#e04a10] cursor-pointer' :
+                        'bg-slate-700 cursor-not-allowed opacity-50'"
                     x-on:click="open = false; $wire.set('tncRead', true); $wire.set('agree_tnc', true);"
                     class="w-full text-white font-bold py-3 rounded-xl transition">
                     Saya Setuju

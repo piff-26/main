@@ -4,7 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Transaction;
-use App\Models\Voucher; 
+use App\Models\Voucher;
+use App\Enums\TransactionStatusEnum;
 
 class CheckoutConfirm extends Component
 {
@@ -20,7 +21,7 @@ class CheckoutConfirm extends Component
         $this->transaction = Transaction::with('transactionItems.ticketCategory')
             ->where('invoice_code', $invoice_code)
             ->where('user_id', session('user_id'))
-            ->where('transaction_status', 'pending')
+            ->where('transaction_status', TransactionStatusEnum::PENDING->value)
             ->firstOrFail();
 
         $this->applied_voucher_id = $this->transaction->voucher_id;

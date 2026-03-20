@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\BaseController;
 use App\Models\Event;
 use App\Models\User;
+use App\Enums\TransactionStatusEnum;
 
 class TransactionController extends Controller
 {
@@ -56,7 +57,7 @@ class TransactionController extends Controller
                 'user_id' => session('user_id'),
                 'invoice_code' => $invoiceCode,
                 'total_amount' => $totalAmount,
-                'transaction_status' => 'draft',
+                'transaction_status' => TransactionStatusEnum::DRAFT->value,
                 'expired_at' => now()->addMinutes(15),
             ]);
 
@@ -75,7 +76,7 @@ class TransactionController extends Controller
 
         if ($userId) {
             $active = Transaction::where('user_id', $userId)
-                ->whereIn('transaction_status', ['draft', 'pending'])
+                ->whereIn('transaction_status', [TransactionStatusEnum::DRAFT->value, TransactionStatusEnum::PENDING->value])
                 ->where('expired_at', '>', now())
                 ->latest()
                 ->first();
@@ -101,7 +102,7 @@ class TransactionController extends Controller
         // Pastikan transaksi valid, milik user yang login, dan statusnya masih pending
         $transaction = Transaction::where('invoice_code', $invoiceCode)
             ->where('user_id', session('user_id'))
-            ->whereIn('transaction_status', ['draft', 'pending'])
+            ->whereIn('transaction_status', [TransactionStatusEnum::DRAFT->value, TransactionStatusEnum::PENDING->value])
             ->firstOrFail();
 
         return view('user.transactions.transaction', [
@@ -117,7 +118,7 @@ class TransactionController extends Controller
     {
         $transaction = Transaction::where('invoice_code', $invoiceCode)
             ->where('user_id', session('user_id'))
-            ->where('transaction_status', 'pending')
+            ->where('transaction_status', TransactionStatusEnum::PENDING->value)
             ->firstOrFail();
 
         return view('user.transactions.step3-confirm', [

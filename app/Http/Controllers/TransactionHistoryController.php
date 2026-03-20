@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Enums\TransactionStatusEnum;
 
 class TransactionHistoryController extends Controller
 {
@@ -14,7 +15,7 @@ class TransactionHistoryController extends Controller
         $userId = session('user_id');
         $transaction = Transaction::where('invoice_code', $invoiceCode)
             ->where('user_id', $userId)
-            ->where('transaction_status', 'paid')
+            ->where('transaction_status', TransactionStatusEnum::PAID->value)
             ->with(['tickets.ticketCategory.event']) // Load relasi tiket
             ->firstOrFail();
 

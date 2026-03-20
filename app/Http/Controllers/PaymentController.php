@@ -8,6 +8,7 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use App\Models\Ticket;
 use Illuminate\Support\Str;
+use App\Enums\TransactionStatusEnum;
 
 class PaymentController extends Controller
 {
@@ -16,7 +17,7 @@ class PaymentController extends Controller
         // Transaksi berdasarkan invoice
         $transaction = Transaction::with('transactionItems.ticketCategory')
             ->where('invoice_code', $invoice_code)
-            ->where('transaction_status', 'pending') // Pastikan statusnya pending
+            ->where('transaction_status', TransactionStatusEnum::PENDING->value)
             ->firstOrFail();
 
         // Jika sudah punya snap_token, langsung tampilkan view
@@ -106,7 +107,7 @@ class PaymentController extends Controller
         }
 
         // Jika transaksi sudah paid sebelumnya, abaikan
-        if ($transaction->transaction_status === 'paid') {
+        if ($transaction->transaction_status === TransactionStatusEnum::PAID->value) {
             return response()->json(['message' => 'Already paid'], 200);
         }
 
@@ -117,10 +118,10 @@ class PaymentController extends Controller
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             if ($fraudStatus == 'challenge') {
                 // Jangan diapa-apain dulu kalau statusnya challenge (butuh verifikasi manual Midtrans)
-                $transaction->update(['transaction_status' => 'pending']);
+                $transaction->update(['transaction_status' => TransactionStatusEnum::PENDING->value]);
             } else {
                 $transaction->update([
-                    'transaction_status' => 'paid',
+                    'transaction_status' => TransactionStatusEnum::PAID->value,
                     'payment_method' => $request->payment_type,
                     'payment_reference' => $request->transaction_id,
                     'paid_at' => now()
@@ -153,7 +154,7 @@ class PaymentController extends Controller
         } else if ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
             // Transaksi expired atau failed
             $transaction->update([
-                'transaction_status' => 'expired', // atau failed
+                'transaction_status' => TransactionStatusEnum::EXPIRED->value,
                 'cancel_reason' => 'Midtrans status: ' . $transactionStatus
             ]);
 
@@ -165,7 +166,7 @@ class PaymentController extends Controller
             }
         } else if ($transactionStatus == 'pending') {
             // Transaksi masuk ke pending (misal user baru milih metode bayar Transfer Bank tapi belum transfer)
-            $transaction->update(['transaction_status' => 'pending']);
+            $transaction->update(['transaction_status' => TransactionStatusEnum::PENDING->value]);
         }
 
         // Balas pesan ke Midtrans bahwa kita sudah menerima datanya dengan baik

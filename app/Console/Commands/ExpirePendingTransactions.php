@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Transaction;
+use App\Enums\TransactionStatusEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -30,7 +31,7 @@ class ExpirePendingTransactions extends Command
         {
             // Cari semua transaksi pending yang waktu expired_at-nya sudah lewat dari waktu sekarang
             $expiredTransactions = Transaction::with('transactionItems.ticketCategory')
-                ->where('transaction_status', 'pending')
+                ->where('transaction_status', TransactionStatusEnum::PENDING->value)
                 ->where('expired_at', '<', now())
                 ->get();
 
@@ -46,7 +47,7 @@ class ExpirePendingTransactions extends Command
                 DB::transaction(function () use ($transaction, &$count) {
                     // Ubah status transaksi jadi expired
                     $transaction->update([
-                        'transaction_status' => 'expired',
+                        'transaction_status' => TransactionStatusEnum::EXPIRED->value,
                         'cancel_reason' => 'Expired by System (Timeout)'
                     ]);
 

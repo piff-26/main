@@ -10,7 +10,7 @@
             </div>
             <div class="flex gap-2">
                 <button id="btnRefundCancel" class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold">
-                    <i class="fas fa-undo mr-2"></i><span id="refundCancelText">{{ $transaction->transaction_status === 'paid' ? 'Refund' : 'Cancel' }}</span>
+                    <i class="fas fa-undo mr-2"></i><span id="refundCancelText">{{ $transaction->transaction_status === \App\Enums\TransactionStatusEnum::PAID->value ? 'Refund' : 'Cancel' }}</span>
                 </button>
                 <a href="/admin/transaction" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold">
                     <i class="fas fa-arrow-left mr-2"></i>Back
@@ -89,11 +89,12 @@
                     <div>
                         <div class="text-sm text-gray-500">Status</div>
                         <div>
-                            @if($transaction->transaction_status === 'paid')
+                            @php use App\Enums\TransactionStatusEnum; @endphp
+                        @if($transaction->transaction_status === TransactionStatusEnum::PAID->value)
                                 <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
-                            @elseif($transaction->transaction_status === 'draft')
+                            @elseif($transaction->transaction_status === TransactionStatusEnum::DRAFT->value)
                                 <span class="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800">Draft</span>
-                            @elseif($transaction->transaction_status === 'expired')
+                            @elseif($transaction->transaction_status === TransactionStatusEnum::EXPIRED->value)
                                 <span class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">Expired</span>
                             @else
                                 <span class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">{{ ucfirst($transaction->transaction_status) }}</span>
@@ -324,7 +325,7 @@ $(document).ready(function() {
                     success: function() {
                         Swal.fire({
                             icon: 'success',
-                            title: transactionData.transaction_status === 'paid' ? 'Refund Processed!' : 'Transaction Cancelled!',
+                            title: transactionData.transaction_status === '{{ \App\Enums\TransactionStatusEnum::PAID->value }}' ? 'Refund Processed!' : 'Transaction Cancelled!',
                             confirmButtonColor: '#27b4f7',
                             timer: 2000
                         }).then(() => window.location.href = '/admin/transaction');

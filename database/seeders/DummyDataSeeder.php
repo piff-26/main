@@ -10,6 +10,8 @@ use App\Models\Ticket;
 use App\Models\TicketCategory;
 use App\Models\Voucher;
 use Illuminate\Support\Str;
+use App\Enums\TransactionStatusEnum;
+use App\Enums\SourceInfoEnum;
 
 class DummyDataSeeder extends Seeder
 {
@@ -26,7 +28,7 @@ class DummyDataSeeder extends Seeder
         $categories = TicketCategory::all();
         $vouchers = Voucher::all();
         $cities = ['Surabaya', 'Jakarta', 'Bandung', 'Semarang', 'Yogyakarta'];
-        $sources = ['Social Media', 'Website resmi', 'Iklan', 'Poster', 'Teman', 'Dosen'];
+        $sources = array_column(SourceInfoEnum::cases(), 'value');
         $paymentMethods = ['QRIS', 'BCA', 'Gopay', 'OVO', 'Mandiri'];
         
         // Create paid transactions with varied items
@@ -66,7 +68,7 @@ class DummyDataSeeder extends Seeder
                 'total_amount' => $totalAmount,
                 'voucher_id' => $voucher?->id,
                 'payment_method' => $paymentMethods[array_rand($paymentMethods)],
-                'transaction_status' => 'paid',
+                'transaction_status' => TransactionStatusEnum::PAID->value,
                 'paid_at' => now()->subDays(rand(1, 30)),
                 'agree_tnc' => true,
                 'created_at' => now()->subDays(rand(1, 30)),
@@ -115,7 +117,7 @@ class DummyDataSeeder extends Seeder
                 'source_info' => $sources[array_rand($sources)],
                 'total_amount' => $category->price * $quantity,
                 'payment_method' => $paymentMethods[array_rand($paymentMethods)],
-                'transaction_status' => 'draft',
+                'transaction_status' => TransactionStatusEnum::DRAFT->value,
                 'agree_tnc' => true,
                 'created_at' => now()->subDays(rand(1, 10)),
             ]);
@@ -144,7 +146,7 @@ class DummyDataSeeder extends Seeder
                 'source_info' => $sources[array_rand($sources)],
                 'total_amount' => $category->price * $quantity,
                 'payment_method' => $paymentMethods[array_rand($paymentMethods)],
-                'transaction_status' => rand(0, 1) ? 'failed' : 'expired',
+                'transaction_status' => rand(0, 1) ? TransactionStatusEnum::FAILED->value : TransactionStatusEnum::EXPIRED->value,
                 'agree_tnc' => true,
                 'created_at' => now()->subDays(rand(10, 30)),
             ]);

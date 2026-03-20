@@ -264,14 +264,15 @@
             <div>
                 <div class="invoice-number">{{ $transaction->invoice_code }}</div>
                 @php
+                    use App\Enums\TransactionStatusEnum;
                     $statusClass = 'status-draft';
                     $statusText = strtoupper($transaction->transaction_status);
                     
-                    if ($transaction->transaction_status === 'paid') {
+                    if ($transaction->transaction_status === TransactionStatusEnum::PAID->value) {
                         $statusClass = 'status-paid';
-                    } elseif ($transaction->transaction_status === 'failed') {
+                    } elseif ($transaction->transaction_status === TransactionStatusEnum::FAILED->value) {
                         $statusClass = 'status-failed';
-                    } elseif ($transaction->transaction_status === 'expired') {
+                    } elseif ($transaction->transaction_status === TransactionStatusEnum::EXPIRED->value) {
                         $statusClass = 'status-expired';
                     }
                 @endphp
@@ -386,7 +387,7 @@
         </div>
         
         <!-- Confirmation Box (if paid) -->
-        @if($transaction->transaction_status === 'paid')
+        @if($transaction->transaction_status === TransactionStatusEnum::PAID->value)
         <div class="confirmation-box">
             <div class="icon">OK</div>
             <div class="title">Payment Confirmed</div>

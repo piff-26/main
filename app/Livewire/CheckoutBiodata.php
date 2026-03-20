@@ -12,6 +12,8 @@ use App\Models\TransactionItem;
 use App\Mail\ETicketMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use App\Enums\SourceInfoEnum;
+use App\Enums\TransactionStatusEnum;
 
 class CheckoutBiodata extends Component
 {
@@ -34,6 +36,8 @@ class CheckoutBiodata extends Component
     public $discount_amount = 0;
     public $grand_total = 0;
 
+    public array $sourceInfoOptions = [];
+
     public $draftSavedTime;
     public $agree_tnc = false;
     public $tncRead = false;
@@ -41,6 +45,8 @@ class CheckoutBiodata extends Component
 
     public function mount($invoice_code)
     {
+        $this->sourceInfoOptions = array_column(SourceInfoEnum::cases(), 'value');
+
         // Mengambil data transaksi draft
         $this->transaction = Transaction::with('transactionItems.ticketCategory')
             ->where('invoice_code', $invoice_code)
@@ -194,7 +200,7 @@ class CheckoutBiodata extends Component
         // Simpan total amount ke DB dan ubah status 
         $this->transaction->update([
             'total_amount' => $this->grand_total,
-            'transaction_status' => 'pending' // Update status siap bayar
+            'transaction_status' => TransactionStatusEnum::PENDING->value
         ]);
 
         // TODO: Generate Midtrans Snap Token di sini jika belum ada
@@ -222,7 +228,7 @@ class CheckoutBiodata extends Component
     public function paymentSuccess()
     {
         $this->transaction->update([
-            'transaction_status' => 'paid',
+            'transaction_status' => TransactionStatusEnum::PAID->value,
             'paid_at'            => now(),
             'agree_tnc'          => true,
         ]);
