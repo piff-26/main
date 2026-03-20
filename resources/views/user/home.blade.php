@@ -57,6 +57,12 @@
                 @include('partials.ticket')
             </div>
         </div>
+        {{-- ticket --}}
+        {{-- <div class="relative flex items-center justify-center" id="ticket">
+            <div class="relative z-31">
+                @include('partials.ticket_fix')
+            </div>
+        </div> --}}
     </div>
 
     @push('scripts')
@@ -64,12 +70,12 @@
             if (history.scrollRestoration) {
                 history.scrollRestoration = 'manual';
             }
-            
-            window.addEventListener('beforeunload', function () {
+
+            window.addEventListener('beforeunload', function() {
                 window.scrollTo(0, 0);
             });
-            
-            window.addEventListener('load', function () {
+
+            window.addEventListener('load', function() {
                 setTimeout(function() {
                     window.scrollTo(0, 0);
                 }, 0);

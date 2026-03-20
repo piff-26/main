@@ -1,0 +1,54 @@
+@push('styles')
+    <style>
+        .title-session {
+            color: var(--black);
+            /* Font size dipindahkan ke class HTML agar responsif */
+        }
+
+        .info-session {
+            color: var(--black);
+            text-align: center;
+            /* Font size dipindahkan ke class HTML agar responsif */
+        }
+
+        .perspective-wrap {
+            perspective: 1000px;
+        }
+    </style>
+@endpush
+
+<div class="relative w-screen left-1/2 -translate-x-1/2 h-auto overflow-hidden">
+    <div class="absolute inset-0 w-full h-full z-0" style="background-color: #fec401"></div>
+
+    <div class="relative z-10 container mx-auto py-10 md:py-20 px-4">
+        <div
+            class="flex flex-col sm:flex-row items-center sm:items-baseline justify-center gap-2 sm:gap-6 perspective-wrap">
+
+            <h1 data-aos="fade-up-right" data-aos-duration="3000"
+                class="title-session font-montech-medium ticket-animation-1 text-4xl sm:text-[50px] leading-none text-center sm:text-left">
+                SESSION
+            </h1>
+
+            <h1 data-aos="fade-up-left" data-aos-duration="3000"
+                class="title-session font-montech-bold ticket-animation-1 text-4xl sm:text-[50px] leading-none text-center sm:text-left">
+                ACCESS
+            </h1>
+
+        </div>
+
+        <div class="mt-4">
+            <h2 data-aos="zoom-in-up" data-aos-duration="3000"
+                class="info-session font-inter-semibold ticket-animation-2 text-sm sm:text-base">Tickets for D-Day
+                sessions will be available soon</h2>
+            <h2 data-aos="zoom-in-up" data-aos-duration="3000"
+                class="info-session font-inter-regular ticket-animation-2 text-sm sm:text-base">Check back for more
+                details.</h2>
+        </div>
+    </div>
+
+</div>
+
+@push('scripts')
+    <!-- <script>
+    </script> -->
+@endpush
