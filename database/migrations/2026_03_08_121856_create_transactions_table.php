@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\SourceInfoEnum;
+use App\Enums\TransactionStatusEnum;
 
 return new class extends Migration
 {
@@ -19,14 +21,14 @@ return new class extends Migration
             $table->string('buyer_name')->nullable();
             $table->string('buyer_phone')->nullable();
             $table->string('city')->nullable();
-            $table->enum('source_info', ['Social Media', 'Website resmi', 'Iklan', 'Poster', 'Teman', 'Dosen'])->nullable();
+            $table->enum('source_info', array_column(SourceInfoEnum::cases(), 'value'))->nullable();
             
             $table->foreignId('voucher_id')->nullable()->constrained('vouchers')->nullOnDelete();
             $table->double('discount_amount')->default(0);
             $table->double('total_amount')->default(0);
             
             $table->string('payment_method')->default('QRIS');
-            $table->enum('transaction_status', ['draft', 'pending', 'paid', 'failed', 'expired'])->default('draft');
+            $table->enum('transaction_status', array_column(TransactionStatusEnum::cases(), 'value'))->default(TransactionStatusEnum::DRAFT->value);
             $table->string('payment_url')->nullable();
             $table->string('snap_token')->nullable();
             $table->string('payment_reference')->nullable();
