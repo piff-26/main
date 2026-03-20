@@ -9,6 +9,7 @@ class MidtransService
 {
     public static function getSnapToken(Transaction $transaction): string
     {
+        $transaction->loadMissing('user', 'transactionItems.ticketCategory');
         $isProduction = env('MIDTRANS_IS_PRODUCTION', false);
         $serverKey    = env('MIDTRANS_SERVER_KEY');
         $baseUrl      = $isProduction
@@ -42,6 +43,7 @@ class MidtransService
             'customer_details' => [
                 'first_name' => $transaction->buyer_name,
                 'phone'      => $transaction->buyer_phone,
+                'email'      => $transaction->user->email,
             ],
             'item_details'     => $item_details,
             // 'enabled_payments' => ['qris'], // aktifkan saat hari-H
