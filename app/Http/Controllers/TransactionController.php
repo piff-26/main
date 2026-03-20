@@ -91,7 +91,7 @@ class TransactionController extends Controller
             $query->orderBy('price', 'asc');
         }])->where('slug', $eventSlug)->firstOrFail();
 
-        return view('user.transactions.category', [
+        return view('user.ticket', [
             'title' => 'Pilih Tiket - ' . $event->name,
             'event' => $event
         ]);
