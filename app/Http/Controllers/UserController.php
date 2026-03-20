@@ -44,7 +44,7 @@ class UserController extends BaseController
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('user.transactions', [
+        return view('user.history', [
             'title' => 'Riwayat Transaksi & Tiket',
             'transactions' => $transactions
         ]);

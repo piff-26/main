@@ -61,7 +61,7 @@ Route::prefix('admin')->group(function(){
 Route::middleware('auth')->group(function () {
     
     // menu user (Riwayat & Tiket)
-    Route::get('/transaction-history', [UserController::class, 'myTransactions'])->name('user.transactions-history');
+    Route::get('/history', [UserController::class, 'myTransactions'])->name('user.transactions-history');
     
 
     Route::get('/transaction/{invoice_code}/download', [TransactionHistoryController::class, 'downloadETicket'])->name('ticket.download');
