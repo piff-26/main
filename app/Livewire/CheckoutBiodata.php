@@ -138,14 +138,32 @@ class CheckoutBiodata extends Component
             return;
         }
 
-        // Validasi 3: Apakah kuota penukaran masih ada?
+        // Apakah kuota penukaran masih ada?
         if ($voucher->used_count >= $voucher->max_uses) {
             $this->addError('voucher_code', 'Kuota voucher sudah habis.');
             return;
         }
 
-        // Validasi 4: Pengecekan Scope (Jika voucher khusus event/kategori tertentu)
-        // (Kita skip dulu detail ini agar simpel, tapi logikanya tinggal cek relasi item di keranjang)
+        // Validasi Scope event
+        if ($voucher->event_id !== null) {
+            $transactionEventIds = $this->transaction->transactionItems
+                ->pluck('ticketCategory.event_id')
+                ->unique();
+            if (!$transactionEventIds->contains($voucher->event_id)) {
+                $this->addError('voucher_code', 'Voucher tidak berlaku untuk event ini.');
+                return;
+            }
+        }
+
+        // Validasi 5: Scope kategori tiket
+        if ($voucher->ticket_category_id !== null) {
+            $hasCategoryInCart = $this->transaction->transactionItems
+                ->contains('ticket_category_id', $voucher->ticket_category_id);
+            if (!$hasCategoryInCart) {
+                $this->addError('voucher_code', 'Voucher tidak berlaku untuk kategori tiket yang dipilih.');
+                return;
+            }
+        }
 
         // Terapkan Diskon
         if ($voucher->discount_type === 'nominal') {
@@ -199,21 +217,33 @@ class CheckoutBiodata extends Component
 
         // Simpan total amount ke DB dan ubah status 
         $this->transaction->update([
-            'total_amount' => $this->grand_total,
-            'transaction_status' => TransactionStatusEnum::PENDING->value
+            'buyer_name'         => $this->buyer_name,
+            'buyer_phone'        => $this->buyer_phone,
+            'city'               => $this->city,
+            'source_info'        => $this->source_info,
+            'total_amount'       => $this->grand_total,
+            'discount_amount'    => $this->discount_amount,
+            'voucher_id'         => $this->applied_voucher_id,
+            'transaction_status' => TransactionStatusEnum::PENDING->value,
         ]);
 
-        // TODO: Generate Midtrans Snap Token di sini jika belum ada
-        // $this->transaction->snap_token = MidtransService::getSnapToken($this->transaction);
-        // $this->transaction->save();
+        // Generate Midtrans Snap Token jika belum ada
+        if (!$this->transaction->snap_token) {
+            $this->transaction->refresh();
+            $snapToken = \App\Services\MidtransService::getSnapToken($this->transaction);
+            $this->transaction->update(['snap_token' => $snapToken]);
+
+            // Increment used_count voucher setelah token berhasil digenerate
+            if ($this->applied_voucher_id) {
+                \App\Models\Voucher::where('id', $this->applied_voucher_id)->increment('used_count');
+            }
+        }
 
         // Pindah ke halaman pembayaran
         $this->currentStep = 2;
         
         // Trigger Javascript untuk buka popup Midtrans
-        if ($this->transaction->snap_token) {
-            $this->dispatch('trigger-midtrans', snapToken: $this->transaction->snap_token);
-        }
+        $this->dispatch('trigger-midtrans', snapToken: $this->transaction->snap_token);
     }
 
     public function reTriggerMidtrans()
@@ -261,6 +291,22 @@ class CheckoutBiodata extends Component
         if ($user && $user->email) {
             Mail::to($user->email)->send(new ETicketMail($transaction));
         }
+    }
+
+    #[\Livewire\Attributes\On('cancel-transaction')]
+    public function cancelTransaction()
+    {
+        $this->transaction->update([
+            'transaction_status' => TransactionStatusEnum::FAILED->value,
+            'cancel_reason'      => 'Dibatalkan oleh pembeli.',
+        ]);
+
+        foreach ($this->transaction->transactionItems as $item) {
+            $item->ticketCategory->decrement('sold_count', $item->quantity);
+        }
+
+        session()->flash('toast_info', 'Transaksi berhasil dibatalkan.');
+        return redirect()->route('user.ticket');
     }
 
     public function render()
