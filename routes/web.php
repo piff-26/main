@@ -72,21 +72,8 @@ Route::middleware('auth')->group(function () {
         // Pilih Event & Kategori Tiket
         Route::get('/{event_slug}', [TransactionController::class, 'step1'])->name('step1');
         Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
-
-        // Isi Biodata 
-        Route::get('/{invoice_code}/biodata', [TransactionController::class, 'step2'])->name('step2');
-
-        // Konfirmasi Pesanan & Voucher 
-        Route::get('/{invoice_code}/confirm', [TransactionController::class, 'step3'])->name('step3');
-
-        // Pembayaran Midtrans Snap
-        Route::get('/{invoice_code}/payment', [PaymentController::class, 'show'])->name('payment');
         
     });
-
-    // Alias untuk payment
-    // Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
-
 });
 
 Route::get('/test', function () {
