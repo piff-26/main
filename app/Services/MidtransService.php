@@ -3,24 +3,24 @@
 namespace App\Services;
 
 use App\Models\Transaction;
-use Midtrans\Config;
-use Midtrans\Snap;
+use Illuminate\Support\Facades\Http;
 
 class MidtransService
 {
     public static function getSnapToken(Transaction $transaction): string
     {
-        Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-        Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
+        $isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        $serverKey    = env('MIDTRANS_SERVER_KEY');
+        $baseUrl      = $isProduction
+            ? 'https://app.midtrans.com/snap/v1/transactions'
+            : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
         $item_details = [];
         foreach ($transaction->transactionItems as $item) {
             $item_details[] = [
-                'id'       => $item->ticket_category_id,
-                'price'    => $item->price,
-                'quantity' => $item->quantity,
+                'id'       => (string) $item->ticket_category_id,
+                'price'    => (int) $item->price,
+                'quantity' => (int) $item->quantity,
                 'name'     => $item->ticketCategory->name,
             ];
         }
@@ -28,26 +28,32 @@ class MidtransService
         if ($transaction->discount_amount > 0) {
             $item_details[] = [
                 'id'       => 'VOUCHER',
-                'price'    => -$transaction->discount_amount,
+                'price'    => -(int) $transaction->discount_amount,
                 'quantity' => 1,
                 'name'     => 'Diskon Voucher',
             ];
         }
 
-        $params = [
+        $payload = [
             'transaction_details' => [
                 'order_id'     => $transaction->invoice_code,
-                'gross_amount' => $transaction->total_amount,
+                'gross_amount' => (int) $transaction->total_amount,
             ],
             'customer_details' => [
                 'first_name' => $transaction->buyer_name,
                 'phone'      => $transaction->buyer_phone,
             ],
             'item_details'     => $item_details,
-            // 'enabled_payments' => ['qris','other_qris'], note: hari-h nanti nyalain ini aja
-            'enabled_payments' => ['gopay','bca'],
+            // 'enabled_payments' => ['qris'], // aktifkan saat hari-H
         ];
 
-        return Snap::getSnapToken($params);
+        $response = Http::withBasicAuth($serverKey, '')
+            ->post($baseUrl, $payload);
+
+        if ($response->failed()) {
+            throw new \Exception('Midtrans error: ' . $response->body());
+        }
+
+        return $response->json('token');
     }
 }

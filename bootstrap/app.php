@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'auth' => AuthMiddleware::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/callback',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
