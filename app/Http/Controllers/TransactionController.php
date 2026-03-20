@@ -91,7 +91,7 @@ class TransactionController extends Controller
             $query->orderBy('price', 'asc');
         }])->where('slug', $eventSlug)->firstOrFail();
 
-        return view('user.ticket', [
+        return view('user.transactions.category', [
             'title' => 'Pilih Tiket - ' . $event->name,
             'event' => $event
         ]);
@@ -112,19 +112,4 @@ class TransactionController extends Controller
         ]);
     }
 
-    // App\Http\Controllers\TransactionController.php
-
-    public function step3($invoiceCode)
-    {
-        $transaction = Transaction::where('invoice_code', $invoiceCode)
-            ->where('user_id', session('user_id'))
-            ->where('transaction_status', TransactionStatusEnum::PENDING->value)
-            ->firstOrFail();
-
-        return view('user.transactions.step3-confirm', [
-            'title' => 'Konfirmasi Pesanan - ' . $transaction->invoice_code,
-            'invoiceCode' => $invoiceCode,
-            'transaction' => $transaction
-        ]);
-    }
 }
