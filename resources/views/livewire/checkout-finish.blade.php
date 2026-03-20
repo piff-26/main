@@ -98,8 +98,9 @@
                             <select wire:model.live="source_info"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition">
                                 <option value="" class="bg-slate-800">Pilih Sumber Info</option>
-                                @foreach($sourceInfoOptions ?? [] as $option)
-                                    <option value="{{ $option }}" class="bg-slate-800">{{ $option }}</option>
+                                @foreach ($sourceInfoOptions ?? [] as $option)
+                                    <option value="{{ $option }}" class="bg-slate-800">{{ $option }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('source_info')
@@ -247,8 +248,13 @@
     </div>
 
     {{-- TNC MODAL --}}
-    <div x-data="{ open: false, scrolled: false }" x-on:open-tnc.window="open = true; scrolled = false" x-show="open" x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    <div x-data="{ open: false, scrolled: false }"
+        x-on:open-tnc.window="
+            open = true; scrolled = false;
+            document.body.style.overflow = 'hidden';
+            document.getElementById('navigation-bar')?.classList.add('nav-hidden');
+        "
+        x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4"
         style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
 
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg flex flex-col"
@@ -259,28 +265,88 @@
 
             <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3" x-ref="tncContent"
                 x-on:scroll="if($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 10) scrolled = true">
-                <p class="font-bold text-white">1. Ketentuan Pembelian Tiket</p>
-                <p>Tiket yang telah dibeli tidak dapat dikembalikan atau ditukar dalam kondisi apapun.</p>
-                <p class="font-bold text-white">2. Penggunaan Tiket</p>
-                <p>Tiket hanya berlaku untuk satu kali masuk. QR Code pada tiket tidak boleh digandakan atau
-                    dipindahtangankan.</p>
-                <p class="font-bold text-white">3. Identitas</p>
-                <p>Panitia berhak meminta identitas diri yang sesuai dengan data pemesan saat check-in.</p>
-                <p class="font-bold text-white">4. Perubahan Acara</p>
-                <p>Panitia berhak mengubah jadwal, lokasi, atau pembicara tanpa pemberitahuan sebelumnya.</p>
-                <p class="font-bold text-white">5. Privasi Data</p>
-                <p>Data pribadi yang Anda berikan akan digunakan hanya untuk keperluan acara PIFF 2026 dan tidak akan
-                    disebarkan kepada pihak ketiga.</p>
-                <p class="font-bold text-white">6. Keamanan</p>
-                <p>Panitia tidak bertanggung jawab atas kehilangan barang bawaan selama acara berlangsung.</p>
+
+                <p class="font-bold text-white">A. KETENTUAN UMUM & VALIDITAS TIKET</p>
+
+                <p><span class="font-semibold">1.</span> Tiket hanya berlaku untuk tanggal, waktu, dan acara yang
+                    tertera pada tiket.</p>
+                <p><span class="font-semibold">2.</span> Satu (1) tiket berlaku untuk satu (1) orang.</p>
+                <p><span class="font-semibold">3.</span> Tiket tidak dapat dipindahtangankan tanpa persetujuan resmi
+                    dari panitia.</p>
+                <p><span class="font-semibold">4.</span> Tiket yang telah dibeli dianggap sah apabila diperoleh melalui
+                    kanal penjualan resmi yang ditunjuk oleh panitia.</p>
+                <p><span class="font-semibold">5.</span> Panitia berhak untuk:</p>
+                <p class="ml-4"><span class="font-semibold">a.</span> Menolak tiket yang rusak, tidak terbaca,
+                    terduplikasi, atau diperoleh secara tidak sah.</p>
+                <p class="ml-4"><span class="font-semibold">b.</span> Memproses atau mengajukan hukum, baik perdata
+                    atau kriminal kepada pengunjung yang mendapatkan tiket dengan ilegal, termasuk memalsukan dan
+                    menggandakan tiket yang sah atau mendapatkan tiket dengan cara yang tidak sesuai prosedur.</p>
+
+                <p class="font-bold text-white mt-4">B. KEBIJAKAN PEMBELIAN & PENGEMBALIAN DANA</p>
+
+                <p><span class="font-semibold">1.</span> Seluruh pembelian tiket bersifat final dan tidak dapat
+                    dibatalkan.</p>
+                <p><span class="font-semibold">2.</span> Tiket yang telah dibeli tidak dapat dikembalikan dan tidak
+                    dapat ditukar (<i>non-refundable</i> & <i>non-exchangeable</i>), kecuali apabila acara dibatalkan
+                    secara resmi oleh panitia.</p>
+                <p><span class="font-semibold">3.</span> Panitia tidak bertanggung jawab atas kegagalan proses
+                    pembelian tiket yang disebabkan oleh kesalahan pengisian data oleh pembeli maupun gangguan jaringan
+                    dan perangkat yang berada di luar kendali panitia.</p>
+                <p><span class="font-semibold">4.</span> Apabila acara dibatalkan oleh panitia, mekanisme pengembalian
+                    dana akan diinformasikan melalui kanal komunikasi resmi PIFF 2026.</p>
+                <p><span class="font-semibold">5.</span> Apabila acara mengalami perubahan jadwal (<i>reschedule</i>),
+                    tiket tetap berlaku untuk tanggal pengganti.</p>
+
+                <p class="font-bold text-white mt-4">C. AKSES & REGISTRASI MASUK</p>
+
+                <p><span class="font-semibold">1.</span> Pengunjung wajib menunjukkan tiket dalam bentuk digital
+                    (<i>e-ticket</i>) saat proses registrasi.</p>
+                <p><span class="font-semibold">2.</span> Tiket digital (<i>e-ticket</i>) akan ditukarkan dengan tiket
+                    gelang yang wajib digunakan selama berada di area acara.</p>
+                <p><span class="font-semibold">3.</span> Pengunjung yang tidak dapat menunjukkan tiket gelang tidak
+                    diperkenankan memasuki area acara.</p>
+                <p><span class="font-semibold">4.</span> Panitia berhak melakukan pemeriksaan ulang terhadap tiket dan
+                    identitas apabila diperlukan.</p>
+
+                <p class="font-bold text-white mt-4">D. KETENTUAN SELAMA ACARA</p>
+
+                <p><span class="font-semibold">1.</span> Pengunjung wajib menjaga ketertiban dan mematuhi seluruh
+                    peraturan yang berlaku selama acara berlangsung.</p>
+                <p><span class="font-semibold">2.</span> Dilarang membawa barang terlarang sesuai ketentuan panitia
+                    (misalnya senjata tajam, narkotika, minuman beralkohol, dan barang berbahaya lainnya).</p>
+                <p><span class="font-semibold">3.</span> Panitia berhak mengeluarkan pengunjung dari area acara apabila
+                    melanggar peraturan tanpa kewajiban pengembalian dana.</p>
+                <p><span class="font-semibold">4.</span> Tamu bertanggung jawab sepenuhnya atas keamanan semua
+                    barang-barang pribadi. Kehilangan barang pribadi bukan tanggung jawab panitia.</p>
+                <p><span class="font-semibold">5.</span> Dengan membeli tiket, pengunjung memberikan persetujuan untuk
+                    didokumentasikan (foto/video) dan digunakan untuk kepentingan publikasi acara.</p>
+
+                <p class="font-bold text-white mt-4">E. KEJADIAN KAHAR (FORCE MAJEURE)</p>
+
+                <p><span class="font-semibold">1.</span> Dalam hal terjadi kejadian kahar (<i>Force Majeure</i>),
+                    Panitia berhak untuk membatalkan, menunda, mengubah jadwal, memindahkan lokasi, atau menyesuaikan
+                    format acara tanpa kewajiban memberikan kompensasi tambahan di luar kebijakan yang ditentukan
+                    Panitia.</p>
+                <p><span class="font-semibold">2.</span> Panitia tidak bertanggung jawab atas kerugian tidak langsung
+                    yang mungkin timbul akibat perubahan atau pembatalan acara yang disebabkan oleh <i>Force
+                        Majeure</i>.</p>
+                <p><span class="font-semibold">3.</span> Informasi resmi terkait perubahan akibat <i>Force Majeure</i>
+                    akan diumumkan melalui kanal komunikasi resmi PIFF 2026.</p>
+
                 <p class="text-slate-500 text-xs mt-4">Scroll ke bawah untuk menyetujui.</p>
+
             </div>
 
             <div class="px-6 py-4 border-t border-slate-700">
                 <button x-bind:disabled="!scrolled"
                     x-bind:class="scrolled ? 'bg-[#ff5b1d] hover:bg-[#e04a10] cursor-pointer' :
                         'bg-slate-700 cursor-not-allowed opacity-50'"
-                    x-on:click="open = false; $wire.set('tncRead', true); $wire.set('agree_tnc', true);"
+                    x-on:click="
+                        open = false;
+                        $wire.set('tncRead', true); $wire.set('agree_tnc', true);
+                        document.body.style.overflow = '';
+                        document.getElementById('navigation-bar')?.classList.remove('nav-hidden');
+                    "
                     class="w-full text-white font-bold py-3 rounded-xl transition">
                     Saya Setuju
                 </button>
