@@ -85,7 +85,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Alias untuk payment
-    Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
+    // Route::get('/checkout/payment/{invoice_code}', [PaymentController::class, 'show'])->name('user.checkout.payment');
 
 });
 
