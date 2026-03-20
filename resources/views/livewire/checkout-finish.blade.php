@@ -3,7 +3,7 @@
     <div
         class="w-full max-w-6xl glass-card rounded-[2rem] p-6 md:p-8 relative bg-slate-900/40 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
 
-        <div wire:loading.flex wire:target="processToPayment, applyVoucher"
+        <div wire:loading.flex wire:target="processToPayment, applyVoucher, reTriggerMidtrans"
             class="absolute inset-0 z-50 flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-[2rem]">
             <div class="w-16 h-16 rounded-full border-4 border-[#ff5b1d]/30 border-t-[#ff5b1d] animate-spin"></div>
             <span class="text-white text-lg font-bold tracking-widest mt-4 animate-pulse">MEMPROSES DATA...</span>
@@ -135,6 +135,14 @@
                     @if ($tncError)
                         <span class="text-red-400 text-xs mt-1 block">{{ $tncError }}</span>
                     @endif
+
+                    <div class="mt-6">
+                        <button wire:click="cancelTransaction"
+                            x-on:click="if(!confirm('Batalkan transaksi ini? Kuota tiket akan dikembalikan.')) $event.preventDefault()"
+                            class="inline-flex items-center gap-2 text-red-400 hover:text-red-300 text-sm underline transition">
+                            <i class="fas fa-times-circle"></i> Batalkan Transaksi
+                        </button>
+                    </div>
                 </div>
 
                 <div class="w-full md:w-2/5">
@@ -359,7 +367,12 @@
 @script
     <script>
         $wire.on('trigger-midtrans', (event) => {
-            let token = event[0].snapToken;
+            let token = event?.snapToken ?? event?.[0]?.snapToken ?? event?.[0];
+
+            if (!token) {
+                console.error('Snap token tidak ditemukan', event);
+                return;
+            }
 
             window.snap.pay(token, {
                 onSuccess: function(result) {
