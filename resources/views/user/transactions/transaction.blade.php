@@ -21,6 +21,9 @@
                 <strong>{{ \Carbon\Carbon::parse($expiredAt)->setTimezone('Asia/Jakarta')->format('H:i') }} WIB</strong>
                 agar kuota tiket tidak hangus.
             </div>
+
+            <div class="mt-4">
+            </div>
         </div>
 
         <div class="max-w-3xl mx-auto">
@@ -35,5 +38,24 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lenis !== 'undefined') lenis.destroy();
         });
+
+        function confirmCancel() {
+            Swal.fire({
+                title: 'Batalkan Transaksi?',
+                text: 'Transaksi akan dibatalkan dan kuota tiket dikembalikan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Batalkan',
+                cancelButtonText: 'Tidak',
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#475569',
+                background: '#0f172a',
+                color: '#f1f5f9',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('cancel-transaction');
+                }
+            });
+        }
     </script>
 @endsection
