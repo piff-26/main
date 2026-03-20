@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Controllers\TransactionController;
@@ -72,6 +71,9 @@ Route::middleware('auth')->group(function () {
         // Pilih Event & Kategori Tiket
         Route::get('/{event_slug}', [TransactionController::class, 'step1'])->name('step1');
         Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
+
+        // Isi Biodata & Pembayaran
+        Route::get('/transaction/{invoice_code}', [TransactionController::class, 'step2'])->name('step2');
         
     });
 });
