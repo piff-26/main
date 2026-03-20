@@ -1,143 +1,79 @@
 @extends('layouts.user')
+@section('title', 'Pilih Tiket - ' . $event->name)
 
 @section('content')
     <div class="min-h-screen bg-black py-36 px-4">
 
-        <div class="max-w-2xl mx-auto mb-8 text-center">
+        <div class="max-w-4xl mx-auto mb-10 text-center">
             <h2 class="text-3xl font-bold text-white">{{ $event->name }}</h2>
-            <p class="text-gray-400 mt-2">Pilih kategori dan jumlah tiket yang ingin dibeli.</p>
+            <p class="text-gray-400 mt-2">{{ $event->description ?? 'Pilih kategori tiket dan amankan tempatmu sekarang.' }}</p>
         </div>
 
-        <div class="max-w-2xl mx-auto">
+        <div class="max-w-4xl mx-auto">
 
-            @if (session('error'))
-                <div class="bg-red-500/20 border border-red-500 text-red-300 rounded-lg px-4 py-3 mb-6">
-                    {{ session('error') }}
+            @if ($event->ticketCategories->isEmpty())
+                <div class="bg-white/10 border border-white/20 rounded-2xl px-6 py-12 text-center">
+                    <i class="fas fa-calendar-times text-4xl text-gray-500 mb-4 block"></i>
+                    <p class="text-white font-semibold">Belum ada tiket tersedia</p>
+                    <p class="text-gray-400 text-sm mt-1">Saat ini belum ada kategori tiket yang tersedia untuk event ini.</p>
                 </div>
-            @endif
+            @else
+                <form action="{{ route('checkout.storeStep1', $event->slug) }}" method="POST">
+                    @csrf
 
-            <form action="{{ route('checkout.storeStep1', $event->slug) }}" method="POST" id="ticketForm">
-                @csrf
+                    @if (session('error'))
+                        <div class="bg-red-500/20 border border-red-400/50 text-red-300 rounded-xl px-4 py-3 mb-6 text-sm">
+                            {{ session('error') }}
+                        </div>
+                    @endif
 
-                <div class="bg-white/10 border border-white/20 rounded-2xl mb-6 overflow-hidden">
-                    <div class="px-6 pt-6 pb-2">
-                        <h5 class="text-white font-semibold text-lg">Pilih Tiket</h5>
-                        <p class="text-gray-400 text-sm mt-1">Atur jumlah tiket per kategori. Maksimal 5 tiket per kategori.</p>
-                    </div>
-                    <div class="px-6 pb-6 space-y-3 mt-2">
-
+                    <div class="space-y-4 mb-8">
                         @foreach ($event->ticketCategories as $category)
-                            @php
-                                $isSoldOut = $category->quota !== null && $category->sold_count >= $category->quota;
-                                $remaining = $category->quota !== null ? $category->quota - $category->sold_count : null;
-                            @endphp
-
-                            <div class="flex items-center justify-between p-4 rounded-xl border-2 transition-all
-                                {{ $isSoldOut ? 'border-white/10 bg-white/5 opacity-60' : 'border-white/20 bg-white/5 hover:border-yellow-400/50' }}">
+                            <div class="bg-white/10 border border-white/20 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
-                                    <span class="text-white font-bold text-base block">{{ $category->name }}</span>
-                                    <span class="text-yellow-400 font-semibold text-sm">Rp {{ number_format($category->price, 0, ',', '.') }}</span>
-                                    @if ($remaining !== null && !$isSoldOut)
-                                        <span class="text-gray-400 text-xs block mt-0.5">Sisa {{ $remaining }} tiket</span>
+                                    <h3 class="text-white font-bold text-lg">{{ $category->name }}</h3>
+                                    @if ($category->description)
+                                        <p class="text-gray-400 text-sm mt-1">{{ $category->description }}</p>
+                                    @endif
+                                    <p class="text-yellow-400 font-bold mt-2">Rp {{ number_format($category->price, 0, ',', '.') }}</p>
+                                    @if ($category->quota !== null)
+                                        <p class="text-gray-500 text-xs mt-1">Sisa: {{ max(0, $category->quota - $category->sold_count) }} tiket</p>
                                     @endif
                                 </div>
-
                                 <div class="flex items-center gap-3">
-                                    @if ($isSoldOut)
-                                        <span class="bg-red-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Habis</span>
-                                    @else
-                                        <button type="button" onclick="changeQty('{{ $category->id }}', -1)"
-                                            class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold transition flex items-center justify-center">−</button>
-
-                                        <span id="display_{{ $category->id }}" class="text-white font-bold w-4 text-center">0</span>
-
-                                        <input type="hidden" name="items[{{ $category->id }}]" id="qty_{{ $category->id }}" value="0">
-
-                                        <button type="button" onclick="changeQty('{{ $category->id }}', 1)"
-                                            class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold transition flex items-center justify-center">+</button>
-                                    @endif
+                                    <button type="button" onclick="changeQty({{ $category->id }}, -1)"
+                                        class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg transition">−</button>
+                                    <span id="qty-display-{{ $category->id }}" class="text-white font-bold w-6 text-center">0</span>
+                                    <input type="hidden" name="items[{{ $category->id }}]" id="qty-{{ $category->id }}" value="0">
+                                    <button type="button" onclick="changeQty({{ $category->id }}, 1)"
+                                        class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg transition">+</button>
                                 </div>
                             </div>
                         @endforeach
-
-                        @error('items')
-                            <span class="text-red-400 text-sm">{{ $message }}</span>
-                        @enderror
-
                     </div>
-                </div>
 
-                {{-- Summary --}}
-                <div id="summary" class="bg-white/10 border border-white/20 rounded-2xl mb-6 px-6 py-4 hidden">
-                    <h5 class="text-white font-semibold mb-3">Ringkasan</h5>
-                    <div id="summaryItems" class="space-y-1 text-sm text-gray-300"></div>
-                    <div class="border-t border-white/10 mt-3 pt-3 flex justify-between">
-                        <span class="text-white font-bold">Total</span>
-                        <span class="text-yellow-400 font-bold" id="summaryTotal">Rp 0</span>
+                    <div class="text-center">
+                        <button type="submit"
+                            class="px-10 py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl transition-all hover:-translate-y-0.5">
+                            Lanjut ke Biodata <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
                     </div>
-                </div>
+                </form>
+            @endif
 
-                <button type="submit" id="submitBtn"
-                    class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-lg py-4 rounded-2xl transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                    Lanjut Isi Biodata Diri <i class="fas fa-arrow-right ml-2"></i>
-                </button>
-
-            </form>
         </div>
     </div>
+@endsection
 
+@section('script')
     <script>
-        const prices = {
-            @foreach ($event->ticketCategories as $category)
-                '{{ $category->id }}': {{ $category->price }},
-            @endforeach
-        };
-
-        const names = {
-            @foreach ($event->ticketCategories as $category)
-                '{{ $category->id }}': '{{ $category->name }}',
-            @endforeach
-        };
-
-        const maxQty = 5;
-
         function changeQty(id, delta) {
-            const input = document.getElementById('qty_' + id);
-            const display = document.getElementById('display_' + id);
+            const input = document.getElementById('qty-' + id);
+            const display = document.getElementById('qty-display-' + id);
             let val = parseInt(input.value) + delta;
-            val = Math.max(0, Math.min(maxQty, val));
+            val = Math.max(0, Math.min(5, val));
             input.value = val;
             display.textContent = val;
-            updateSummary();
-        }
-
-        function updateSummary() {
-            const summaryDiv = document.getElementById('summary');
-            const summaryItems = document.getElementById('summaryItems');
-            const summaryTotal = document.getElementById('summaryTotal');
-            const submitBtn = document.getElementById('submitBtn');
-
-            let total = 0;
-            let hasItem = false;
-            let html = '';
-
-            for (const id in prices) {
-                const input = document.getElementById('qty_' + id);
-                if (!input) continue;
-                const qty = parseInt(input.value);
-                if (qty > 0) {
-                    hasItem = true;
-                    const subtotal = qty * prices[id];
-                    total += subtotal;
-                    html += `<div class="flex justify-between"><span>${names[id]} x${qty}</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>`;
-                }
-            }
-
-            summaryDiv.classList.toggle('hidden', !hasItem);
-            summaryItems.innerHTML = html;
-            summaryTotal.textContent = 'Rp ' + total.toLocaleString('id-ID');
-            submitBtn.disabled = !hasItem;
         }
     </script>
 @endsection
