@@ -29,3 +29,11 @@
 
     </div>
 @endsection
+
+@section('script')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lenis !== 'undefined') lenis.destroy();
+        });
+    </script>
+@endsection
