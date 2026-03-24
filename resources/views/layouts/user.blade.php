@@ -4,6 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="@yield('og_title', 'Petra International Film Festival 2026')">
+    <meta property="og:description" content="@yield('og_description', 'PIFF serves as a platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas.')">
+    <meta property="og:image" content="@yield('og_image', asset('assets/img/og_main.png'))">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
     {{-- <title>{{ $title }}</title> --}}
     <title>PIFF 2026 | @yield('title', $title ?? 'Welcome')</title>
     <link rel="icon" href="{{ asset('assets/logo/logo_browser_piff.png') }}" type="image/x-icon" />
