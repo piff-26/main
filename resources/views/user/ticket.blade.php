@@ -20,7 +20,8 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($events as $event)
-                        <div class="bg-white/10 border border-white/20 rounded-2xl overflow-hidden flex flex-col hover:border-yellow-400/50 transition-all group">
+                        <div
+                            class="bg-white/10 border border-white/20 rounded-2xl overflow-hidden flex flex-col hover:border-yellow-400/50 transition-all group">
                             <div class="overflow-hidden">
                                 <img src="{{ $event->image ? asset('storage/' . $event->image) : 'https://ui-avatars.com/api/?name=' . urlencode($event->name) . '&background=111&color=fec401&size=512' }}"
                                     alt="{{ $event->name }}"
@@ -36,7 +37,7 @@
                                 <div class="mt-4 pt-4 border-t border-white/10">
                                     <a href="{{ route('checkout.step1', $event->slug) }}"
                                         class="w-full flex justify-center items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm py-3 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0">
-                                        Beli Tiket <i class="fas fa-arrow-right"></i>
+                                        View Event <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
                             </div>
