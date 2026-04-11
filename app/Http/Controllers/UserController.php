@@ -38,10 +38,13 @@ class UserController extends BaseController
             return redirect()->route('user.home')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Ambil transaksi milik user yang sudah lunas
         $transactions = Transaction::where('user_id', $userId)
-            ->where('transaction_status', TransactionStatusEnum::PAID->value)
-            ->with(['tickets.ticketCategory.event']) 
+            ->whereIn('transaction_status', [
+                TransactionStatusEnum::PAID->value,
+                TransactionStatusEnum::PENDING->value,
+                TransactionStatusEnum::FAILED->value,
+            ])
+            ->with(['tickets.ticketCategory.event', 'transactionItems.ticketCategory'])
             ->orderBy('created_at', 'desc')
             ->get();
 
