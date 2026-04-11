@@ -39,6 +39,23 @@
             if (typeof lenis !== 'undefined') lenis.destroy();
         });
 
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('transaction-expired', () => {
+                Swal.fire({
+                    title: 'Transaksi Expired',
+                    text: 'Waktu pembayaran telah habis. Silakan buat transaksi baru.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ef4444',
+                    background: '#0f172a',
+                    color: '#f1f5f9',
+                    allowOutsideClick: false,
+                }).then(() => {
+                    window.location.href = '{{ route('user.ticket') }}';
+                });
+            });
+        });
+
         function confirmCancel() {
             Swal.fire({
                 title: 'Batalkan Transaksi?',

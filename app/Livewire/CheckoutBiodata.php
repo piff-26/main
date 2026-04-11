@@ -61,6 +61,18 @@ class CheckoutBiodata extends Component
             ->where('invoice_code', $invoice_code)
             ->firstOrFail();
 
+        if (
+            $this->transaction->transaction_status === TransactionStatusEnum::DRAFT->value &&
+            $this->transaction->expired_at &&
+            now()->greaterThan($this->transaction->expired_at)
+        ) {
+            $this->transaction->update(['transaction_status' => TransactionStatusEnum::EXPIRED->value]);
+            foreach ($this->transaction->transactionItems as $item) {
+                $item->ticketCategory->decrement('sold_count', $item->quantity);
+            }
+            $this->dispatch('transaction-expired');
+        }
+
         $this->buyer_name     = $this->transaction->buyer_name;
         // Split existing buyer_phone into code + number if it starts with +
         if ($this->transaction->buyer_phone && str_starts_with($this->transaction->buyer_phone, '+')) {

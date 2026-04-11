@@ -107,6 +107,15 @@ class TransactionController extends Controller
             ->where('transaction_status', TransactionStatusEnum::DRAFT->value)
             ->firstOrFail();
 
+        if ($transaction->expired_at && now()->greaterThan($transaction->expired_at)) {
+            $transaction->update(['transaction_status' => TransactionStatusEnum::EXPIRED->value]);
+            foreach ($transaction->transactionItems()->with('ticketCategory')->get() as $item) {
+                $item->ticketCategory->decrement('sold_count', $item->quantity);
+            }
+            return redirect()->route('user.ticket')
+                ->with('toast_error', 'Transaksi sudah expired. Silakan buat transaksi baru.');
+        }
+
         return view('user.transactions.transaction', [
             'title' => 'Isi Biodata - ' . $transaction->invoice_code,
             'invoiceCode' => $invoiceCode,
