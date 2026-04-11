@@ -15,7 +15,10 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session()->has('role') || session('role') !== 'admin' ) {
+        if (!session()->has('role') || session('role') !== 'admin') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Unauthorized.'], 401);
+            }
             return redirect()->route('admin.login')->with('error', 'You are not authorized.');
         }
 
