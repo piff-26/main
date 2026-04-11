@@ -14,6 +14,10 @@ use App\Models\Voucher;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Enums\TransactionStatusEnum;
+use App\Mail\PaymentApprovedMail;
+use App\Mail\PaymentRejectedMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AdminController extends BaseController
 {
@@ -108,7 +112,6 @@ class AdminController extends BaseController
                 'city' => $transaction->city,
                 'total_amount' => (float) $transaction->total_amount,
                 'voucher_code' => $transaction->voucher?->code ?? '-',
-                'payment_method' => $transaction->payment_method,
                 'transaction_status' => $transaction->transaction_status,
                 'created_at' => $transaction->created_at->format('Y-m-d H:i'),
                 'paid_at' => $transaction->paid_at ? $transaction->paid_at->format('Y-m-d H:i') : '-'
@@ -117,9 +120,8 @@ class AdminController extends BaseController
         
         $events = Event::pluck('name')->unique()->values();
         $cities = Transaction::whereNotNull('city')->pluck('city')->unique()->values();
-        $paymentMethods = Transaction::pluck('payment_method')->unique()->values();
         
-        return view('admin.transaction.transaction', compact('transactions', 'events', 'cities', 'paymentMethods'));
+        return view('admin.transaction.transaction', compact('transactions', 'events', 'cities'));
     }
 
     public function transactionDetail($invoice_code)
@@ -133,13 +135,13 @@ class AdminController extends BaseController
 
     public function exportTransactionPDF($invoice_code)
     {
-        $transaction = Transaction::with(['user', 'voucher', 'transactionItems.ticketCategory'])
+        $transaction = Transaction::with(['user', 'voucher', 'transactionItems.ticketCategory', 'tickets.ticketCategory.event'])
             ->where('invoice_code', $invoice_code)
             ->firstOrFail();
 
-        $pdf = Pdf::loadView('admin.transaction.invoice-pdf', compact('transaction'));
-        
-        return $pdf->download('invoice_' . $invoice_code . '.pdf');
+        $pdf = Pdf::loadView('pdf.tickets.bundle', compact('transaction'));
+
+        return $pdf->download('E-Ticket_' . $invoice_code . '.pdf');
     }
 
     // --- MONITOR & SCAN ---
@@ -157,21 +159,36 @@ class AdminController extends BaseController
     {
         try {
             $request->validate([
-                'name' => 'required|string|max:255',
+                'name'       => 'required|string|max:255',
                 'event_date' => 'required|date|after_or_equal:today',
                 'start_time' => 'required',
-                'end_time' => 'required|after:start_time',
-                'location' => 'required|string|max:255',
+                'end_time'   => 'required|after:start_time',
+                'location'   => 'required|string|max:255',
+                'image'          => 'nullable|image|max:2048',
+                'seat_map_image' => 'nullable|image|max:2048',
             ]);
 
-            Event::create([
-                'name' => $request->name,
-                'slug' => \Str::slug($request->name),
+            $data = [
+                'name'       => $request->name,
+                'slug'       => \Str::slug($request->name),
                 'event_date' => $request->event_date,
                 'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'location' => $request->location,
-            ]);
+                'end_time'   => $request->end_time,
+                'location'   => $request->location,
+            ];
+
+            if ($request->hasFile('image')) {
+                $data['image'] = $request->file('image')->store('events', 'public');
+            }
+
+            if ($request->hasFile('seat_map_image')) {
+                $data['seat_map_image'] = $request->file('seat_map_image')->store('events', 'public');
+            }
+
+            $data['description'] = $request->description;
+            $data['tnc']         = $request->tnc;
+
+            Event::create($data);
 
             return response()->json(['success' => true, 'message' => 'Event created successfully']);
         } catch (\Exception $e) {
@@ -183,23 +200,44 @@ class AdminController extends BaseController
     {
         try {
             $event = Event::findOrFail($id);
-            
+
             $request->validate([
-                'name' => 'required|string|max:255',
+                'name'       => 'required|string|max:255',
                 'event_date' => 'required|date|after_or_equal:today',
                 'start_time' => 'required',
-                'end_time' => 'required|after:start_time',
-                'location' => 'required|string|max:255',
+                'end_time'   => 'required|after:start_time',
+                'location'   => 'required|string|max:255',
+                'image'          => 'nullable|image|max:2048',
+                'seat_map_image' => 'nullable|image|max:2048',
             ]);
 
-            $event->update([
-                'name' => $request->name,
-                'slug' => \Str::slug($request->name),
+            $data = [
+                'name'       => $request->name,
+                'slug'       => \Str::slug($request->name),
                 'event_date' => $request->event_date,
                 'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'location' => $request->location,
-            ]);
+                'end_time'   => $request->end_time,
+                'location'   => $request->location,
+            ];
+
+            if ($request->hasFile('image')) {
+                if ($event->image) {
+                    \Storage::disk('public')->delete($event->image);
+                }
+                $data['image'] = $request->file('image')->store('events', 'public');
+            }
+
+            if ($request->hasFile('seat_map_image')) {
+                if ($event->seat_map_image) {
+                    \Storage::disk('public')->delete($event->seat_map_image);
+                }
+                $data['seat_map_image'] = $request->file('seat_map_image')->store('events', 'public');
+            }
+
+            $data['description'] = $request->description;
+            $data['tnc']         = $request->tnc;
+
+            $event->update($data);
 
             return response()->json(['success' => true, 'message' => 'Event updated successfully']);
         } catch (\Exception $e) {
@@ -284,6 +322,83 @@ class AdminController extends BaseController
         }
     }
 
+    public function validatePayment($invoice_code)
+    {
+        try {
+            $transaction = Transaction::with('transactionItems.ticketCategory', 'user')->where('invoice_code', $invoice_code)->firstOrFail();
+
+            if ($transaction->transaction_status !== TransactionStatusEnum::PENDING->value) {
+                return response()->json(['success' => false, 'message' => 'Transaksi tidak dalam status pending.'], 422);
+            }
+
+            $transaction->update([
+                'transaction_status' => TransactionStatusEnum::PAID->value,
+                'paid_at'            => now(),
+            ]);
+
+            // Generate tiket
+            if ($transaction->tickets()->count() === 0) {
+                foreach ($transaction->transactionItems as $item) {
+                    $holderNames = $item->holder_names ?? [];
+                    for ($i = 0; $i < $item->quantity; $i++) {
+                        $ticket = Ticket::create([
+                            'transaction_id'     => $transaction->id,
+                            'ticket_category_id' => $item->ticket_category_id,
+                            'ticket_code'        => 'TEMP-' . Str::random(10),
+                            'holder_name'        => $holderNames[$i] ?? null,
+                        ]);
+                        $categorySlug  = strtoupper($item->ticketCategory->slug);
+                        $invRandom     = substr($transaction->invoice_code, 4);
+                        $newTicketCode = "INV-{$categorySlug}-{$invRandom}-" . strtoupper(Str::random(3));
+                        $ticket->update(['ticket_code' => $newTicketCode]);
+                    }
+                }
+            }
+
+            // Kirim email ke user
+            $transaction->refresh()->load('tickets.ticketCategory.event', 'transactionItems.ticketCategory');
+            if ($transaction->user && $transaction->user->email) {
+                Mail::to($transaction->user->email)->send(new PaymentApprovedMail($transaction));
+            }
+
+            return response()->json(['success' => true, 'message' => 'Pembayaran berhasil divalidasi.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function rejectPayment(Request $request, $invoice_code)
+    {
+        try {
+            $request->validate(['reason' => 'required|string|max:500']);
+
+            $transaction = Transaction::with('transactionItems.ticketCategory', 'user')->where('invoice_code', $invoice_code)->firstOrFail();
+
+            if ($transaction->transaction_status !== TransactionStatusEnum::PENDING->value) {
+                return response()->json(['success' => false, 'message' => 'Transaksi tidak dalam status pending.'], 422);
+            }
+
+            $transaction->update([
+                'transaction_status' => TransactionStatusEnum::FAILED->value,
+                'rejection_reason'   => $request->reason,
+            ]);
+
+            // Kembalikan quota
+            foreach ($transaction->transactionItems as $item) {
+                $item->ticketCategory->decrement('sold_count', $item->quantity);
+            }
+
+            // Kirim email ke user
+            if ($transaction->user && $transaction->user->email) {
+                Mail::to($transaction->user->email)->send(new PaymentRejectedMail($transaction));
+            }
+
+            return response()->json(['success' => true, 'message' => 'Pembayaran berhasil ditolak.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
     public function cancelTransaction($invoice_code)
     {
         try {
@@ -317,44 +432,42 @@ class AdminController extends BaseController
     // --- MANAGE VOUCHERS ---
     public function listVouchers()
     {
-        // Mengambil semua voucher termasuk yang di-soft delete
         $vouchers = Voucher::withTrashed()->with(['event', 'ticketCategory'])->get();
+        $events = Event::all();
+        $ticketCategories = TicketCategory::with('event')->get();
 
         return view('admin.manageVouchers', [
             'title' => 'Manage Vouchers',
-            'vouchers' => $vouchers
+            'vouchers' => $vouchers,
+            'events' => $events,
+            'ticketCategories' => $ticketCategories,
         ]);
     }
 
     public function storeVoucher(Request $request)
     {
         $request->validate([
-            'code' => [
-                'required',
-                Rule::unique('vouchers', 'code')->whereNull('deleted_at')
-            ],
-            'discount_type' => 'required|in:nominal,percentage',
-            'discount_value' => 'required|numeric',
-            'max_uses' => 'nullable|integer',
-            'expired_at' => 'required|date',
+            'code'           => ['required', Rule::unique('vouchers', 'code')->whereNull('deleted_at')],
+            'discount_type'  => 'required|in:nominal,percentage',
+            'discount_value' => 'required|numeric|min:0',
+            'max_uses'       => 'required|integer|min:1',
+            'expired_at'     => 'required|date',
+            'event_id'       => 'nullable|exists:events,id',
+            'ticket_category_id' => 'nullable|exists:ticket_categories,id',
         ]);
 
         $data = [
-            'code' => $request->code,
-            'discount_type' => $request->discount_type,
-            'max_uses' => $request->max_uses ?? 0,
-            'expired_at' => $request->expired_at,
-            'status' => 'active',
-            'used_count' => 0,
+            'code'               => strtoupper($request->code),
+            'discount_type'      => $request->discount_type,
+            'discount_nominal'   => $request->discount_type === 'nominal' ? $request->discount_value : null,
+            'discount_percentage'=> $request->discount_type === 'percentage' ? $request->discount_value : null,
+            'event_id'           => $request->event_id ?: null,
+            'ticket_category_id' => $request->ticket_category_id ?: null,
+            'max_uses'           => $request->max_uses,
+            'expired_at'         => $request->expired_at,
+            'status'             => 'active',
+            'used_count'         => 0,
         ];
-
-        if ($request->discount_type == 'nominal') {
-            $data['discount_nominal'] = $request->discount_value;
-            $data['discount_percentage'] = 0;
-        } else {
-            $data['discount_percentage'] = $request->discount_value;
-            $data['discount_nominal'] = 0;
-        }
 
         Voucher::create($data);
 
@@ -364,31 +477,28 @@ class AdminController extends BaseController
     public function updateVoucher(Request $request, $id)
     {
         $request->validate([
-            'code' => ['required', Rule::unique('vouchers', 'code')->ignore($id)->whereNull('deleted_at')],
-            'discount_type' => 'required|in:nominal,percentage',
-            'discount_value' => 'required|numeric',
-            'max_uses' => 'nullable|integer',
-            'expired_at' => 'required|date',
+            'code'           => ['required', Rule::unique('vouchers', 'code')->ignore($id)->whereNull('deleted_at')],
+            'discount_type'  => 'required|in:nominal,percentage',
+            'discount_value' => 'required|numeric|min:0',
+            'max_uses'       => 'required|integer|min:1',
+            'expired_at'     => 'required|date',
+            'event_id'       => 'nullable|exists:events,id',
+            'ticket_category_id' => 'nullable|exists:ticket_categories,id',
         ]);
 
         $voucher = Voucher::withTrashed()->findOrFail($id);
-        
-        $data = [
-            'code' => $request->code,
-            'discount_type' => $request->discount_type,
-            'max_uses' => $request->max_uses ?? 0,
-            'expired_at' => $request->expired_at,
-        ];
 
-        if ($request->discount_type == 'nominal') {
-            $data['discount_nominal'] = $request->discount_value;
-            $data['discount_percentage'] = 0;
-        } else {
-            $data['discount_percentage'] = $request->discount_value;
-            $data['discount_nominal'] = 0;
-        }
+        $voucher->update([
+            'code'               => strtoupper($request->code),
+            'discount_type'      => $request->discount_type,
+            'discount_nominal'   => $request->discount_type === 'nominal' ? $request->discount_value : null,
+            'discount_percentage'=> $request->discount_type === 'percentage' ? $request->discount_value : null,
+            'event_id'           => $request->event_id ?: null,
+            'ticket_category_id' => $request->ticket_category_id ?: null,
+            'max_uses'           => $request->max_uses,
+            'expired_at'         => $request->expired_at,
+        ]);
 
-        $voucher->update($data);
         return redirect()->back()->with('success', 'Voucher berhasil diperbarui!');
     }
 
