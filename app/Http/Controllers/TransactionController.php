@@ -75,8 +75,10 @@ class TransactionController extends Controller
         $userId = session('user_id');
 
         if ($userId) {
+            // Hanya blok jika ada transaksi DRAFT yang belum expired (masih bisa dilanjutkan)
+            // PENDING tidak diblok karena sudah selesai dari sisi user (tinggal tunggu verifikasi admin)
             $active = Transaction::where('user_id', $userId)
-                ->whereIn('transaction_status', [TransactionStatusEnum::DRAFT->value, TransactionStatusEnum::PENDING->value])
+                ->where('transaction_status', TransactionStatusEnum::DRAFT->value)
                 ->where('expired_at', '>', now())
                 ->latest()
                 ->first();
@@ -99,10 +101,10 @@ class TransactionController extends Controller
 
     public function step2($invoiceCode)
     {
-        // Pastikan transaksi valid, milik user yang login, dan statusnya masih pending
+        // Hanya izinkan akses jika masih DRAFT — PENDING berarti sudah upload bukti bayar
         $transaction = Transaction::where('invoice_code', $invoiceCode)
             ->where('user_id', session('user_id'))
-            ->whereIn('transaction_status', [TransactionStatusEnum::DRAFT->value, TransactionStatusEnum::PENDING->value])
+            ->where('transaction_status', TransactionStatusEnum::DRAFT->value)
             ->firstOrFail();
 
         return view('user.transactions.transaction', [
