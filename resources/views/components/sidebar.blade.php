@@ -1,171 +1,91 @@
-<nav id="sidenav-8"
-    class="fixed left-0 top-0 z-[1035] h-full min-h-[100vh] w-60 -translate-x-full overflow-hidden bg-white shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 invisible md:visible"
-    data-te-sidenav-init data-te-sidenav-hidden="false" data-te-sidenav-position="fixed" data-te-sidenav-mode="side"
-    data-te-sidenav-accordion="true">
-    <a class="mb-3 flex flex-col items-center justify-center border-b-2 border-solid border-gray-100 py-6 outline-none"
-        href="#" data-te-ripple-init data-te-ripple-color="primary">
-        <div class="flex items-center justify-center space-x-3 mb-3">
-        </div>
-        <span class="text-center font-bold">Petra International Film Festival <br>2026</span>
-    </a>
-    <ul class="relative m-0 list-none px-[0.2rem] pb-12" data-te-sidenav-menu-ref>
-        <li class="relative">
-            <a id="overview"
-                class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.dashboard') }}">
-                <span>Dashboard</span>
-            </a>
-        </li>
+@php
+    $currentRoute = request()->route()?->getName();
+    $navItems = [
+        ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'fa-gauge-high'],
+        ['route' => 'admin.transaction', 'label' => 'Transactions', 'icon' => 'fa-receipt'],
+        ['route' => 'admin.event', 'label' => 'Events', 'icon' => 'fa-calendar-days'],
+        ['route' => 'admin.category', 'label' => 'Ticket Category', 'icon' => 'fa-tags'],
+        ['route' => 'admin.monitor', 'label' => 'Monitor', 'icon' => 'fa-tower-broadcast'],
+        ['route' => 'admin.insight', 'label' => 'Insight', 'icon' => 'fa-chart-line'],
+        ['route' => 'admin.ticketScan', 'label' => 'Ticket Scan', 'icon' => 'fa-qrcode'],
+        ['route' => 'admin.manageVouchers', 'label' => 'Vouchers', 'icon' => 'fa-ticket'],
+    ];
+@endphp
 
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.transaction') }}">
-                <span>Transaction</span>
-            </a>
-        </li>
+{{-- Mobile overlay --}}
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden" onclick="closeSidebar()"></div>
 
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.event') }}">
-                <span>Event</span>
-            </a>
-        </li>
+{{-- Sidebar --}}
+<aside id="sidebar"
+    class="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-100 shadow-xl z-50
+           flex flex-col
+           -translate-x-full md:translate-x-0
+           transition-transform duration-300 ease-in-out">
 
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.category') }}">
-                <span>Ticket Category</span>
-            </a>
-        </li>
-
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.monitor') }}">
-                <span>Monitor</span>
-            </a>
-        </li>
-
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.insight') }}">
-                <span>Insight</span>
-            </a>
-        </li>
-
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.ticketScan') }}">
-                <span>Ticket Scan</span>
-            </a>
-        </li>
-
-        <li class="relative">
-            <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref href="{{ route('admin.manageVouchers') }}">
-                <span>Manage Voucher</span>
-            </a>
-        </li>
-
-
-
-
-        <li class="relative pt-6">
-            <span class="px-6 py-4 text-[0.6rem] font-bold uppercase text-gray-600 ">Logout</span>
-            <a href="{{ route('logout') }}"
-                class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                data-te-sidenav-link-ref>
-                <span>Logout</span>
-            </a>
-        </li>
-    </ul>
-</nav>
-
-{{-- NAVBAR --}}
-<!-- Main navigation container -->
-<nav
-    class="flex-no-wrap relative flex w-full items-center justify-between bg-[#FBFBFB] py-2 shadow-md shadow-black/5  lg:flex-wrap lg:justify-start lg:py-4 block md:hidden">
-    <div class="flex w-full flex-wrap items-center justify-between px-3">
-        <!-- Hamburger button for mobile view -->
-        <button
-            class="block border-0 bg-transparent px-2 text-neutral-500 hover:no-underline hover:shadow-none focus:no-underline focus:shadow-none focus:outline-none focus:ring-0  sm:hidden"
-            type="button" data-te-collapse-init data-te-target="#navbarSupportedContent12"
-            aria-controls="navbarSupportedContent12" aria-expanded="false" aria-label="Toggle navigation">
-            <!-- Hamburger icon -->
-            <span class="[&>svg]:w-7">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7">
-                    <path fill-rule="evenodd"
-                        d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z"
-                        clip-rule="evenodd" />
-                </svg>
-            </span>
-        </button>
-
-        <!-- Collapsible navigation container -->
-        <div class="!visible hidden flex-grow basis-[100%] items-center sm:!flex sm:basis-auto"
-            id="navbarSupportedContent12" data-te-collapse-item>
-            <!-- Left navigation links -->
-            <ul class="list-style-none mr-auto flex flex-col pl-0 sm:flex-row" data-te-navbar-nav-ref>
-                {{-- Dashboard --}}
-                <li class="relative pt-4">
-                    <span class="px-6 py-4 text-[0.6rem] font-bold uppercase text-gray-600 ">Overview</span>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.dashboard') }}" data-te-nav-link-ref>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.transaction') }}" data-te-nav-link-ref>
-                        <span>Transaction</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.event') }}" data-te-nav-link-ref>
-                        <span>Event</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.category') }}" data-te-nav-link-ref>
-                        <span>Ticket Category</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.monitor') }}" data-te-nav-link-ref>
-                        <span>Monitor</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.insight') }}" data-te-nav-link-ref>
-                        <span>Insight</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="flex cursor-pointer items-center truncate rounded-[5px] px-6 py-[0.45rem] text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
-                        href="{{ route('admin.ticketScan') }}" data-te-nav-link-ref>
-                        <span>Ticket Scan</span>
-                    </a>
-                </li>
-
-            </ul>
-        </div>
-
-        <div class="relative flex items-center">
-            <a class="pl-2 my-auto sm:mb-0 sm:mr-4 text-secondary-500 transition duration-200 hover:text-secondary-400 hover:ease-in-out focus:text-secondary-400 disabled:text-black/30 motion-reduce:transition-none"
-                href="{{ route('logout') }}">
-                <span class="[&>svg]:w-5">
-                    <svg class="w-[24px] h-[24px] fill-[#ff6b6b]" viewBox="0 0 512 512"
-                        xmlns="http://www.w3.org/2000/svg">
-
-                        <path
-                            d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
-                        </path>
-                    </svg>
-                </span>
-            </a>
-        </div>
+    {{-- Logo / Brand --}}
+    <div class="flex flex-col items-center justify-center px-6 py-7 border-b border-gray-100">
+        {{-- <div class="w-10 h-10  flex items-center justify-center mb-3 shadow-md">
+            <img src="{{ asset('assets/logo/logo_piff.png') }}" alt="">
+        </div> --}}
+        <p class="text-[11px] font-black text-gray-800 uppercase tracking-widest text-center leading-tight">Petra
+            International<br>Film Festival 2026</p>
     </div>
-</nav>
+
+    {{-- Nav --}}
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-3 mb-2">Menu</p>
+        @foreach ($navItems as $item)
+            @php $isActive = $currentRoute === $item['route']; @endphp
+            <a href="{{ route($item['route']) }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150
+                       {{ $isActive ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800' }}">
+                <span
+                    class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs
+                             {{ $isActive ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-400' }}">
+                    <i class="fa-solid {{ $item['icon'] }}"></i>
+                </span>
+                {{ $item['label'] }}
+                @if ($isActive)
+                    <span class="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                @endif
+            </a>
+        @endforeach
+    </nav>
+
+    {{-- Footer / Logout --}}
+    <div class="px-3 py-4 border-t border-gray-100">
+        <a href="{{ route('logout') }}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-50 hover:text-red-600 transition-all duration-150">
+            <span class="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center shrink-0 text-xs text-red-400">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </span>
+            Logout
+        </a>
+    </div>
+</aside>
+
+{{-- Mobile topbar --}}
+<header
+    class="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-4 h-14">
+    <button onclick="openSidebar()"
+        class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition">
+        <i class="fa-solid fa-bars text-sm"></i>
+    </button>
+    <p class="text-xs font-black text-gray-800 uppercase tracking-widest">PIFF 2026</p>
+    <a href="{{ route('logout') }}"
+        class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center text-red-400 hover:bg-red-100 transition">
+        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+    </a>
+</header>
+
+<script>
+    function openSidebar() {
+        document.getElementById('sidebar').classList.remove('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+    }
+</script>
