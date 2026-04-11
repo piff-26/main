@@ -17,4 +17,7 @@ class TicketCategory extends Model
     public function transactionItems() {
         return $this->hasMany(TransactionItem::class);
     }
+    public function tickets() {
+        return $this->hasMany(Ticket::class);
+    }
 }
