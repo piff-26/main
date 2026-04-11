@@ -24,6 +24,10 @@ const eventsData = {!! json_encode($events->map(function($event) {
     return [
         'id' => $event->id,
         'name' => $event->name,
+        'image' => $event->image ? asset('storage/' . $event->image) : null,
+        'seatMapImage' => $event->seat_map_image ? asset('storage/' . $event->seat_map_image) : null,
+        'description' => $event->description,
+        'tnc' => $event->tnc,
         'date' => $event->event_date->format('d M Y'),
         'startTime' => $event->start_time->format('H:i'),
         'endTime' => $event->end_time ? $event->end_time->format('H:i') : '',
@@ -63,6 +67,7 @@ $(document).ready(function() {
 
             html += `
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 event-card" style="opacity: 0; transform: translateY(20px);">
+                    ${event.image ? `<img src="${event.image}" alt="${event.name}" class="w-full h-40 object-cover">` : `<div class="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image text-4xl"></i></div>`}
                     <div class="p-6">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
@@ -224,6 +229,22 @@ $(document).ready(function() {
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
                         <input id="eventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter location">
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <input id="eventImage" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Seat Map Image <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <input id="eventSeatMap" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <textarea id="eventDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none" placeholder="Deskripsi event..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Syarat & Ketentuan <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <textarea id="eventTnc" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none" placeholder="Syarat dan ketentuan..."></textarea>
+                    </div>
                 </div>
             `,
             width: '600px',
@@ -239,13 +260,12 @@ $(document).ready(function() {
                 const startTime = $('#startTime').val();
                 const endTime = $('#endTime').val();
                 const location = $('#eventLocation').val();
-                
+
                 if (!name || !date || !startTime || !endTime || !location) {
                     Swal.showValidationMessage('Please fill all required fields');
                     return false;
                 }
-                
-                // Validate date is not in the past
+
                 const selectedDate = new Date(date);
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -253,14 +273,27 @@ $(document).ready(function() {
                     Swal.showValidationMessage('Event date cannot be in the past');
                     return false;
                 }
-                
-                // Validate end time is after start time
+
                 if (endTime <= startTime) {
                     Swal.showValidationMessage('End time must be after start time');
                     return false;
                 }
-                
-                return { name, event_date: date, start_time: startTime, end_time: endTime, location };
+
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('event_date', date);
+                formData.append('start_time', startTime);
+                formData.append('end_time', endTime);
+                formData.append('location', location);
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                const imageFile = document.getElementById('eventImage').files[0];
+                if (imageFile) formData.append('image', imageFile);
+                const seatMapFile = document.getElementById('eventSeatMap').files[0];
+                if (seatMapFile) formData.append('seat_map_image', seatMapFile);
+                formData.append('description', document.getElementById('eventDescription').value);
+                formData.append('tnc', document.getElementById('eventTnc').value);
+
+                return formData;
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -268,6 +301,8 @@ $(document).ready(function() {
                     url: '/admin/event',
                     method: 'POST',
                     data: result.value,
+                    processData: false,
+                    contentType: false,
                     success: function() {
                         Swal.fire({ icon: 'success', title: 'Success!', confirmButtonColor: '#27b4f7', timer: 2000 })
                             .then(() => location.reload());
@@ -285,12 +320,11 @@ $(document).ready(function() {
         const eventId = $(this).data('id');
         const event = eventsData.find(e => e.id === eventId);
         if (!event) return;
-        
-        // Convert date format from 'd M Y' to 'Y-m-d'
+
         const dateParts = event.date.split(' ');
         const months = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
         const dateValue = `${dateParts[2]}-${months[dateParts[1]]}-${dateParts[0].padStart(2, '0')}`;
-        
+
         Swal.fire({
             title: '<span class="font-bold">Edit Event</span>',
             html: `
@@ -317,6 +351,24 @@ $(document).ready(function() {
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
                         <input id="editEventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.location}">
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(kosongkan jika tidak diganti)</span></label>
+                        ${event.image ? `<img src="${event.image}" class="w-full h-32 object-cover rounded-lg mb-2">` : ''}
+                        <input id="editEventImage" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Seat Map Image <span class="text-gray-400 font-normal">(kosongkan jika tidak diganti)</span></label>
+                        ${event.seatMapImage ? `<img src="${event.seatMapImage}" class="w-full h-32 object-contain rounded-lg mb-2 bg-gray-50">` : ''}
+                        <input id="editEventSeatMap" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <textarea id="editEventDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none">${event.description ?? ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Syarat & Ketentuan <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <textarea id="editEventTnc" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none">${event.tnc ?? ''}</textarea>
+                    </div>
                 </div>
             `,
             width: '600px',
@@ -325,20 +377,30 @@ $(document).ready(function() {
             cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
             confirmButtonColor: '#27b4f7',
             preConfirm: () => {
-                return {
-                    name: $('#editEventName').val(),
-                    event_date: $('#editEventDate').val(),
-                    start_time: $('#editStartTime').val(),
-                    end_time: $('#editEndTime').val(),
-                    location: $('#editEventLocation').val()
-                };
+                const formData = new FormData();
+                formData.append('name', $('#editEventName').val());
+                formData.append('event_date', $('#editEventDate').val());
+                formData.append('start_time', $('#editStartTime').val());
+                formData.append('end_time', $('#editEndTime').val());
+                formData.append('location', $('#editEventLocation').val());
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+                formData.append('_method', 'PUT');
+                const imageFile = document.getElementById('editEventImage').files[0];
+                if (imageFile) formData.append('image', imageFile);
+                const seatMapFile = document.getElementById('editEventSeatMap').files[0];
+                if (seatMapFile) formData.append('seat_map_image', seatMapFile);
+                formData.append('description', document.getElementById('editEventDescription').value);
+                formData.append('tnc', document.getElementById('editEventTnc').value);
+                return formData;
             }
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
                     url: `/admin/event/${eventId}`,
-                    method: 'PUT',
+                    method: 'POST',
                     data: result.value,
+                    processData: false,
+                    contentType: false,
                     success: function() {
                         Swal.fire({ icon: 'success', title: 'Success!', confirmButtonColor: '#27b4f7', timer: 2000 })
                             .then(() => location.reload());
