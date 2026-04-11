@@ -17,6 +17,8 @@ Route::get('/login', [AuthController::class, 'userLoginView'])->name('user.login
 Route::get('/auth/google', [AuthController::class, 'userGoogleAuth'])->name('user.auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'userProcessLogin'])->name('user.auth.google.callback');
 
+Route::get('/checkout/{event_slug}', [TransactionController::class, 'step1'])->name('checkout.step1');
+
 Route::prefix('admin')->group(function(){
     Route::get('/',function(){
         return redirect()->route('admin.login');
@@ -64,20 +66,13 @@ Route::middleware('auth')->group(function () {
     
     // menu user (Riwayat & Tiket)
     Route::get('/history', [UserController::class, 'myTransactions'])->name('user.transactions-history');
-    
 
     Route::get('/transaction/{invoice_code}/download', [TransactionHistoryController::class, 'downloadETicket'])->name('ticket.download');
 
-
     Route::prefix('checkout')->name('checkout.')->group(function () {
-        
-        // Pilih Event & Kategori Tiket
-        Route::get('/{event_slug}', [TransactionController::class, 'step1'])->name('step1');
-        Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
-
         // Isi Biodata & Pembayaran
         Route::get('/transaction/{invoice_code}', [TransactionController::class, 'step2'])->name('step2');
-        
+        Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
     });
 });
 
