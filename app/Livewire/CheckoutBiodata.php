@@ -5,40 +5,50 @@ namespace App\Livewire;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\Ticket;
 use Illuminate\Support\Str;
-use App\Services\MidtransService;
 use App\Models\TransactionItem;
-use App\Mail\ETicketMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\PaymentPendingUserMail;
+use App\Mail\PaymentPendingAdminMail;
 use App\Enums\SourceInfoEnum;
 use App\Enums\TransactionStatusEnum;
 
 class CheckoutBiodata extends Component
 {
+    use WithFileUploads;
+
     public $transaction;
 
     public $currentStep = 1;
-    
+
     // Form Biodata
     public $buyer_name;
     public $buyer_phone;
+    public $phone_code = '+62';
+    public $phone_number = '';
     public $city;
     public $source_info;
 
     // Form Voucher
     public $voucher_code;
     public $applied_voucher_id = null;
-    
+
     // Kalkulasi Harga
     public $original_total = 0;
     public $discount_amount = 0;
     public $grand_total = 0;
 
+    // Upload bukti bayar
+    public $payment_proof;
+
+    // Nama pemilik tiket per item: [transaction_item_id => ['Nama 1', 'Nama 2', ...]]
+    public array $holderNames = [];
+
     public array $sourceInfoOptions = [];
 
-    public $draftSavedTime;
     public $agree_tnc = false;
     public $tncRead = false;
     public $tncError = '';
@@ -47,60 +57,68 @@ class CheckoutBiodata extends Component
     {
         $this->sourceInfoOptions = array_column(SourceInfoEnum::cases(), 'value');
 
-        // Mengambil data transaksi draft
         $this->transaction = Transaction::with('transactionItems.ticketCategory')
             ->where('invoice_code', $invoice_code)
             ->firstOrFail();
 
-        // Load data jika user kembali ke halaman ini (melanjutkan draft)
-        $this->buyer_name = $this->transaction->buyer_name;
-        $this->buyer_phone = $this->transaction->buyer_phone;
-        $this->city = $this->transaction->city;
-        $this->source_info = $this->transaction->source_info;
+        $this->buyer_name     = $this->transaction->buyer_name;
+        // Split existing buyer_phone into code + number if it starts with +
+        if ($this->transaction->buyer_phone && str_starts_with($this->transaction->buyer_phone, '+')) {
+            preg_match('/^(\+\d+)(.*)$/', $this->transaction->buyer_phone, $m);
+            $this->phone_code   = $m[1] ?? '+62';
+            $this->phone_number = $m[2] ?? '';
+        } else {
+            $this->phone_number = $this->transaction->buyer_phone ?? '';
+        }
+        $this->buyer_phone    = $this->transaction->buyer_phone;
+        $this->city           = $this->transaction->city;
+        $this->source_info    = $this->transaction->source_info;
         $this->discount_amount = $this->transaction->discount_amount;
 
-        // Kalkulasi Harga
         foreach ($this->transaction->transactionItems as $item) {
             $this->original_total += ($item->quantity * $item->price);
+            // Pre-fill holder names jika sudah pernah diisi
+            if (!isset($this->holderNames[$item->id])) {
+                $this->holderNames[$item->id] = $item->holder_names ?? array_fill(0, $item->quantity, '');
+            }
         }
         $this->calculateTotal();
     }
 
-
     public function updated($propertyName, $value)
     {
-        $allowedFields = ['buyer_name', 'buyer_phone', 'city', 'source_info'];
-        
-        if (in_array($propertyName, $allowedFields)) {
-            // Save langsung ke Database
-            Transaction::where('id', $this->transaction->id)->update([
-                $propertyName => $value
-            ]);
+        $allowedFields = ['buyer_name', 'city', 'source_info'];
 
-            // Tembak event ke frontend (bawa data waktu)
+        if (in_array($propertyName, $allowedFields)) {
+            Transaction::where('id', $this->transaction->id)->update([$propertyName => $value]);
+            $this->dispatch('draft-saved', time: now()->format('H:i:s'));
+        }
+
+        if (in_array($propertyName, ['phone_code', 'phone_number'])) {
+            $combined = $this->phone_code . $this->phone_number;
+            $this->buyer_phone = $combined;
+            Transaction::where('id', $this->transaction->id)->update(['buyer_phone' => $combined]);
             $this->dispatch('draft-saved', time: now()->format('H:i:s'));
         }
     }
 
     public function calculateTotal()
     {
-        $this->grand_total = $this->original_total - $this->discount_amount;
-        // Pastikan total tidak minus
-        if($this->grand_total < 0) $this->grand_total = 0; 
+        $this->grand_total = max(0, $this->original_total - $this->discount_amount);
     }
 
     public function nextStep()
     {
         $this->validate([
-            'buyer_name' => 'required|string|max:255',
-            'buyer_phone' => 'required|numeric',
-            'city' => 'required|string|max:255',
-            'source_info' => 'required|string',
+            'buyer_name'   => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'city'         => 'required|string|max:255',
+            'source_info'  => 'required|string',
         ], [
             'required' => ':attribute wajib diisi.',
-            'numeric' => 'Nomor telepon harus berupa angka.'
         ]);
 
+        $this->buyer_phone = $this->phone_code . $this->phone_number;
         $this->currentStep = 2;
     }
 
@@ -109,9 +127,6 @@ class CheckoutBiodata extends Component
         $this->currentStep = 1;
     }
 
-    /**
-     * Fungsi Cek dan Terapkan Voucher secara Real-time
-     */
     public function applyVoucher()
     {
         $this->resetErrorBag('voucher_code');
@@ -121,93 +136,91 @@ class CheckoutBiodata extends Component
             return;
         }
 
-        // Cari Voucher yang aktif
         $voucher = Voucher::where('code', strtoupper($this->voucher_code))
             ->where('status', 'active')
             ->first();
 
-        // Validasi 1: Apakah voucher ada?
         if (!$voucher) {
             $this->addError('voucher_code', 'Kode voucher tidak valid.');
             return;
         }
 
-        // Validasi 2: Apakah sudah expired?
         if ($voucher->expired_at && now()->greaterThan($voucher->expired_at)) {
             $this->addError('voucher_code', 'Kode voucher sudah kedaluwarsa.');
             return;
         }
 
-        // Apakah kuota penukaran masih ada?
         if ($voucher->used_count >= $voucher->max_uses) {
             $this->addError('voucher_code', 'Kuota voucher sudah habis.');
             return;
         }
 
-        // Validasi Scope event
         if ($voucher->event_id !== null) {
-            $transactionEventIds = $this->transaction->transactionItems
-                ->pluck('ticketCategory.event_id')
-                ->unique();
+            $transactionEventIds = $this->transaction->transactionItems->pluck('ticketCategory.event_id')->unique();
             if (!$transactionEventIds->contains($voucher->event_id)) {
                 $this->addError('voucher_code', 'Voucher tidak berlaku untuk event ini.');
                 return;
             }
         }
 
-        // Validasi 5: Scope kategori tiket
         if ($voucher->ticket_category_id !== null) {
-            $hasCategoryInCart = $this->transaction->transactionItems
-                ->contains('ticket_category_id', $voucher->ticket_category_id);
+            $hasCategoryInCart = $this->transaction->transactionItems->contains('ticket_category_id', $voucher->ticket_category_id);
             if (!$hasCategoryInCart) {
                 $this->addError('voucher_code', 'Voucher tidak berlaku untuk kategori tiket yang dipilih.');
                 return;
             }
         }
 
-        // Terapkan Diskon
         if ($voucher->discount_type === 'nominal') {
             $this->discount_amount = $voucher->discount_nominal;
         } else {
-            // Jika persentase
             $this->discount_amount = $this->original_total * ($voucher->discount_percentage / 100);
         }
 
-        // Pastikan diskon tidak lebih besar dari total belanja
         if ($this->discount_amount > $this->original_total) {
             $this->discount_amount = $this->original_total;
         }
 
-        $this->grand_total = $this->original_total - $this->discount_amount;
         $this->applied_voucher_id = $voucher->id;
         $this->calculateTotal();
 
         session()->flash('voucher_success', 'Voucher berhasil diterapkan!');
     }
 
-    /**
-     * Fungsi hapus voucher (jika user berubah pikiran)
-     */
     public function removeVoucher()
     {
-        $this->voucher_code = '';
+        $this->voucher_code       = '';
         $this->applied_voucher_id = null;
-        $this->discount_amount = 0;
-        $this->grand_total = $this->original_total;
+        $this->discount_amount    = 0;
+        $this->grand_total        = $this->original_total;
     }
 
     /**
-     * Simpan Data & Lanjut Bayar
+     * Simpan biodata + voucher, lanjut ke step upload bukti bayar
      */
     public function processToPayment()
     {
         $this->tncError = '';
 
-        $this->validate([
-            'buyer_name'  => 'required|string|max:255',
-            'buyer_phone' => 'required|numeric',
-            'city'        => 'required|string|max:255',
-            'source_info' => 'required|string',
+        // Validasi holder names dulu sebelum apapun
+        $holderRules = [];
+        foreach ($this->transaction->transactionItems as $item) {
+            for ($i = 0; $i < $item->quantity; $i++) {
+                $holderRules["holderNames.{$item->id}.{$i}"] = 'required|string|max:255';
+            }
+        }
+        $this->validate(array_merge([
+            'buyer_name'   => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'city'         => 'required|string|max:255',
+            'source_info'  => 'required|string',
+        ], $holderRules), [
+            'buyer_name.required'   => 'Name is required.',
+            'phone_number.required' => 'Phone number is required.',
+            'city.required'         => 'City is required.',
+            'source_info.required'  => 'Information source is required.',
+            'required'              => 'Owner name is required.',
+            'max'                   => 'Name to long. (give first and last name if possible)',
         ]);
 
         if (!$this->agree_tnc) {
@@ -215,82 +228,64 @@ class CheckoutBiodata extends Component
             return;
         }
 
-        // Simpan total amount ke DB dan ubah status 
+        $this->buyer_phone = $this->phone_code . $this->phone_number;
+
         $this->transaction->update([
-            'buyer_name'         => $this->buyer_name,
-            'buyer_phone'        => $this->buyer_phone,
-            'city'               => $this->city,
-            'source_info'        => $this->source_info,
-            'total_amount'       => $this->grand_total,
-            'discount_amount'    => $this->discount_amount,
-            'voucher_id'         => $this->applied_voucher_id,
+            'buyer_name'      => $this->buyer_name,
+            'buyer_phone'     => $this->phone_code . $this->phone_number,
+            'city'            => $this->city,
+            'source_info'     => $this->source_info,
+            'total_amount'    => $this->grand_total,
+            'discount_amount' => $this->discount_amount,
+            'voucher_id'      => $this->applied_voucher_id,
+            'agree_tnc'       => true,
+        ]);
+
+        // Simpan holder names per transaction item
+        foreach ($this->transaction->transactionItems as $item) {
+            $item->update(['holder_names' => array_values($this->holderNames[$item->id] ?? [])]);
+        }
+
+        if ($this->applied_voucher_id) {
+            Voucher::where('id', $this->applied_voucher_id)->increment('used_count');
+        }
+
+        $this->currentStep = 2;
+    }
+
+    /**
+     * Upload bukti bayar → set status PENDING → kirim email
+     */
+    public function uploadPaymentProof()
+    {
+        $this->validate([
+            'payment_proof' => 'required|image|max:2048',
+        ], [
+            'payment_proof.required' => 'Bukti pembayaran wajib diupload.',
+            'payment_proof.image'    => 'File harus berupa gambar.',
+            'payment_proof.max'      => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        $path = $this->payment_proof->store('payment-proofs', 'public');
+
+        $this->transaction->update([
+            'payment_proof'      => $path,
             'transaction_status' => TransactionStatusEnum::PENDING->value,
         ]);
 
-        // Generate Midtrans Snap Token jika belum ada
-        if (!$this->transaction->snap_token) {
-            $this->transaction->refresh();
-            $snapToken = \App\Services\MidtransService::getSnapToken($this->transaction);
-            $this->transaction->update(['snap_token' => $snapToken]);
-
-            // Increment used_count voucher setelah token berhasil digenerate
-            if ($this->applied_voucher_id) {
-                \App\Models\Voucher::where('id', $this->applied_voucher_id)->increment('used_count');
-            }
+        // Kirim email ke user
+        $user = User::find($this->transaction->user_id);
+        if ($user && $user->email) {
+            Mail::to($user->email)->send(new PaymentPendingUserMail($this->transaction));
         }
 
-        // Pindah ke halaman pembayaran
-        $this->currentStep = 2;
-        
-        // Trigger Javascript untuk buka popup Midtrans
-        $this->dispatch('trigger-midtrans', snapToken: $this->transaction->snap_token);
-    }
-
-    public function reTriggerMidtrans()
-    {
-        if ($this->transaction->snap_token) {
-            $this->dispatch('trigger-midtrans', snapToken: $this->transaction->snap_token);
-        } else {
-            $this->processToPayment();
-        }
-    }
-
-    public function paymentSuccess()
-    {
-        $this->transaction->update([
-            'transaction_status' => TransactionStatusEnum::PAID->value,
-            'paid_at'            => now(),
-            'agree_tnc'          => true,
-        ]);
-
-        if ($this->transaction->tickets()->count() === 0) {
-            $transaction = Transaction::with('transactionItems.ticketCategory')->find($this->transaction->id);
-
-            foreach ($transaction->transactionItems as $item) {
-                for ($i = 0; $i < $item->quantity; $i++) {
-                    $ticket = Ticket::create([
-                        'transaction_id'     => $transaction->id,
-                        'ticket_category_id' => $item->ticket_category_id,
-                        'ticket_code'        => 'TEMP-' . Str::random(10),
-                    ]);
-
-                    $categorySlug = strtoupper($item->ticketCategory->slug);
-                    $invRandom = substr($transaction->invoice_code, 4); // ambil bagian setelah 'INV-'
-                    $newTicketCode = "INV-{$categorySlug}-{$invRandom}-" . strtoupper(Str::random(3));
-
-                    $ticket->update(['ticket_code' => $newTicketCode]);
-                }
-            }
+        // Kirim email ke semua admin
+        $adminEmails = \App\Models\Admin::pluck('email')->filter()->toArray();
+        if (!empty($adminEmails)) {
+            Mail::to($adminEmails)->send(new PaymentPendingAdminMail($this->transaction));
         }
 
         $this->currentStep = 3;
-
-        // Kirim email e-ticket
-        $transaction = Transaction::with('transactionItems.ticketCategory', 'tickets.ticketCategory.event')->find($this->transaction->id);
-        $user = User::find($transaction->user_id);
-        if ($user && $user->email) {
-            Mail::to($user->email)->send(new ETicketMail($transaction));
-        }
     }
 
     #[\Livewire\Attributes\On('cancel-transaction')]
@@ -311,6 +306,7 @@ class CheckoutBiodata extends Component
 
     public function render()
     {
-        return view('livewire.checkout-finish');
+        $countries = json_decode(file_get_contents(resource_path('data/countries.json')), true);
+        return view('livewire.checkout-finish', compact('countries'));
     }
 }
