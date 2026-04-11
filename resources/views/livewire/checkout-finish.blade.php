@@ -310,9 +310,9 @@
                                 berita transfer berikut:</p>
                             <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
                                 <span class="text-white font-mono text-sm flex-1"
-                                    id="transferNote">piff_inv_{{ strtolower($transaction->invoice_code) }}</span>
+                                    id="transferNote">piff_{{ strtolower(substr($transaction->invoice_code, 4)) }}</span>
                                 <button type="button"
-                                    onclick="copyText('piff_inv_{{ strtolower($transaction->invoice_code) }}', this)"
+                                    onclick="copyText('piff_{{ strtolower(substr($transaction->invoice_code, 4)) }}', this)"
                                     class="text-yellow-400 hover:text-yellow-300 text-xs font-semibold transition flex items-center gap-1">
                                     <i class="fas fa-copy"></i> Salin
                                 </button>
@@ -395,7 +395,7 @@
                             @enderror
                         </div>
 
-                        <div class="flex gap-3 mt-6">
+                        <div class="flex flex-col gap-3 mt-6">
                             <button wire:click="previousStep"
                                 class="flex-1 px-4 py-3 border border-slate-600 text-slate-300 rounded-xl hover:bg-slate-800 transition font-semibold">
                                 <i class="fas fa-arrow-left mr-2"></i>Kembali
