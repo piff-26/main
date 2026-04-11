@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             EventSeeder::class,
             VoucherSeeder::class,
-            UserSeeder::class,
-            DummyDataSeeder::class,
+            // UserSeeder::class,
+            // DummyDataSeeder::class,
         ]);
     }
 }
