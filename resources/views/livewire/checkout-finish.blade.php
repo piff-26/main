@@ -1,9 +1,10 @@
 <div class="font-organetto relative w-full min-h-screen flex flex-col items-center py-[2rem] px-4">
+    @php use App\Enums\PaymentAccountEnum; @endphp
 
     <div
         class="w-full max-w-6xl glass-card rounded-[2rem] p-6 md:p-8 relative bg-slate-900/40 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
 
-        <div wire:loading.flex wire:target="processToPayment, applyVoucher, reTriggerMidtrans"
+        <div wire:loading.flex wire:target="processToPayment, applyVoucher, uploadPaymentProof"
             class="absolute inset-0 z-50 flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-[2rem]">
             <div class="w-16 h-16 rounded-full border-4 border-[#ff5b1d]/30 border-t-[#ff5b1d] animate-spin"></div>
             <span class="text-white text-lg font-bold tracking-widest mt-4 animate-pulse">MEMPROSES DATA...</span>
@@ -14,9 +15,9 @@
                 @if ($currentStep == 1)
                     Lengkapi Data Diri
                 @elseif($currentStep == 2)
-                    Selesaikan Pembayaran
+                    Upload Bukti Pembayaran
                 @else
-                    Transaksi Berhasil
+                    Menunggu Verifikasi
                 @endif
             </h1>
 
@@ -37,7 +38,7 @@
 
             {{-- Progress Steps --}}
             <div class="flex items-center justify-center space-x-4 mt-6">
-                @foreach ([1 => 'Biodata', 2 => 'Pembayaran', 3 => 'E-Ticket'] as $step => $label)
+                @foreach ([1 => 'Biodata', 2 => 'Pembayaran', 3 => 'Verifikasi'] as $step => $label)
                     <div class="flex flex-col items-center">
                         <div
                             class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
@@ -56,48 +57,101 @@
             </div>
         </div>
 
+        {{-- STEP 1: BIODATA --}}
         @if ($currentStep == 1)
             <div class="flex flex-col md:flex-row gap-8">
                 <div class="w-full md:w-3/5 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">NAMA LENGKAP
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">FULL NAME
                                 *</label>
                             <input type="text" wire:model.live.debounce.600ms="buyer_name"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] focus:ring-1 focus:ring-[#ff5b1d] transition"
-                                placeholder="Sesuai KTP/KTM">
+                                placeholder="Full Name (as per ID card / passport)">
                             @error('buyer_name')
                                 <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">NOMOR TELEPON
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">PHONE NUMBER
                                 *</label>
-                            <input type="text" inputmode="numeric" pattern="\d*" required maxlength="15"
-                                wire:model.live.debounce.600ms="buyer_phone"
-                                oninput="this.value = this.value.replace(/\D/g, '')"
-                                class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition"
-                                placeholder="08xxxxxxxxxx">
-                            @error('buyer_phone')
+                            <div class="flex gap-2" x-data="{
+                                open: false,
+                                search: '',
+                                selected: { flag: '🇮🇩', dial_code: '+62', name: 'Indonesia' },
+                                countries: @js($countries),
+                                get filtered() {
+                                    if (!this.search) return this.countries;
+                                    const q = this.search.toLowerCase();
+                                    return this.countries.filter(c => c.name.toLowerCase().includes(q) || c.dial_code.includes(q));
+                                },
+                                pick(c) {
+                                    this.selected = c;
+                                    $wire.set('phone_code', c.dial_code);
+                                    this.open = false;
+                                    this.search = '';
+                                }
+                            }" x-init="const init = countries.find(c => c.dial_code === $wire.get('phone_code'));
+                            if (init) selected = init;">
+                                {{-- Trigger --}}
+                                <div class="relative shrink-0">
+                                    <button type="button" x-on:click="open = !open"
+                                        class="flex items-center gap-2 bg-slate-800/50 border border-slate-600 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition w-36 h-full">
+                                        <img :src="`https://flagcdn.com/24x18/${countries.find(c=>c.dial_code===selected.dial_code)?.code?.toLowerCase()}.png`"
+                                            class="w-6 h-4 object-cover rounded-sm shrink-0"
+                                            x-on:error="$el.style.display='none'">
+                                        <span class="text-sm font-mono" x-text="selected.dial_code"></span>
+                                        <i class="fas fa-chevron-down text-xs text-slate-400 ml-auto"></i>
+                                    </button>
+
+                                    {{-- Dropdown --}}
+                                    <div x-show="open" x-on:click.outside="open = false" x-cloak
+                                        class="absolute z-50 mt-1 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                                        <div class="p-2 border-b border-slate-700">
+                                            <input type="text" x-model="search" placeholder="Search country..."
+                                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#ff5b1d]">
+                                        </div>
+                                        <ul class="overflow-y-auto max-h-52">
+                                            <template x-for="c in filtered" :key="c.code">
+                                                <li x-on:click="pick(c)"
+                                                    class="flex items-center gap-3 px-3 py-2 hover:bg-slate-700 cursor-pointer transition">
+                                                    <img :src="`https://flagcdn.com/24x18/${c.code.toLowerCase()}.png`"
+                                                        class="w-6 h-4 object-cover rounded-sm shrink-0">
+                                                    <span class="text-white text-sm flex-1" x-text="c.name"></span>
+                                                    <span class="text-slate-400 text-xs font-mono"
+                                                        x-text="c.dial_code"></span>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <input type="text" inputmode="numeric" pattern="\d*" required maxlength="15"
+                                    wire:model.live.debounce.600ms="phone_number"
+                                    oninput="this.value = this.value.replace(/\D/g, '')"
+                                    class="flex-1 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition"
+                                    placeholder="8123456789">
+                            </div>
+                            @error('phone_number')
                                 <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">KOTA ASAL
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">CITY OF ORIGIN
                                 *</label>
                             <input type="text" wire:model.live.debounce.600ms="city"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition"
-                                placeholder="Contoh: Surabaya">
+                                placeholder="Example: New York">
                             @error('city')
                                 <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">SUMBER INFORMASI
+                            <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">INFORMATION SOURCE
                                 *</label>
                             <select wire:model.live="source_info"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] transition">
-                                <option value="" class="bg-slate-800">Pilih Sumber Info</option>
+                                <option value="" class="bg-slate-800">Choose</option>
                                 @foreach ($sourceInfoOptions ?? [] as $option)
                                     <option value="{{ $option }}" class="bg-slate-800">{{ $option }}
                                     </option>
@@ -106,6 +160,31 @@
                             @error('source_info')
                                 <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
                             @enderror
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-slate-700/50">
+                        <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-4">TICKET OWNERS *</h4>
+                        <div class="space-y-4">
+                            @foreach ($transaction->transactionItems as $item)
+                                @for ($i = 0; $i < $item->quantity; $i++)
+                                    <div>
+                                        <label class="block text-xs text-slate-500 mb-1">
+                                            {{ $item->ticketCategory->name }}
+                                            @if ($item->quantity > 1)
+                                                #{{ $i + 1 }}
+                                            @endif
+                                        </label>
+                                        <input type="text"
+                                            wire:model.live.debounce.400ms="holderNames.{{ $item->id }}.{{ $i }}"
+                                            class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ff5b1d] focus:ring-1 focus:ring-[#ff5b1d] transition"
+                                            required placeholder="Ticket owner's name as per ID card / passport">
+                                        @error("holderNames.{$item->id}.{$i}")
+                                            <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                @endfor
+                            @endforeach
                         </div>
                     </div>
 
@@ -119,12 +198,18 @@
                             <button wire:click.prevent="applyVoucher"
                                 class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">TERAPKAN</button>
                         </div>
+                        @error('voucher_code')
+                            <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
+                        @if (session('voucher_success'))
+                            <span class="text-green-400 text-xs mt-1 block">{{ session('voucher_success') }}</span>
+                        @endif
                     </div>
 
                     {{-- TNC --}}
                     <div class="mt-6 flex items-center gap-3">
-                        <input type="checkbox" id="agree_tnc" wire:model="agree_tnc" class="w-4 h-4 accent-[#ff5b1d]"
-                            {{ !$tncRead ? 'disabled' : '' }}>
+                        <input type="checkbox" id="agree_tnc" wire:model="agree_tnc"
+                            class="w-4 h-4 accent-[#ff5b1d]" {{ !$tncRead ? 'disabled' : '' }}>
                         <label for="agree_tnc" class="text-sm text-slate-300">
                             Saya menyetujui
                             <button type="button" x-data x-on:click="$dispatch('open-tnc')"
@@ -184,71 +269,183 @@
                     </div>
                 </div>
             </div>
+
+            {{-- STEP 2: UPLOAD BUKTI BAYAR --}}
         @elseif ($currentStep == 2)
-            <div class="flex flex-col items-center justify-center py-10 text-center">
-                <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
-                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-                        </path>
-                    </svg>
+            <div class="flex flex-col md:flex-row gap-8">
+                {{-- Info Rekening --}}
+                <div class="w-full md:w-1/2">
+                    <div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50">
+                        <h3
+                            class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3 flex items-center gap-2">
+                            <i class="fas fa-university text-[#ff5b1d]"></i> INFO PEMBAYARAN
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4">Transfer ke salah satu rekening berikut:</p>
+
+                        <div class="space-y-3">
+                            @foreach (PaymentAccountEnum::cases() as $account)
+                                <div
+                                    class="bg-slate-900/60 rounded-xl p-4 border border-slate-700 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                                            {{ $account->label() }}</p>
+                                        <p class="text-white font-bold text-lg tracking-widest"
+                                            data-norek="{{ $account->accountNumber() }}">
+                                            {{ $account->accountNumber() }}</p>
+                                        <p class="text-slate-400 text-sm">a.n. {{ $account->accountName() }}</p>
+                                    </div>
+                                    <button type="button"
+                                        onclick="copyText('{{ $account->accountNumber() }}', this)"
+                                        class="text-slate-400 hover:text-white transition p-2 rounded-lg hover:bg-slate-700">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                            <p class="text-yellow-400 text-sm font-semibold mb-1"><i
+                                    class="fas fa-exclamation-triangle mr-2"></i>Penting!</p>
+                            <p class="text-yellow-300/80 text-xs mb-3">Transfer tepat sesuai total tagihan. Gunakan
+                                berita transfer berikut:</p>
+                            <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                                <span class="text-white font-mono text-sm flex-1"
+                                    id="transferNote">piff_inv_{{ strtolower($transaction->invoice_code) }}</span>
+                                <button type="button"
+                                    onclick="copyText('piff_inv_{{ strtolower($transaction->invoice_code) }}', this)"
+                                    class="text-yellow-400 hover:text-yellow-300 text-xs font-semibold transition flex items-center gap-1">
+                                    <i class="fas fa-copy"></i> Salin
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-slate-700">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Total Tagihan</span>
+                                <span class="text-2xl font-extrabold text-[#ff5b1d]">Rp
+                                    {{ number_format($grand_total, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-slate-400 text-sm">Invoice</span>
+                                <span class="text-white font-mono text-sm">{{ $transaction->invoice_code }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h2 class="text-2xl font-bold text-white mb-2">Menunggu Pembayaran</h2>
-                <p class="text-slate-400 mb-8 max-w-md">Selesaikan pembayaran Anda melalui *popup* yang muncul. Jika
-                    *popup* tidak muncul atau ter-close, klik tombol di bawah ini.</p>
 
-                <div class="text-3xl font-extrabold text-[#ff5b1d] mb-8">Rp
-                    {{ number_format($grand_total, 0, ',', '.') }}</div>
+                {{-- Form Upload --}}
+                <div class="w-full md:w-1/2">
+                    <div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50">
+                        <h3
+                            class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3 flex items-center gap-2">
+                            <i class="fas fa-upload text-[#ff5b1d]"></i> UPLOAD BUKTI TRANSFER
+                        </h3>
 
-                <div class="flex gap-4">
-                    <button wire:click="$set('currentStep', 1)"
-                        class="px-6 py-3 border border-slate-600 text-slate-300 rounded-xl hover:bg-slate-800 transition">Kembali</button>
-                    <button wire:click="reTriggerMidtrans"
-                        class="px-8 py-3 bg-[#ff5b1d] hover:bg-[#e04a10] text-white rounded-xl font-bold shadow-lg transition">Bayar
-                        Sekarang</button>
+                        <div x-data="{
+                            preview: null,
+                            dragging: false,
+                            uploading: false,
+                            handleFile(file) {
+                                if (!file || !file.type.startsWith('image/')) return;
+                                this.uploading = true;
+                                const reader = new FileReader();
+                                reader.onload = e => this.preview = e.target.result;
+                                reader.readAsDataURL(file);
+                                $wire.upload('payment_proof', file,
+                                    () => { this.uploading = false; },
+                                    () => { this.uploading = false; },
+                                    (event) => {}
+                                );
+                            }
+                        }" class="space-y-4" x-on:dragover.prevent="dragging = true"
+                            x-on:dragleave.prevent="dragging = false"
+                            x-on:drop.prevent="dragging = false; handleFile($event.dataTransfer.files[0])">
 
-                    {{-- Tombol simulasi untuk tes pindah ke step 3 (Hapus saat Production) --}}
-                    <button wire:click="paymentSuccess"
-                        class="px-4 py-3 bg-green-600 text-white rounded-xl text-xs">Simulasi Sukses (Dev)</button>
+                            <div class="border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer"
+                                :class="dragging ? 'border-[#ff5b1d] bg-[#ff5b1d]/10' :
+                                    'border-slate-600 hover:border-[#ff5b1d]/50'"
+                                x-on:click="$refs.fileInput.click()">
+                                <template x-if="uploading">
+                                    <div>
+                                        <i class="fas fa-spinner fa-spin text-3xl text-[#ff5b1d] mb-3"></i>
+                                        <p class="text-slate-400 text-sm">Mengupload...</p>
+                                    </div>
+                                </template>
+                                <template x-if="!uploading && !preview">
+                                    <div>
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-slate-500 mb-3"></i>
+                                        <p class="text-slate-400 text-sm">Klik atau drag & drop foto bukti transfer</p>
+                                        <p class="text-slate-600 text-xs mt-1">JPG, PNG, max 2MB</p>
+                                    </div>
+                                </template>
+                                <template x-if="!uploading && preview">
+                                    <div>
+                                        <img :src="preview"
+                                            class="max-h-48 mx-auto rounded-lg object-contain mb-2">
+                                        <p class="text-slate-500 text-xs">Klik untuk ganti foto</p>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <input type="file" x-ref="fileInput" accept="image/*" class="hidden"
+                                x-on:change="handleFile($event.target.files[0])">
+
+                            @error('payment_proof')
+                                <span class="text-red-400 text-xs block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="flex gap-3 mt-6">
+                            <button wire:click="previousStep"
+                                class="flex-1 px-4 py-3 border border-slate-600 text-slate-300 rounded-xl hover:bg-slate-800 transition font-semibold">
+                                <i class="fas fa-arrow-left mr-2"></i>Kembali
+                            </button>
+                            <button wire:click="uploadPaymentProof"
+                                class="flex-1 bg-[#ff5b1d] hover:bg-[#e04a10] text-white py-3 rounded-xl font-bold tracking-wider transition shadow-[0_0_20px_rgba(255,91,29,0.3)]">
+                                <i class="fas fa-paper-plane mr-2"></i>KIRIM BUKTI
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {{-- STEP 3: MENUNGGU VERIFIKASI --}}
         @elseif ($currentStep == 3)
             <div class="flex flex-col items-center justify-center py-10 text-center">
                 <div
-                    class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 border-4 border-green-500">
-                    <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                        </path>
-                    </svg>
+                    class="w-24 h-24 bg-yellow-500/20 rounded-full flex items-center justify-center mb-6 border-4 border-yellow-500">
+                    <i class="fas fa-clock text-yellow-400 text-4xl"></i>
                 </div>
-                <h2 class="text-3xl font-bold text-white mb-2">Pembayaran Berhasil!</h2>
-                <p class="text-slate-400 mb-8 max-w-md">Terima kasih, pembayaran untuk tiket Anda telah kami terima.
-                    Invoice: <span class="text-white font-mono">{{ $transaction->invoice_code }}</span></p>
+                <h2 class="text-3xl font-bold text-white mb-2">Bukti Pembayaran Terkirim!</h2>
+                <p class="text-slate-400 mb-2 max-w-md">Terima kasih! Bukti pembayaran Anda sedang diverifikasi oleh
+                    tim kami.</p>
+                <p class="text-slate-500 text-sm mb-8 max-w-md">Proses verifikasi biasanya memakan waktu 1x24 jam.
+                    Harap cek email dan halaman riwayat transaksi Anda secara berkala.</p>
 
                 <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl w-full max-w-md mb-8">
                     <div class="flex justify-between mb-2">
-                        <span class="text-slate-400">Nama Lengkap</span>
+                        <span class="text-slate-400">Invoice</span>
+                        <span class="text-white font-mono font-semibold">{{ $transaction->invoice_code }}</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-slate-400">Nama</span>
                         <span class="text-white font-semibold">{{ $transaction->buyer_name }}</span>
                     </div>
                     <div class="flex justify-between mb-2">
-                        <span class="text-slate-400">Total Tiket</span>
+                        <span class="text-slate-400">Jumlah Tiket</span>
                         <span class="text-white font-semibold">{{ $transaction->transactionItems->sum('quantity') }}
                             Tiket</span>
                     </div>
                     <div class="flex justify-between pt-4 border-t border-slate-700 mt-2">
-                        <span class="text-slate-300 font-bold">Total Dibayar</span>
-                        <span class="text-green-400 font-bold">Rp
+                        <span class="text-slate-300 font-bold">Total</span>
+                        <span class="text-[#ff5b1d] font-bold">Rp
                             {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
                     </div>
                 </div>
 
-                <a href="{{ route('ticket.download', $transaction->invoice_code) }}" target="_blank"
-                    class="px-8 py-4 bg-gradient-to-r from-[#ff5b1d] to-[#ff8c3a] text-white rounded-xl font-bold shadow-[0_0_20px_rgba(255,91,29,0.4)] hover:shadow-[0_0_30px_rgba(255,91,29,0.6)] transition-all transform hover:-translate-y-1 flex items-center gap-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    DOWNLOAD E-TICKET (PDF)
+                <a href="{{ route('user.transactions-history') }}"
+                    class="px-8 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition flex items-center gap-3">
+                    <i class="fas fa-history"></i> Lihat Riwayat Transaksi
                 </a>
             </div>
         @endif
@@ -275,7 +472,6 @@
                 x-on:scroll="if($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 10) scrolled = true">
 
                 <p class="font-bold text-white">A. KETENTUAN UMUM & VALIDITAS TIKET</p>
-
                 <p><span class="font-semibold">1.</span> Tiket hanya berlaku untuk tanggal, waktu, dan acara yang
                     tertera pada tiket.</p>
                 <p><span class="font-semibold">2.</span> Satu (1) tiket berlaku untuk satu (1) orang.</p>
@@ -287,62 +483,47 @@
                 <p class="ml-4"><span class="font-semibold">a.</span> Menolak tiket yang rusak, tidak terbaca,
                     terduplikasi, atau diperoleh secara tidak sah.</p>
                 <p class="ml-4"><span class="font-semibold">b.</span> Memproses atau mengajukan hukum, baik perdata
-                    atau kriminal kepada pengunjung yang mendapatkan tiket dengan ilegal, termasuk memalsukan dan
-                    menggandakan tiket yang sah atau mendapatkan tiket dengan cara yang tidak sesuai prosedur.</p>
+                    atau kriminal kepada pengunjung yang mendapatkan tiket dengan ilegal.</p>
 
                 <p class="font-bold text-white mt-4">B. KEBIJAKAN PEMBELIAN & PENGEMBALIAN DANA</p>
-
                 <p><span class="font-semibold">1.</span> Seluruh pembelian tiket bersifat final dan tidak dapat
                     dibatalkan.</p>
                 <p><span class="font-semibold">2.</span> Tiket yang telah dibeli tidak dapat dikembalikan dan tidak
                     dapat ditukar (<i>non-refundable</i> & <i>non-exchangeable</i>), kecuali apabila acara dibatalkan
                     secara resmi oleh panitia.</p>
                 <p><span class="font-semibold">3.</span> Panitia tidak bertanggung jawab atas kegagalan proses
-                    pembelian tiket yang disebabkan oleh kesalahan pengisian data oleh pembeli maupun gangguan jaringan
-                    dan perangkat yang berada di luar kendali panitia.</p>
+                    pembelian tiket yang disebabkan oleh kesalahan pengisian data oleh pembeli maupun gangguan jaringan.
+                </p>
                 <p><span class="font-semibold">4.</span> Apabila acara dibatalkan oleh panitia, mekanisme pengembalian
                     dana akan diinformasikan melalui kanal komunikasi resmi PIFF 2026.</p>
                 <p><span class="font-semibold">5.</span> Apabila acara mengalami perubahan jadwal (<i>reschedule</i>),
                     tiket tetap berlaku untuk tanggal pengganti.</p>
 
                 <p class="font-bold text-white mt-4">C. AKSES & REGISTRASI MASUK</p>
-
                 <p><span class="font-semibold">1.</span> Pengunjung wajib menunjukkan tiket dalam bentuk digital
                     (<i>e-ticket</i>) saat proses registrasi.</p>
                 <p><span class="font-semibold">2.</span> Tiket digital (<i>e-ticket</i>) akan ditukarkan dengan tiket
                     gelang yang wajib digunakan selama berada di area acara.</p>
                 <p><span class="font-semibold">3.</span> Pengunjung yang tidak dapat menunjukkan tiket gelang tidak
                     diperkenankan memasuki area acara.</p>
-                <p><span class="font-semibold">4.</span> Panitia berhak melakukan pemeriksaan ulang terhadap tiket dan
-                    identitas apabila diperlukan.</p>
 
                 <p class="font-bold text-white mt-4">D. KETENTUAN SELAMA ACARA</p>
-
                 <p><span class="font-semibold">1.</span> Pengunjung wajib menjaga ketertiban dan mematuhi seluruh
                     peraturan yang berlaku selama acara berlangsung.</p>
-                <p><span class="font-semibold">2.</span> Dilarang membawa barang terlarang sesuai ketentuan panitia
-                    (misalnya senjata tajam, narkotika, minuman beralkohol, dan barang berbahaya lainnya).</p>
+                <p><span class="font-semibold">2.</span> Dilarang membawa barang terlarang sesuai ketentuan panitia.
+                </p>
                 <p><span class="font-semibold">3.</span> Panitia berhak mengeluarkan pengunjung dari area acara apabila
                     melanggar peraturan tanpa kewajiban pengembalian dana.</p>
-                <p><span class="font-semibold">4.</span> Tamu bertanggung jawab sepenuhnya atas keamanan semua
-                    barang-barang pribadi. Kehilangan barang pribadi bukan tanggung jawab panitia.</p>
                 <p><span class="font-semibold">5.</span> Dengan membeli tiket, pengunjung memberikan persetujuan untuk
                     didokumentasikan (foto/video) dan digunakan untuk kepentingan publikasi acara.</p>
 
                 <p class="font-bold text-white mt-4">E. KEJADIAN KAHAR (FORCE MAJEURE)</p>
-
                 <p><span class="font-semibold">1.</span> Dalam hal terjadi kejadian kahar (<i>Force Majeure</i>),
-                    Panitia berhak untuk membatalkan, menunda, mengubah jadwal, memindahkan lokasi, atau menyesuaikan
-                    format acara tanpa kewajiban memberikan kompensasi tambahan di luar kebijakan yang ditentukan
-                    Panitia.</p>
-                <p><span class="font-semibold">2.</span> Panitia tidak bertanggung jawab atas kerugian tidak langsung
-                    yang mungkin timbul akibat perubahan atau pembatalan acara yang disebabkan oleh <i>Force
-                        Majeure</i>.</p>
-                <p><span class="font-semibold">3.</span> Informasi resmi terkait perubahan akibat <i>Force Majeure</i>
+                    Panitia berhak untuk membatalkan, menunda, atau menyesuaikan format acara.</p>
+                <p><span class="font-semibold">2.</span> Informasi resmi terkait perubahan akibat <i>Force Majeure</i>
                     akan diumumkan melalui kanal komunikasi resmi PIFF 2026.</p>
 
                 <p class="text-slate-500 text-xs mt-4">Scroll ke bawah untuk menyetujui.</p>
-
             </div>
 
             <div class="px-6 py-4 border-t border-slate-700">
@@ -364,30 +545,38 @@
 
 </div>
 
-@script
-    <script>
-        $wire.on('trigger-midtrans', (event) => {
-            let token = event?.snapToken ?? event?.[0]?.snapToken ?? event?.[0];
+<script>
+    function copyText(text, btn) {
+        // Fallback method yang reliable di semua browser
+        const el = document.createElement('textarea');
+        el.value = text;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.focus();
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
 
-            if (!token) {
-                console.error('Snap token tidak ditemukan', event);
-                return;
+        // Visual feedback pada tombol
+        const icon = btn.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-check';
+        btn.classList.add('text-green-400');
+        setTimeout(() => {
+            icon.className = originalClass;
+            btn.classList.remove('text-green-400');
+        }, 1500);
+
+        Toastify({
+            text: 'Disalin!',
+            duration: 1500,
+            gravity: 'top',
+            position: 'right',
+            style: {
+                background: '#10b981',
+                color: '#fff'
             }
-
-            window.snap.pay(token, {
-                onSuccess: function(result) {
-                    $wire.paymentSuccess();
-                },
-                onPending: function(result) {
-                    alert("Menunggu pembayaran Anda!");
-                },
-                onError: function(result) {
-                    alert("Pembayaran gagal!");
-                },
-                onClose: function() {
-                    console.log('Popup ditutup tanpa menyelesaikan pembayaran');
-                }
-            });
-        });
-    </script>
-@endscript
+        }).showToast();
+    }
+</script>
