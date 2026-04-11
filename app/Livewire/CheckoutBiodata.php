@@ -291,10 +291,10 @@ class CheckoutBiodata extends Component
             Mail::to($user->email)->send(new PaymentPendingUserMail($this->transaction));
         }
 
-        // Kirim email ke semua admin
+        // Kirim email ke semua admin (delay 5 detik agar tidak rate limit)
         $adminEmails = \App\Models\Admin::pluck('email')->filter()->toArray();
         if (!empty($adminEmails)) {
-            Mail::to($adminEmails)->send(new PaymentPendingAdminMail($this->transaction));
+            Mail::to($adminEmails)->later(now()->addSeconds(5), new PaymentPendingAdminMail($this->transaction));
         }
 
         $this->currentStep = 3;
