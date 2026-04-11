@@ -177,7 +177,7 @@
             const input = document.getElementById('qty-' + id);
             const display = document.getElementById('qty-display-' + id);
             let val = parseInt(input.value) + delta;
-            val = Math.max(0, Math.min(5, val));
+            val = Math.max(0, Math.min(10, val));
             input.value = val;
             display.textContent = val;
         }
