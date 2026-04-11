@@ -142,6 +142,10 @@
                             {{-- Footer --}}
                             <div class="flex items-center justify-between px-6 py-4 border-t border-white/10">
                                 <div>
+                                    @if ($transaction->voucher)
+                                        <p class="text-gray-500 text-xs">Voucher: <span class="text-green-400 font-semibold">{{ $transaction->voucher->code }}</span></p>
+                                        <p class="text-gray-500 text-xs">Diskon: <span class="text-green-400 font-semibold">- Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</span></p>
+                                    @endif
                                     <p class="text-gray-400 text-xs">Total</p>
                                     <p class="text-yellow-400 font-bold text-lg">Rp
                                         {{ number_format($transaction->total_amount, 0, ',', '.') }}</p>

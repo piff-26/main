@@ -35,6 +35,23 @@
         </tbody>
     </table>
 
+    <table class="w-100" style="margin-bottom: 10px; text-align: right;">
+        <tr>
+            <td style="color: #555;">Subtotal</td>
+            <td style="width: 180px;">Rp {{ number_format($transaction->total_amount + $transaction->discount_amount, 0, ',', '.') }}</td>
+        </tr>
+        @if ($transaction->voucher)
+        <tr>
+            <td style="color: #555;">Voucher ({{ $transaction->voucher->code }})</td>
+            <td style="color: #16a34a;">- Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</td>
+        </tr>
+        @endif
+        <tr style="font-weight: bold; font-size: 16px;">
+            <td>Total</td>
+            <td>Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
+        </tr>
+    </table>
+
     <h3 style="background: #f0f0f0; padding: 10px;">Syarat & Ketentuan (Terms & Conditions)</h3>
     <p style="font-weight: bold; margin-bottom: 6px;">A. KETENTUAN UMUM & VALIDITAS TIKET</p>
     <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
