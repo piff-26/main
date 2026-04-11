@@ -19,7 +19,7 @@ class TransactionController extends Controller
     {
         $request->validate([
             'items' => 'required|array',
-            'items.*' => 'integer|min:0|max:5',
+            'items.*' => 'integer|min:0|max:10',
         ]);
 
         // Filter hanya item yang qty > 0
