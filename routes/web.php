@@ -47,6 +47,7 @@ Route::prefix('admin')->group(function(){
         Route::delete('/transaction/{invoice_code}',[AdminController::class, 'cancelTransaction'])->name('admin.transaction.cancel');
         Route::post('/transaction/{invoice_code}/validate',[AdminController::class, 'validatePayment'])->name('admin.transaction.validate');
         Route::post('/transaction/{invoice_code}/reject',[AdminController::class, 'rejectPayment'])->name('admin.transaction.reject');
+        Route::get('/log', [AdminController::class, 'systemLog'])->name('admin.log');
         Route::get('/monitor',[AdminController::class,'monitor'])->name('admin.monitor');
         Route::get('/insight',[AdminController::class,'insight'])->name('admin.insight');
         Route::get('/ticketscan',[AdminController::class,'ticketScan'])->name('admin.ticketScan');
