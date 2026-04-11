@@ -43,10 +43,13 @@ Route::prefix('admin')->group(function(){
         Route::delete('/category/{id}',[AdminController::class, 'deleteCategory'])->name('admin.category.delete');
         
         Route::delete('/transaction/{invoice_code}',[AdminController::class, 'cancelTransaction'])->name('admin.transaction.cancel');
+        Route::post('/transaction/{invoice_code}/validate',[AdminController::class, 'validatePayment'])->name('admin.transaction.validate');
+        Route::post('/transaction/{invoice_code}/reject',[AdminController::class, 'rejectPayment'])->name('admin.transaction.reject');
         Route::get('/monitor',[AdminController::class,'monitor'])->name('admin.monitor');
         Route::get('/insight',[AdminController::class,'insight'])->name('admin.insight');
         Route::get('/ticketscan',[AdminController::class,'ticketScan'])->name('admin.ticketScan');
         Route::get('/checkin/{ticket_code}', [TicketController::class, 'processCheckIn'])->name('admin.ticket.checkin');
+        Route::get('/ticket/lookup/{ticket_code}', [TicketController::class, 'lookupTicket'])->name('admin.ticket.lookup');
 
         Route::get('/managevouchers', [AdminController::class, 'listVouchers'])->name('admin.manageVouchers');
         // Route baru untuk handle Create dan Delete Voucher
@@ -77,6 +80,8 @@ Route::middleware('auth')->group(function () {
         
     });
 });
+
+Route::get('/admin/ticket/lookup/{ticket_code}', [TicketController::class, 'lookupTicket'])->name('admin.ticket.lookup');
 
 Route::get('/test', function () {
     return view('user.test');
