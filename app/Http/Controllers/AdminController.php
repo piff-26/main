@@ -18,6 +18,7 @@ use App\Mail\PaymentApprovedMail;
 use App\Mail\PaymentRejectedMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use App\Models\SystemLog;
 
 class AdminController extends BaseController
 {
@@ -429,6 +430,7 @@ class AdminController extends BaseController
                         $invRandom     = substr($transaction->invoice_code, 4);
                         $newTicketCode = "INV-{$categorySlug}-{$invRandom}-" . strtoupper(Str::random(3));
                         $ticket->update(['ticket_code' => $newTicketCode]);
+                        SystemLog::success('ticket', "Tiket digenerate: {$newTicketCode}", $invoice_code, ['holder' => $holderNames[$i] ?? '-', 'category' => $item->ticketCategory->name]);
                     }
                 }
             }
@@ -437,10 +439,12 @@ class AdminController extends BaseController
             $transaction->refresh()->load('tickets.ticketCategory.event', 'transactionItems.ticketCategory');
             if ($transaction->user && $transaction->user->email) {
                 Mail::to($transaction->user->email)->send(new PaymentApprovedMail($transaction));
+                SystemLog::success('email', "Email approval dikirim ke {$transaction->user->email}", $invoice_code);
             }
 
             return response()->json(['success' => true, 'message' => 'Pembayaran berhasil divalidasi.']);
         } catch (\Exception $e) {
+            SystemLog::fail('ticket', "Gagal validasi payment: {$e->getMessage()}", $invoice_code);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
@@ -469,10 +473,12 @@ class AdminController extends BaseController
             // Kirim email ke user
             if ($transaction->user && $transaction->user->email) {
                 Mail::to($transaction->user->email)->send(new PaymentRejectedMail($transaction));
+                SystemLog::success('email', "Email penolakan dikirim ke {$transaction->user->email}", $invoice_code);
             }
 
             return response()->json(['success' => true, 'message' => 'Pembayaran berhasil ditolak.']);
         } catch (\Exception $e) {
+            SystemLog::fail('email', "Gagal kirim email penolakan: {$e->getMessage()}", $invoice_code);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
@@ -505,6 +511,15 @@ class AdminController extends BaseController
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
+    }
+
+    public function systemLog(Request $request)
+    {
+        $query = SystemLog::latest();
+        if ($request->type)   $query->where('type', $request->type);
+        if ($request->status) $query->where('status', $request->status);
+        $logs = $query->paginate(50)->withQueryString();
+        return view('admin.system-log', compact('logs'));
     }
 
     // --- MANAGE VOUCHERS ---

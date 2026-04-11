@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Transaction;
+use App\Models\SystemLog;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Events\TicketCheckedIn;
 
@@ -47,7 +48,6 @@ class TicketController extends Controller
             return response()->json(['message' => 'Tiket SUDAH DIGUNAKAN sebelumnya!'], 400);
         }
 
-        // Lakukan check-in
         $ticket->update([
             'is_checked_in' => true,
             'checked_in_at' => now(),
@@ -56,6 +56,13 @@ class TicketController extends Controller
 
         $ticket->load(['ticketCategory.event', 'checker', 'transaction']);
         $totalCheckedIn = Ticket::where('is_checked_in', true)->where('is_canceled', false)->count();
+
+        SystemLog::success('checkin', "Check-in berhasil: {$ticket->ticket_code} atas nama {$ticket->holder_name}", $ticket->ticket_code, [
+            'holder'   => $ticket->holder_name ?? $ticket->transaction->buyer_name,
+            'category' => $ticket->ticketCategory->name,
+            'event'    => $ticket->ticketCategory->event->name ?? '-',
+            'by'       => $ticket->checker?->name ?? '-',
+        ]);
 
         broadcast(new TicketCheckedIn(
             ticket_code:      $ticket->ticket_code,

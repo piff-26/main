@@ -15,6 +15,7 @@ use App\Mail\PaymentPendingUserMail;
 use App\Mail\PaymentPendingAdminMail;
 use App\Enums\SourceInfoEnum;
 use App\Enums\TransactionStatusEnum;
+use App\Models\SystemLog;
 
 class CheckoutBiodata extends Component
 {
@@ -289,12 +290,14 @@ class CheckoutBiodata extends Component
         $user = User::find($this->transaction->user_id);
         if ($user && $user->email) {
             Mail::to($user->email)->send(new PaymentPendingUserMail($this->transaction));
+            SystemLog::success('email', "Email pending dikirim ke {$user->email}", $this->transaction->invoice_code);
         }
 
         // Kirim email ke semua admin (delay 5 detik agar tidak rate limit)
         $adminEmails = \App\Models\Admin::pluck('email')->filter()->toArray();
         if (!empty($adminEmails)) {
             Mail::to($adminEmails)->later(now()->addSeconds(5), new PaymentPendingAdminMail($this->transaction));
+            SystemLog::success('email', 'Email notifikasi admin dijadwalkan', $this->transaction->invoice_code);
         }
 
         $this->currentStep = 3;
