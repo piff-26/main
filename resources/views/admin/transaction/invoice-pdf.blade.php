@@ -313,10 +313,6 @@
             <div class="info-card">
                 <h3>Payment Details</h3>
                 <div class="info-row">
-                    <span class="info-label">Method</span>
-                    <span class="info-value">{{ $transaction->payment_method }}</span>
-                </div>
-                <div class="info-row">
                     <span class="info-label">Status</span>
                     <span class="info-value">{{ ucfirst($transaction->transaction_status) }}</span>
                 </div>

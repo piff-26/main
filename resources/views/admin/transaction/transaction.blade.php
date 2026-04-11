@@ -30,7 +30,7 @@
                     @endforeach
                 </select>
             </div>
-            <div>
+            {{-- <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Method</label>
                 <select id="filterPayment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                     <option value="">All Methods</option>
@@ -38,7 +38,7 @@
                         <option value="{{ $method }}">{{ $method }}</option>
                     @endforeach
                 </select>
-            </div>
+            </div> --}}
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">City</label>
                 <select id="filterCity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
@@ -72,6 +72,14 @@
         </div>
     </div>
 
+    {{-- Loading Overlay --}}
+    <div id="loadingOverlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center" style="background:rgba(0,0,0,0.45);backdrop-filter:blur(2px);">
+        <div class="bg-white rounded-2xl px-10 py-8 flex flex-col items-center shadow-2xl">
+            <div class="w-14 h-14 rounded-full border-4 border-gray-200 border-t-blue-500 animate-spin mb-4"></div>
+            <p id="loadingText" class="text-gray-700 font-semibold text-base">Memproses...</p>
+        </div>
+    </div>
+
     {{-- Table --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
@@ -85,11 +93,11 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">City</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Voucher</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid At</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Manage</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200"></tbody>
@@ -101,9 +109,19 @@
 @section('script')
 <script>
 const STATUS_PAID = '{{ \App\Enums\TransactionStatusEnum::PAID->value }}';
+const STATUS_PENDING = '{{ \App\Enums\TransactionStatusEnum::PENDING->value }}';
+const STATUS_DRAFT = '{{ \App\Enums\TransactionStatusEnum::DRAFT->value }}';
 const STATUS_FAILED = '{{ \App\Enums\TransactionStatusEnum::FAILED->value }}';
 const STATUS_EXPIRED = '{{ \App\Enums\TransactionStatusEnum::EXPIRED->value }}';
 const transactionsData = {!! json_encode($transactions) !!};
+
+function showLoading(text) {
+    document.getElementById('loadingText').innerText = text || 'Memproses...';
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+}
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+}
 
 $(document).ready(function() {
     // Custom sorting for currency
@@ -121,15 +139,15 @@ $(document).ready(function() {
             { data: 'city' },
             { data: 'total_amount', render: (data) => `<span class="font-semibold">Rp ${data.toLocaleString('id-ID')}</span>` },
             { data: 'voucher_code', render: (data) => data === '-' ? '<span class="text-gray-400">-</span>' : `<span class="px-2 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-800">${data}</span>` },
-            { data: 'payment_method' },
             { 
                 data: 'transaction_status', 
                 render: (data) => {
                     const badges = {
-                        paid: '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Paid</span>',
-                        draft: '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Draft</span>',
+                        paid:    '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Paid</span>',
+                        pending: '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Pending Verification</span>',
+                        draft:   '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Draft</span>',
                         expired: '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Expired</span>',
-                        failed: '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Failed</span>'
+                        failed:  '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Failed</span>'
                     };
                     return badges[data] || data;
                 }
@@ -140,30 +158,105 @@ $(document).ready(function() {
                 data: null,
                 orderable: false,
                 render: (data) => `
-                    <a href="/admin/transaction/detail/${data.invoice_code}" class="text-blue-600 hover:text-blue-800 mr-2" title="View Details">
-                        <i class="fas fa-eye"></i>
+                    <a href="/admin/transaction/detail/${data.invoice_code}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition font-semibold" title="View Details">
+                        <i class="fas fa-eye"></i> View
                     </a>
-                    <button class="text-green-600 hover:text-green-800 mr-2 btn-export-pdf" data-invoice="${data.invoice_code}" title="Export PDF">
-                        <i class="fas fa-file-pdf"></i>
+                    <button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition font-semibold btn-export-pdf" data-invoice="${data.invoice_code}" title="Export PDF">
+                        <i class="fas fa-file-pdf"></i> PDF
                     </button>
-                    ${data.transaction_status === STATUS_PAID ? `
-                        <button class="text-red-600 hover:text-red-800 btn-refund" data-invoice="${data.invoice_code}" title="Refund">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                    ` : data.transaction_status !== STATUS_FAILED && data.transaction_status !== STATUS_EXPIRED ? `
-                        <button class="text-red-600 hover:text-red-800 btn-cancel" data-invoice="${data.invoice_code}" title="Cancel">
-                            <i class="fas fa-ban"></i>
-                        </button>
-                    ` : ''}
                 `
+            },
+            {
+                data: null,
+                orderable: false,
+                render: (data) => {
+                    if (data.transaction_status === STATUS_PENDING) {
+                        return `
+                            <button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-500 text-white hover:bg-green-600 rounded-lg transition font-semibold btn-quick-validate" data-invoice="${data.invoice_code}">
+                                <i class="fas fa-check"></i> Validate
+                            </button>
+                            <button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-500 text-white hover:bg-red-600 rounded-lg transition font-semibold btn-quick-reject" data-invoice="${data.invoice_code}">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        `;
+                    } else if (data.transaction_status === STATUS_PAID) {
+                        return `
+                            <button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-yellow-500 text-white hover:bg-yellow-600 rounded-lg transition font-semibold btn-refund" data-invoice="${data.invoice_code}">
+                                <i class="fas fa-undo"></i> Refund
+                            </button>
+                        `;
+                    } else if (data.transaction_status === STATUS_DRAFT) {
+                        return `
+                            <button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-red-500 text-white hover:bg-red-600 rounded-lg transition font-semibold btn-cancel" data-invoice="${data.invoice_code}">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+                        `;
+                    }
+                    return '<span class="text-gray-400 text-xs">-</span>';
+                }
             }
         ],
         columnDefs: [
             { targets: 5, type: 'currency' }
         ],
         pageLength: 10,
-        order: [[9, 'desc']],
+        order: [[8, 'desc']],
         drawCallback: function() {
+            $('.btn-quick-validate').off('click').on('click', function() {
+                const invoice = $(this).data('invoice');
+                Swal.fire({
+                    title: 'Validasi Pembayaran?',
+                    text: `Invoice ${invoice} akan disetujui dan tiket digenerate.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-check mr-1"></i>Ya, Validasi',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/transaction/${invoice}/validate`,
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                            beforeSend: () => showLoading('Memvalidasi pembayaran...'),
+                            success: () => { hideLoading(); Swal.fire({ icon: 'success', title: 'Divalidasi!', timer: 1500, showConfirmButton: false }).then(() => location.reload()); },
+                            error: (xhr) => { hideLoading(); Swal.fire({ icon: 'error', title: 'Gagal!', text: xhr.responseJSON?.message, confirmButtonColor: '#ef4444' }); }
+                        });
+                    }
+                });
+            });
+
+            $('.btn-quick-reject').off('click').on('click', function() {
+                const invoice = $(this).data('invoice');
+                Swal.fire({
+                    title: 'Tolak Pembayaran?',
+                    html: `<textarea id="quickRejectReason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2" placeholder="Alasan penolakan (wajib)"></textarea>`,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-times mr-1"></i>Tolak',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    preConfirm: () => {
+                        const reason = $('#quickRejectReason').val();
+                        if (!reason.trim()) { Swal.showValidationMessage('Alasan wajib diisi.'); return false; }
+                        return { reason };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/admin/transaction/${invoice}/reject`,
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                            data: { reason: result.value.reason },
+                            beforeSend: () => showLoading('Menolak pembayaran...'),
+                            success: () => { hideLoading(); Swal.fire({ icon: 'success', title: 'Ditolak!', timer: 1500, showConfirmButton: false }).then(() => location.reload()); },
+                            error: (xhr) => { hideLoading(); Swal.fire({ icon: 'error', title: 'Gagal!', text: xhr.responseJSON?.message, confirmButtonColor: '#ef4444' }); }
+                        });
+                    }
+                });
+            });
+
             $('.btn-export-pdf').off('click').on('click', function() {
                 const invoice = $(this).data('invoice');
                 window.open(`/admin/transaction/${invoice}/export-pdf`, '_blank');
@@ -199,7 +292,6 @@ $(document).ready(function() {
                                 <p><strong>Buyer:</strong> ${transaction.buyer_name}</p>
                                 <p><strong>Event:</strong> ${transaction.event_name}</p>
                                 <p><strong>Amount:</strong> Rp ${transaction.total_amount.toLocaleString('id-ID')}</p>
-                                <p><strong>Payment:</strong> ${transaction.payment_method}</p>
                             </div>
                         </div>
                     ` : ''}
@@ -230,15 +322,13 @@ $(document).ready(function() {
                 $.ajax({
                     url: `/admin/transaction/${invoiceCode}`,
                     method: 'DELETE',
+                    beforeSend: () => showLoading('Memproses refund...'),
                     success: function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Refund Processed!',
-                            confirmButtonColor: '#27b4f7',
-                            timer: 2000
-                        }).then(() => location.reload());
+                        hideLoading();
+                        Swal.fire({ icon: 'success', title: 'Refund Processed!', confirmButtonColor: '#27b4f7', timer: 2000 }).then(() => location.reload());
                     },
                     error: function(xhr) {
+                        hideLoading();
                         Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to process refund', confirmButtonColor: '#ef4444' });
                     }
                 });
@@ -303,15 +393,13 @@ $(document).ready(function() {
                 $.ajax({
                     url: `/admin/transaction/${invoiceCode}`,
                     method: 'DELETE',
+                    beforeSend: () => showLoading('Membatalkan transaksi...'),
                     success: function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Transaction Cancelled!',
-                            confirmButtonColor: '#27b4f7',
-                            timer: 2000
-                        }).then(() => location.reload());
+                        hideLoading();
+                        Swal.fire({ icon: 'success', title: 'Transaction Cancelled!', confirmButtonColor: '#27b4f7', timer: 2000 }).then(() => location.reload());
                     },
                     error: function(xhr) {
+                        hideLoading();
                         Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to cancel transaction', confirmButtonColor: '#ef4444' });
                     }
                 });
@@ -344,7 +432,6 @@ $(document).ready(function() {
                 row.buyer_phone,
                 row.city,
                 row.total_amount,
-                row.payment_method,
                 row.transaction_status,
                 row.created_at
             ].map(field => `"${field}"`).join(','))
@@ -377,13 +464,12 @@ $(document).ready(function() {
         table.columns().search('');
         
         if (event) table.column(1).search(event);
-        if (status) table.column(8).search(status);
-        if (payment) table.column(7).search(payment);
+        if (status) table.column(7).search(status);
         if (city) table.column(4).search(city);
         
         // Date range filter
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-            const createdAt = data[9]; // Created At column
+            const createdAt = data[8]; // Created At column
             if (!dateStart && !dateEnd) return true;
             
             const rowDate = new Date(createdAt);
