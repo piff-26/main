@@ -43,6 +43,7 @@ class AuthController extends BaseController
 
             if ($admin) {
                 session()->put('role', 'admin');
+                session()->put('admin_id', $admin->id);
                 session()->put('email', $email);
                 session()->put('nrp', $nrp);
                 session()->put('name', $name);
