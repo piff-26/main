@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class Ticket extends Model
 {
     use HasFactory, HasUuids;
-    protected $fillable = ['transaction_id', 'ticket_category_id', 'ticket_code', 'is_checked_in', 'checked_in_at', 'checked_in_by', 'is_canceled', 'canceled_at'];
+    protected $fillable = ['transaction_id', 'ticket_category_id', 'ticket_code', 'holder_name', 'is_checked_in', 'checked_in_at', 'checked_in_by', 'is_canceled', 'canceled_at'];
     protected $casts = ['checked_in_at' => 'datetime', 'canceled_at' => 'datetime', 'is_checked_in' => 'boolean', 'is_canceled' => 'boolean'];
 
     public function transaction() { return $this->belongsTo(Transaction::class); }
