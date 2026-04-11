@@ -131,7 +131,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Voucher Code</label>
-                    <input type="text" name="code" id="input_code" required class="w-full border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" name="code" id="input_code" required class="w-full border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none uppercase">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -143,18 +143,36 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Value</label>
-                        <input type="number" name="discount_value" id="input_value" required class="w-full border rounded-xl px-4 py-2.5">
+                        <input type="number" name="discount_value" id="input_value" required min="0" class="w-full border rounded-xl px-4 py-2.5">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Max Uses</label>
-                        <input type="number" name="max_uses" id="input_max" required class="w-full border rounded-xl px-4 py-2.5">
+                        <input type="number" name="max_uses" id="input_max" required min="1" class="w-full border rounded-xl px-4 py-2.5">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Expiry</label>
                         <input type="date" name="expired_at" id="input_expiry" required class="w-full border rounded-xl px-4 py-2.5">
                     </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Event <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
+                    <select name="event_id" id="input_event" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white" onchange="filterCategories()">
+                        <option value="">— Global (semua event) —</option>
+                        @foreach($events as $event)
+                            <option value="{{ $event->id }}">{{ $event->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Ticket Category <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
+                    <select name="ticket_category_id" id="input_category" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white">
+                        <option value="">— Semua kategori —</option>
+                        @foreach($ticketCategories as $cat)
+                            <option value="{{ $cat->id }}" data-event="{{ $cat->event_id }}">{{ $cat->event->name ?? '' }} — {{ $cat->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
             <div class="mt-8 flex gap-3">
@@ -176,6 +194,7 @@
         document.getElementById('voucherForm').action = "{{ route('admin.voucher.store') }}";
         document.getElementById('methodField').innerHTML = "";
         document.getElementById('voucherForm').reset();
+        filterCategories();
         openModal('modalCreate');
     }
 
@@ -183,16 +202,36 @@
         document.getElementById('modalTitle').innerText = "Edit Voucher";
         document.getElementById('voucherForm').action = `/admin/managevouchers/${data.id}`;
         document.getElementById('methodField').innerHTML = '@method("PUT")';
-        
-        document.getElementById('input_code').value = data.code;
-        document.getElementById('input_type').value = data.discount_type;
-        document.getElementById('input_value').value = (data.discount_type === 'nominal') ? data.discount_nominal : data.discount_percentage;
-        document.getElementById('input_max').value = data.max_uses;
-        
-        if(data.expired_at) {
-            document.getElementById('input_expiry').value = data.expired_at.split(' ')[0];
+
+        document.getElementById('input_code').value    = data.code;
+        document.getElementById('input_type').value    = data.discount_type;
+        document.getElementById('input_value').value   = data.discount_type === 'nominal' ? data.discount_nominal : data.discount_percentage;
+        document.getElementById('input_max').value     = data.max_uses;
+        document.getElementById('input_event').value   = data.event_id ?? '';
+        filterCategories();
+        document.getElementById('input_category').value = data.ticket_category_id ?? '';
+
+        if (data.expired_at) {
+            document.getElementById('input_expiry').value = data.expired_at.split('T')[0].split(' ')[0];
         }
         openModal('modalCreate');
+    }
+
+    function filterCategories() {
+        const eventId = document.getElementById('input_event').value;
+        const options = document.getElementById('input_category').querySelectorAll('option');
+        options.forEach(opt => {
+            if (!opt.value || !eventId || opt.dataset.event === eventId) {
+                opt.style.display = '';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+        // reset category if current selection doesn't match event
+        const selected = document.getElementById('input_category');
+        if (selected.value && eventId && selected.options[selected.selectedIndex]?.dataset.event !== eventId) {
+            selected.value = '';
+        }
     }
 </script>
 @endsection
