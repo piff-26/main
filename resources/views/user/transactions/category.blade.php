@@ -179,6 +179,8 @@
                                 @endif
                             </div>
                         </form>
+                        <p class="text-gray-400 text-sm mt-3 text-center">For buy large quantity ticket, please contact us.</p>
+                        </p>
                     </div>
 
                 </div>
