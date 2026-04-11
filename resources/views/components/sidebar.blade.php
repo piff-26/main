@@ -1,16 +1,22 @@
 @php
     $currentRoute = request()->route()?->getName();
-    $navItems = [
-        ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'fa-gauge-high'],
-        ['route' => 'admin.transaction', 'label' => 'Transactions', 'icon' => 'fa-receipt'],
-        ['route' => 'admin.event', 'label' => 'Events', 'icon' => 'fa-calendar-days'],
-        ['route' => 'admin.category', 'label' => 'Ticket Category', 'icon' => 'fa-tags'],
-        ['route' => 'admin.monitor', 'label' => 'Monitor', 'icon' => 'fa-tower-broadcast'],
-        ['route' => 'admin.insight', 'label' => 'Insight', 'icon' => 'fa-chart-line'],
-        ['route' => 'admin.ticketScan', 'label' => 'Ticket Scan', 'icon' => 'fa-qrcode'],
-        ['route' => 'admin.manageVouchers', 'label' => 'Vouchers', 'icon' => 'fa-ticket'],
-        ['route' => 'admin.log', 'label' => 'System Log', 'icon' => 'fa-terminal'],
+    $adminDivision = \App\Models\Admin::with('division')->find(session('admin_id'))?->division?->slug;
+
+    $allItems = [
+        ['route' => 'admin.dashboard',      'label' => 'Dashboard',       'icon' => 'fa-gauge-high',        'access' => null],
+        ['route' => 'admin.transaction',    'label' => 'Transactions',    'icon' => 'fa-receipt',           'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.event',          'label' => 'Events',          'icon' => 'fa-calendar-days',     'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.category',       'label' => 'Ticket Category', 'icon' => 'fa-tags',              'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.monitor',        'label' => 'Monitor',         'icon' => 'fa-tower-broadcast',   'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.insight',        'label' => 'Insight',         'icon' => 'fa-chart-line',        'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.ticketScan',     'label' => 'Ticket Scan',     'icon' => 'fa-qrcode',            'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.manageVouchers', 'label' => 'Vouchers',        'icon' => 'fa-ticket',            'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.log',            'label' => 'System Log',      'icon' => 'fa-terminal',          'access' => ['it','bph','sc']],
     ];
+
+    $navItems = array_filter($allItems, function($item) use ($adminDivision) {
+        return $item['access'] === null || in_array($adminDivision, $item['access']);
+    });
 @endphp
 
 {{-- Mobile overlay --}}
