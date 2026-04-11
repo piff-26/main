@@ -90,22 +90,22 @@
 
                             {{-- Info Event --}}
                             <div class="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6 space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-map-marker-alt text-yellow-400 w-4"></i>
-                                    <span class="text-gray-400 text-sm w-20">Location</span>
-                                    <span class="text-white text-sm font-semibold">{{ $event->location }}</span>
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-map-marker-alt text-yellow-400 w-4 mt-0.5"></i>
+                                    <span class="text-gray-400 text-sm w-20 shrink-0">Location</span>
+                                    <span class="text-white text-sm font-semibold flex-1">{{ $event->location }}</span>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-calendar text-yellow-400 w-4"></i>
-                                    <span class="text-gray-400 text-sm w-20">Date</span>
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-calendar text-yellow-400 w-4 mt-0.5"></i>
+                                    <span class="text-gray-400 text-sm w-20 shrink-0">Date</span>
                                     <span
-                                        class="text-white text-sm font-semibold">{{ $event->event_date->format('d M Y') }}</span>
+                                        class="text-white text-sm font-semibold flex-1">{{ $event->event_date->format('d M Y') }}</span>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-clock text-yellow-400 w-4"></i>
-                                    <span class="text-gray-400 text-sm w-20">Time</span>
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-clock text-yellow-400 w-4 mt-0.5"></i>
+                                    <span class="text-gray-400 text-sm w-20 shrink-0">Time</span>
                                     <span
-                                        class="text-white text-sm font-semibold">{{ $event->start_time->format('H:i') }}{{ $event->end_time ? ' – ' . $event->end_time->format('H:i') : '' }}
+                                        class="text-white text-sm font-semibold flex-1">{{ $event->start_time->format('H:i') }}{{ $event->end_time ? ' – ' . $event->end_time->format('H:i') : '' }}
                                         WIB</span>
                                 </div>
                             </div>
@@ -120,7 +120,7 @@
                             <div class="space-y-4 mb-8">
                                 @foreach ($event->ticketCategories as $category)
                                     <div
-                                        class="bg-white/10 border border-white/20 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        class="bg-white/10 border border-white/20 rounded-2xl p-5 flex flex-row sm:items-center justify-between gap-4">
                                         <div>
                                             <h3 class="text-white font-bold text-lg">{{ $category->name }}</h3>
                                             @if ($category->description)
@@ -129,8 +129,12 @@
                                             <p class="text-yellow-400 font-bold mt-2">Rp
                                                 {{ number_format($category->price, 0, ',', '.') }}</p>
                                             @if ($category->quota !== null)
-                                                <p class="text-gray-500 text-xs mt-1">Sisa:
-                                                    {{ max(0, $category->quota - $category->sold_count) }} tiket</p>
+                                                @php $remaining = max(0, $category->quota - $category->sold_count); @endphp
+                                                @if ($remaining === 0)
+                                                    <p class="text-red-400 text-xs mt-1 font-semibold">Sold Out</p>
+                                                @else
+                                                    <p class="text-green-400 text-xs mt-1">Available</p>
+                                                @endif
                                             @endif
                                         </div>
                                         <div class="flex items-center gap-3">
@@ -141,25 +145,38 @@
                                             <input type="hidden" name="items[{{ $category->id }}]"
                                                 id="qty-{{ $category->id }}" value="0">
                                             <button type="button" onclick="changeQty({{ $category->id }}, 1)"
-                                                class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg transition">+</button>
+                                                {{ $category->quota !== null && $category->sold_count >= $category->quota ? 'disabled' : '' }}
+                                                class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
 
                             <div class="text-center">
-                                <button type="submit" id="btn-submit"
-                                    class="px-10 py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl transition-all hover:-translate-y-0.5">
-                                    <span id="btn-text">Buy Ticket <i class="fas fa-arrow-right ml-2"></i></span>
-                                    <span id="btn-spinner" class="hidden">
-                                        <svg class="animate-spin h-5 w-5 inline mr-2" xmlns="http://www.w3.org/2000/svg"
-                                            fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                                        </svg>Processing...
-                                    </span>
-                                </button>
+                                @if (session('user_id'))
+                                    <button type="submit" id="btn-submit"
+                                        class="px-10 py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl transition-all hover:-translate-y-0.5">
+                                        <span id="btn-text">Buy Ticket <i class="fas fa-arrow-right ml-2"></i></span>
+                                        <span id="btn-spinner" class="hidden">
+                                            <svg class="animate-spin h-5 w-5 inline mr-2" xmlns="http://www.w3.org/2000/svg"
+                                                fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                    stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z">
+                                                </path>
+                                            </svg>Processing...
+                                        </span>
+                                    </button>
+                                @else
+                                    <button type="button" disabled
+                                        class="px-10 py-4 bg-gray-600 text-gray-400 font-bold rounded-xl cursor-not-allowed opacity-60">
+                                        Buy Ticket <i class="fas fa-arrow-right ml-2"></i>
+                                    </button>
+                                    <p class="text-red-400 text-sm mt-3">
+                                        <a href="{{ route('user.login') }}"
+                                            class="underline hover:text-red-300 transition">Login</a> to buy tickets.
+                                    </p>
+                                @endif
                             </div>
                         </form>
                     </div>
