@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Events\TicketCheckedIn;
 
 class TicketController extends Controller
 {
@@ -52,6 +53,19 @@ class TicketController extends Controller
             'checked_in_at' => now(),
             'checked_in_by' => session('admin_id')
         ]);
+
+        $ticket->load(['ticketCategory.event', 'checker', 'transaction']);
+        $totalCheckedIn = Ticket::where('is_checked_in', true)->where('is_canceled', false)->count();
+
+        broadcast(new TicketCheckedIn(
+            ticket_code:      $ticket->ticket_code,
+            category_name:    $ticket->ticketCategory->name,
+            event_name:       $ticket->ticketCategory->event->name ?? '-',
+            holder_name:      $ticket->holder_name ?? $ticket->transaction->buyer_name ?? '-',
+            checked_in_by:    $ticket->checker?->name ?? session('name', '-'),
+            checked_in_at:    now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
+            total_checked_in: $totalCheckedIn,
+        ));
 
         return response()->json([
             'message' => 'Check-in Berhasil untuk: ' . $ticket->transaction->buyer_name,
