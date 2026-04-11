@@ -181,11 +181,10 @@
     <script>
         const ablyPublicKey = '{{ env('ABLY_PUBLIC_KEY') }}';
         const ably = new Ably.Realtime(ablyPublicKey);
-        const channel = ably.channels.get('checkin-monitor');
+        const channel = ably.channels.get('public:checkin-monitor');
 
         channel.subscribe('ticket.checked-in', function(msg) {
-            const data = msg
-                .data;
+            const data = msg.data;
             const activeFilter = document.getElementById('filter-event').value;
 
             if (!activeFilter || data.event_name === activeFilter) {
