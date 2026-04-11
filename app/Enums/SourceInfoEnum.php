@@ -5,9 +5,9 @@ namespace App\Enums;
 enum SourceInfoEnum: string
 {
     case SOCIAL_MEDIA  = 'Social Media';
-    case WEBSITE_RESMI = 'Website resmi';
-    case IKLAN         = 'Iklan';
+    case WEBSITE_RESMI = 'Website';
+    case IKLAN         = 'Advertisement';
     case POSTER        = 'Poster';
-    case TEMAN         = 'Teman';
-    case DOSEN         = 'Dosen';
+    case TEMAN         = 'Friends';
+    case DOSEN         = 'Lecturer';
 }
