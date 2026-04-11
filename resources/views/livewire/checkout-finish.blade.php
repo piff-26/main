@@ -75,7 +75,7 @@
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">PHONE NUMBER
                                 *</label>
-                            <div class="flex gap-2" x-data="{
+                            <div class="flex flex-col gap-2" x-data="{
                                 open: false,
                                 search: '',
                                 selected: { flag: '🇮🇩', dial_code: '+62', name: 'Indonesia' },
@@ -191,12 +191,12 @@
                     <div class="mt-8 pt-6 border-t border-slate-700/50">
                         <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">KODE VOUCHER
                             (OPSIONAL)</label>
-                        <div class="flex gap-3">
+                        <div class="flex flex-col gap-2">
                             <input type="text" wire:model="voucher_code"
-                                class="flex-1 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white uppercase focus:border-[#ff5b1d] transition"
+                                class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white uppercase focus:border-[#ff5b1d] transition"
                                 placeholder="MASUKKAN KODE">
                             <button wire:click.prevent="applyVoucher"
-                                class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">TERAPKAN</button>
+                                class="w-full bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">TERAPKAN</button>
                         </div>
                         @error('voucher_code')
                             <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
