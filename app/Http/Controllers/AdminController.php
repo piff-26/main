@@ -145,9 +145,87 @@ class AdminController extends BaseController
     }
 
     // --- MONITOR & SCAN ---
-    public function monitor()
+    public function monitor(Request $request)
     {
-        return view('admin.monitor', ['title' => 'Monitor']);
+        $selectedEvent = $request->query('event');
+        $ticketQuery = Ticket::where('is_canceled', false);
+        
+        if ($selectedEvent) {
+            $ticketQuery->whereHas('ticketCategory.event', function($q) use ($selectedEvent) {
+                $q->where('name', $selectedEvent);
+            });
+        }
+
+        // Ambil Stats General
+        $totalCheckedIn = (clone $ticketQuery)->where('is_checked_in', true)->count();
+        $capacity       = (clone $ticketQuery)->count();
+        
+        $categoryStatsQuery = TicketCategory::query();
+        if ($selectedEvent) {
+            $categoryStatsQuery->whereHas('event', fn($e) => $e->where('name', $selectedEvent));
+        }
+        $categoryStats = $categoryStatsQuery
+            ->withCount(['tickets as total' => function($q) { $q->where('is_canceled', false); }])
+            ->withCount(['tickets as checked_in' => function($q) { $q->where('is_canceled', false)->where('is_checked_in', true); }])
+            ->get();
+
+        $remaining      = max(0, $capacity - $totalCheckedIn);
+
+        $firstCheckin = (clone $ticketQuery)->where('is_checked_in', true)->min('checked_in_at');
+        $avgPerHour   = 0;
+        if ($firstCheckin) {
+            $hours = max(1, now()->diffInHours($firstCheckin));
+            $avgPerHour = round($totalCheckedIn / $hours);
+        }
+
+        // Terapkan Base Query ke Log Check-in
+        $logs = (clone $ticketQuery)->with(['ticketCategory.event', 'checker'])
+            ->where('is_checked_in', true)
+            ->whereNotNull('checked_in_at')
+            ->orderByDesc('checked_in_at')
+            ->limit(50)
+            ->get()
+            ->map(fn($t) => (object)[
+                'ticket_code'   => $t->ticket_code,
+                'category_name' => $t->ticketCategory->name ?? '-',
+                'event_name'    => $t->ticketCategory->event->name ?? '-',
+                'holder_name'   => $t->holder_name ?? '-',
+                'checked_at'    => $t->checked_in_at,
+                'staff_name'    => $t->checker?->name ?? '-',
+            ]);
+
+        $events = Event::orderBy('name')->pluck('name', 'id');
+
+        // Terapkan Base Query ke Chart Data (Per jam)
+        $chartData = [];
+        $maxCount  = 1;
+        for ($i = 7; $i >= 0; $i--) {
+            $hour  = now()->subHours($i);
+            // Gunakan clone lagi agar kondisinya aman per loop
+            $count = (clone $ticketQuery)->where('is_checked_in', true)
+                ->whereBetween('checked_in_at', [$hour->copy()->startOfHour(), $hour->copy()->endOfHour()])
+                ->count();
+                
+            $chartData[] = ['hour' => $hour->format('H:00'), 'count' => $count];
+            if ($count > $maxCount) $maxCount = $count;
+        }
+        
+        foreach ($chartData as &$d) {
+            $d['percentage'] = round(($d['count'] / $maxCount) * 100);
+        }
+
+        return view('admin.monitor', [
+            'stats' => [
+                'total_checked_in' => $totalCheckedIn,
+                'remaining'        => max(0, $capacity - $totalCheckedIn),
+                'capacity'         => $capacity,
+                'fill_percentage'  => $capacity > 0 ? round(($totalCheckedIn / $capacity) * 100) : 0,
+            ],
+            'categoryStats' => $categoryStats,
+            'logs'          => $logs,
+            'chart_data'    => $chartData,
+            'events'        => $events,
+        ]);
     }
 
     public function ticketScan()
