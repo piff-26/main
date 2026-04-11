@@ -48,8 +48,6 @@ class PaymentController extends Controller
             } else {
                 $transaction->update([
                     'transaction_status' => TransactionStatusEnum::PAID->value,
-                    'payment_method'     => $request->payment_type,
-                    'payment_reference'  => $request->transaction_id,
                     'paid_at'            => now(),
                 ]);
 
