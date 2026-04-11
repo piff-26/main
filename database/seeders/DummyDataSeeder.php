@@ -29,7 +29,6 @@ class DummyDataSeeder extends Seeder
         $vouchers = Voucher::all();
         $cities = ['Surabaya', 'Jakarta', 'Bandung', 'Semarang', 'Yogyakarta'];
         $sources = array_column(SourceInfoEnum::cases(), 'value');
-        $paymentMethods = ['QRIS', 'BCA', 'Gopay', 'OVO', 'Mandiri'];
         
         // Create paid transactions with varied items
         for ($i = 1; $i <= 15; $i++) {
@@ -58,20 +57,19 @@ class DummyDataSeeder extends Seeder
             }
             
             $transaction = Transaction::create([
-                'id' => Str::uuid(),
-                'invoice_code' => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'user_id' => $user->id,
-                'buyer_name' => $user->name,
-                'buyer_phone' => '08' . rand(1000000000, 9999999999),
-                'city' => $cities[array_rand($cities)],
-                'source_info' => $sources[array_rand($sources)],
-                'total_amount' => $totalAmount,
-                'voucher_id' => $voucher?->id,
-                'payment_method' => $paymentMethods[array_rand($paymentMethods)],
+                'id'                 => Str::uuid(),
+                'invoice_code'       => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'user_id'            => $user->id,
+                'buyer_name'         => $user->name,
+                'buyer_phone'        => '+62' . rand(800000000, 899999999),
+                'city'               => $cities[array_rand($cities)],
+                'source_info'        => $sources[array_rand($sources)],
+                'total_amount'       => $totalAmount,
+                'voucher_id'         => $voucher?->id,
                 'transaction_status' => TransactionStatusEnum::PAID->value,
-                'paid_at' => now()->subDays(rand(1, 30)),
-                'agree_tnc' => true,
-                'created_at' => now()->subDays(rand(1, 30)),
+                'paid_at'            => now()->subDays(rand(1, 30)),
+                'agree_tnc'          => true,
+                'created_at'         => now()->subDays(rand(1, 30)),
             ]);
 
             // Create transaction items and tickets for each category
@@ -108,18 +106,17 @@ class DummyDataSeeder extends Seeder
             $quantity = rand(1, 2);
             
             $transaction = Transaction::create([
-                'id' => Str::uuid(),
-                'invoice_code' => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'user_id' => $user->id,
-                'buyer_name' => $user->name,
-                'buyer_phone' => '08' . rand(1000000000, 9999999999),
-                'city' => $cities[array_rand($cities)],
-                'source_info' => $sources[array_rand($sources)],
-                'total_amount' => $category->price * $quantity,
-                'payment_method' => $paymentMethods[array_rand($paymentMethods)],
+                'id'                 => Str::uuid(),
+                'invoice_code'       => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'user_id'            => $user->id,
+                'buyer_name'         => $user->name,
+                'buyer_phone'        => '+62' . rand(800000000, 899999999),
+                'city'               => $cities[array_rand($cities)],
+                'source_info'        => $sources[array_rand($sources)],
+                'total_amount'       => $category->price * $quantity,
                 'transaction_status' => TransactionStatusEnum::DRAFT->value,
-                'agree_tnc' => true,
-                'created_at' => now()->subDays(rand(1, 10)),
+                'agree_tnc'          => true,
+                'created_at'         => now()->subDays(rand(1, 10)),
             ]);
 
             TransactionItem::create([
@@ -137,18 +134,17 @@ class DummyDataSeeder extends Seeder
             $quantity = rand(1, 2);
             
             $transaction = Transaction::create([
-                'id' => Str::uuid(),
-                'invoice_code' => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'user_id' => $user->id,
-                'buyer_name' => $user->name,
-                'buyer_phone' => '08' . rand(1000000000, 9999999999),
-                'city' => $cities[array_rand($cities)],
-                'source_info' => $sources[array_rand($sources)],
-                'total_amount' => $category->price * $quantity,
-                'payment_method' => $paymentMethods[array_rand($paymentMethods)],
+                'id'                 => Str::uuid(),
+                'invoice_code'       => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'user_id'            => $user->id,
+                'buyer_name'         => $user->name,
+                'buyer_phone'        => '+62' . rand(800000000, 899999999),
+                'city'               => $cities[array_rand($cities)],
+                'source_info'        => $sources[array_rand($sources)],
+                'total_amount'       => $category->price * $quantity,
                 'transaction_status' => rand(0, 1) ? TransactionStatusEnum::FAILED->value : TransactionStatusEnum::EXPIRED->value,
-                'agree_tnc' => true,
-                'created_at' => now()->subDays(rand(10, 30)),
+                'agree_tnc'          => true,
+                'created_at'         => now()->subDays(rand(10, 30)),
             ]);
 
             TransactionItem::create([
@@ -157,6 +153,36 @@ class DummyDataSeeder extends Seeder
                 'quantity' => $quantity,
                 'price' => $category->price,
             ]);
+        }
+        // Create pending transactions (uploaded payment proof, awaiting verification)
+        for ($i = 26; $i <= 30; $i++) {
+            $user = $users[array_rand($users)];
+            $category = $categories->random();
+            $quantity = rand(1, 2);
+
+            $transaction = Transaction::create([
+                'id'                 => Str::uuid(),
+                'invoice_code'       => 'INV-2026-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                'user_id'            => $user->id,
+                'buyer_name'         => $user->name,
+                'buyer_phone'        => '+62' . rand(800000000, 899999999),
+                'city'               => $cities[array_rand($cities)],
+                'source_info'        => $sources[array_rand($sources)],
+                'total_amount'       => $category->price * $quantity,
+                'transaction_status' => TransactionStatusEnum::PENDING->value,
+                'payment_proof'      => null,
+                'agree_tnc'          => true,
+                'created_at'         => now()->subHours(rand(1, 48)),
+            ]);
+
+            TransactionItem::create([
+                'transaction_id'     => $transaction->id,
+                'ticket_category_id' => $category->id,
+                'quantity'           => $quantity,
+                'price'              => $category->price,
+            ]);
+
+            $category->increment('sold_count', $quantity);
         }
     }
 }
