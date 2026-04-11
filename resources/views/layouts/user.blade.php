@@ -34,6 +34,9 @@
     {{-- Lenis --}}
     <link rel="stylesheet" href="https://unpkg.com/lenis@1.1.13/dist/lenis.css">
 
+    {{-- FlagCDN preconnect --}}
+    <link rel="preconnect" href="https://flagcdn.com">
+
     {{-- Font Utama --}}
 
 
