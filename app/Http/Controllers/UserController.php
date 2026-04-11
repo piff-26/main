@@ -44,7 +44,7 @@ class UserController extends BaseController
                 TransactionStatusEnum::PENDING->value,
                 TransactionStatusEnum::FAILED->value,
             ])
-            ->with(['tickets.ticketCategory.event', 'transactionItems.ticketCategory'])
+            ->with(['tickets.ticketCategory.event', 'transactionItems.ticketCategory', 'voucher'])
             ->orderBy('created_at', 'desc')
             ->get();
 

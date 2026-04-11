@@ -16,7 +16,7 @@ class TransactionHistoryController extends Controller
         $transaction = Transaction::where('invoice_code', $invoiceCode)
             ->where('user_id', $userId)
             ->where('transaction_status', TransactionStatusEnum::PAID->value)
-            ->with(['tickets.ticketCategory.event']) // Load relasi tiket
+            ->with(['tickets.ticketCategory.event', 'voucher'])
             ->firstOrFail();
 
         // Render view bundle.blade.php menjadi PDF
