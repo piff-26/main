@@ -9,6 +9,7 @@
         ['route' => 'admin.insight', 'label' => 'Insight', 'icon' => 'fa-chart-line'],
         ['route' => 'admin.ticketScan', 'label' => 'Ticket Scan', 'icon' => 'fa-qrcode'],
         ['route' => 'admin.manageVouchers', 'label' => 'Vouchers', 'icon' => 'fa-ticket'],
+        ['route' => 'admin.log', 'label' => 'System Log', 'icon' => 'fa-terminal'],
     ];
 @endphp
 
