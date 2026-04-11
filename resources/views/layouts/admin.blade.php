@@ -179,7 +179,7 @@
         @yield('content')
     @else
         @include('components.sidebar')
-        <div class="ml-0 md:ml-60 px-3 md:px-8 py-2 md:py-3">
+        <div class="ml-0 md:ml-64 px-4 md:px-8 pt-16 md:pt-4 pb-4">
             <div class="mt-3">
                 @yield('content')
             </div>
