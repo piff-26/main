@@ -27,12 +27,11 @@ return new class extends Migration
             $table->double('discount_amount')->default(0);
             $table->double('total_amount')->default(0);
             
-            $table->string('payment_method')->default('QRIS');
             $table->enum('transaction_status', array_column(TransactionStatusEnum::cases(), 'value'))->default(TransactionStatusEnum::DRAFT->value);
-            $table->string('payment_url')->nullable();
-            $table->string('snap_token')->nullable();
-            $table->string('payment_reference')->nullable();
+            $table->string('payment_proof')->nullable();
+            $table->text('rejection_reason')->nullable();
             $table->timestamp('paid_at')->nullable();
+            $table->timestamp('expired_at')->nullable();
             $table->string('cancel_reason')->nullable();
             
             $table->boolean('agree_tnc')->default(false);
