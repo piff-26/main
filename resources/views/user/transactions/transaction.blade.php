@@ -5,7 +5,7 @@
 
         <div class="max-w-3xl mx-auto mb-8 text-center">
             <h2 class="text-3xl font-bold text-white">TRANSAKSI</h2>
-            <p class="text-gray-400 mt-2">Pastikan data diri Anda benar untuk keperluan E-Ticket.</p>
+            <p class="text-gray-400 mt-2">Ensure your personal information is accurate for E-ticket purposes.</p>
 
             @if (session('warning'))
                 <div
@@ -17,9 +17,11 @@
 
             <div
                 class="flex flex-wrap items-center justify-center gap-2 bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 rounded-xl px-4 py-3 mt-4 text-sm text-center">
-                <span><i class="fas fa-clock shrink-0"></i> Selesaikan pengisian dan pembayaran sebelum
-                    <strong>{{ \Carbon\Carbon::parse($expiredAt)->setTimezone('Asia/Jakarta')->format('H:i') }} WIB</strong>
-                    agar kuota tiket tidak hangus.</span>
+                <span><i class="fas fa-clock shrink-0"></i> Complete your registration and payment before
+                    <strong>{{ \Carbon\Carbon::parse($expiredAt)->setTimezone('Asia/Jakarta')->format('H:i') }}
+                        (UTC+7)</strong>
+                    to avoid ticket forfeiture.</span>
+                <span class="w-full text-sm text-yellow-300">Your local time: <strong id="expired-local"></strong></span>
             </div>
 
             <div class="mt-4">
@@ -37,6 +39,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lenis !== 'undefined') lenis.destroy();
+
+            const expiredUtc = '{{ \Carbon\Carbon::parse($expiredAt)->utc()->toISOString() }}';
+            const d = new Date(expiredUtc);
+            document.getElementById('expired-local').textContent = d.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
         });
 
         document.addEventListener('livewire:initialized', () => {
