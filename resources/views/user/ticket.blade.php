@@ -1,12 +1,12 @@
 @extends('layouts.user')
-@section('title', 'Beli Tiket')
+@section('title', 'Event Ticket')
 
 @section('content')
     <div class="min-h-screen bg-black py-36 px-4">
 
         <div class="max-w-4xl mx-auto mb-10 text-center">
-            <h2 class="text-3xl font-bold text-white">Daftar Event</h2>
-            <p class="text-gray-400 mt-2">Pilih event favoritmu dan amankan tiketnya sekarang sebelum kehabisan.</p>
+            <h2 class="text-3xl font-bold text-white">Our Event</h2>
+            <p class="text-gray-400 mt-2">Choose your ticket category and secure your seat now.</p>
         </div>
 
         <div class="max-w-4xl mx-auto">
@@ -14,8 +14,8 @@
             @if ($events->isEmpty())
                 <div class="bg-white/10 border border-white/20 rounded-2xl px-6 py-12 text-center">
                     <i class="fas fa-calendar-times text-4xl text-gray-500 mb-4 block"></i>
-                    <p class="text-white font-semibold">Belum ada event</p>
-                    <p class="text-gray-400 text-sm mt-1">Saat ini belum ada event yang membuka penjualan tiket.</p>
+                    <p class="text-white font-semibold">No event available</p>
+                    <p class="text-gray-400 text-sm mt-1">Currently there are no events available.</p>
                 </div>
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

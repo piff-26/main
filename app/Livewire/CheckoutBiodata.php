@@ -154,24 +154,24 @@ class CheckoutBiodata extends Component
             ->first();
 
         if (!$voucher) {
-            $this->addError('voucher_code', 'Kode voucher tidak valid.');
+            $this->addError('voucher_code', 'Voucher not valid.');
             return;
         }
 
         if ($voucher->expired_at && now()->greaterThan($voucher->expired_at)) {
-            $this->addError('voucher_code', 'Kode voucher sudah kedaluwarsa.');
+            $this->addError('voucher_code', 'Voucher expired.');
             return;
         }
 
         if ($voucher->used_count >= $voucher->max_uses) {
-            $this->addError('voucher_code', 'Kuota voucher sudah habis.');
+            $this->addError('voucher_code', 'This voucher is no longer available.');
             return;
         }
 
         if ($voucher->event_id !== null) {
             $transactionEventIds = $this->transaction->transactionItems->pluck('ticketCategory.event_id')->unique();
             if (!$transactionEventIds->contains($voucher->event_id)) {
-                $this->addError('voucher_code', 'Voucher tidak berlaku untuk event ini.');
+                $this->addError('voucher_code', 'Voucher is not valid for this event.');
                 return;
             }
         }
@@ -179,7 +179,7 @@ class CheckoutBiodata extends Component
         if ($voucher->ticket_category_id !== null) {
             $hasCategoryInCart = $this->transaction->transactionItems->contains('ticket_category_id', $voucher->ticket_category_id);
             if (!$hasCategoryInCart) {
-                $this->addError('voucher_code', 'Voucher tidak berlaku untuk kategori tiket yang dipilih.');
+                $this->addError('voucher_code', 'This voucher is not valid for the selected ticket category.');
                 return;
             }
         }
@@ -197,7 +197,7 @@ class CheckoutBiodata extends Component
         $this->applied_voucher_id = $voucher->id;
         $this->calculateTotal();
 
-        session()->flash('voucher_success', 'Voucher berhasil diterapkan!');
+        session()->flash('voucher_success', 'Voucher applied successfully!');
     }
 
     public function removeVoucher()
@@ -237,7 +237,7 @@ class CheckoutBiodata extends Component
         ]);
 
         if (!$this->agree_tnc) {
-            $this->tncError = 'Anda harus menyetujui Syarat dan Ketentuan terlebih dahulu.';
+            $this->tncError = 'You must agree to the Terms and Conditions.';
             return;
         }
 
@@ -274,9 +274,9 @@ class CheckoutBiodata extends Component
         $this->validate([
             'payment_proof' => 'required|image|max:2048',
         ], [
-            'payment_proof.required' => 'Bukti pembayaran wajib diupload.',
-            'payment_proof.image'    => 'File harus berupa gambar.',
-            'payment_proof.max'      => 'Ukuran file maksimal 2MB.',
+            'payment_proof.required' => 'Payment proof required.',
+            'payment_proof.image'    => 'File must be image.',
+            'payment_proof.max'      => 'Max file size 2MB.',
         ]);
 
         $path = $this->payment_proof->store('payment-proofs', 'public');
@@ -315,7 +315,7 @@ class CheckoutBiodata extends Component
             $item->ticketCategory->decrement('sold_count', $item->quantity);
         }
 
-        session()->flash('toast_info', 'Transaksi berhasil dibatalkan.');
+        session()->flash('toast_info', 'Transaction cancelled.');
         return redirect()->route('user.ticket');
     }
 

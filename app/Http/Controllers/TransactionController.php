@@ -85,7 +85,7 @@ class TransactionController extends Controller
 
             if ($active) {
                 return redirect()->route('checkout.step2', $active->invoice_code)
-                    ->with('warning', 'Selesaikan transaksi sebelumnya terlebih dahulu.');
+                    ->with('warning', 'Finish you previous transaction.');
             }
         }
 
@@ -117,7 +117,7 @@ class TransactionController extends Controller
         }
 
         return view('user.transactions.transaction', [
-            'title' => 'Isi Biodata - ' . $transaction->invoice_code,
+            'title' => 'Ticket Data - ' . $transaction->invoice_code,
             'invoiceCode' => $invoiceCode,
             'expiredAt' => $transaction->expired_at ? $transaction->expired_at->setTimezone('Asia/Jakarta') : now()->setTimezone('Asia/Jakarta')->addMinutes(15),
         ]);

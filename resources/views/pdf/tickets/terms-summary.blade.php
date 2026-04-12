@@ -1,5 +1,5 @@
 <div style="padding: 20px; border: 2px solid #000;">
-    <h1 class="text-center" style="margin-bottom: 0;">INVOICE PEMBELIAN</h1>
+    <h1 class="text-center" style="margin-bottom: 0;">INVOICE</h1>
     <h3 class="text-center" style="margin-top: 5px; color: #555;">{{ $transaction->invoice_code }}</h3>
 
     <hr style="margin: 20px 0;">
@@ -7,22 +7,22 @@
     <table class="w-100" style="margin-bottom: 30px;">
         <tr>
             <td style="width: 50%;">
-                <strong>Nama Pembeli:</strong><br>
+                <strong>Buyer Name:</strong><br>
                 {{ $transaction->buyer_name }}
             </td>
             <td style="width: 50%; text-align: right;">
-                <strong>Tanggal Transaksi:</strong><br>
+                <strong>Transaction Date:</strong><br>
                 {{ $transaction->created_at->format('d F Y, H:i') }} WIB
             </td>
         </tr>
     </table>
 
-    <h3 style="background: #f0f0f0; padding: 10px;">Ringkasan Tiket</h3>
+    <h3 style="background: #f0f0f0; padding: 10px;">Ticket Summary</h3>
     <table class="w-100" border="1" style="margin-bottom: 30px; text-align: left;" cellpadding="8">
         <thead>
             <tr style="background: #ddd;">
-                <th>Kategori</th>
-                <th>Kode Tiket</th>
+                <th>Category</th>
+                <th>Ticket Code</th>
             </tr>
         </thead>
         <tbody>
@@ -38,82 +38,80 @@
     <table class="w-100" style="margin-bottom: 10px; text-align: right;">
         <tr>
             <td style="color: #555;">Subtotal</td>
-            <td style="width: 180px;">Rp {{ number_format($transaction->total_amount + $transaction->discount_amount, 0, ',', '.') }}</td>
+            <td style="width: 180px;">IDR
+                {{ number_format($transaction->total_amount + $transaction->discount_amount, 0, ',', '.') }}</td>
         </tr>
         @if ($transaction->voucher)
-        <tr>
-            <td style="color: #555;">Voucher ({{ $transaction->voucher->code }})</td>
-            <td style="color: #16a34a;">- Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}</td>
-        </tr>
+            <tr>
+                <td style="color: #555;">Voucher ({{ $transaction->voucher->code }})</td>
+                <td style="color: #16a34a;">- IDR {{ number_format($transaction->discount_amount, 0, ',', '.') }}</td>
+            </tr>
         @endif
         <tr style="font-weight: bold; font-size: 16px;">
             <td>Total</td>
-            <td>Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
+            <td>IDR {{ number_format($transaction->total_amount, 0, ',', '.') }}</td>
         </tr>
     </table>
 
-    <h3 style="background: #f0f0f0; padding: 10px;">Syarat & Ketentuan (Terms & Conditions)</h3>
-    <p style="font-weight: bold; margin-bottom: 6px;">A. KETENTUAN UMUM & VALIDITAS TIKET</p>
+    <h3 style="background: #f0f0f0; padding: 10px;">Terms & Conditions</h3>
+
+    <p style="font-weight: bold; margin-bottom: 6px;">A. GENERAL TERMS & TICKET VALIDITY</p>
     <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
-        <li>Tiket hanya berlaku untuk tanggal, waktu, dan acara yang tertera pada tiket.</li>
-        <li>Satu (1) tiket berlaku untuk satu (1) orang.</li>
-        <li>Tiket tidak dapat dipindahtangankan tanpa persetujuan resmi dari panitia.</li>
-        <li>Tiket yang telah dibeli dianggap sah apabila diperoleh melalui kanal penjualan resmi yang ditunjuk oleh
-            panitia.</li>
-        <li>Panitia berhak untuk:
+        <li>Tickets are valid only for the date, time, and event specified on the ticket.</li>
+        <li>One (1) ticket is valid for one (1) person.</li>
+        <li>Tickets are non-transferable without prior official approval from the organizer.</li>
+        <li>Tickets are considered valid only if purchased through official sales channels designated by the organizer.
+        </li>
+        <li>The organizer reserves the right to:
             <ol type="a" style="margin-top: 6px;">
-                <li>Menolak tiket yang rusak, tidak terbaca, terduplikasi, atau diperoleh secara tidak sah.</li>
-                <li>Memproses atau mengajukan hukum, baik perdata atau kriminal kepada pengunjung yang mendapatkan tiket
-                    dengan ilegal, termasuk memalsukan dan menggandakan tiket yang sah atau mendapatkan tiket dengan
-                    cara yang tidak sesuai prosedur.</li>
+                <li>Refuse tickets that are damaged, unreadable, duplicated, or obtained unlawfully.</li>
+                <li>Take legal action, both civil and criminal, against individuals who obtain tickets illegally,
+                    including but not limited to ticket forgery, duplication, or acquisition through unauthorized means.
+                </li>
             </ol>
         </li>
     </ol>
 
-    <p style="font-weight: bold; margin-bottom: 6px;">B. KEBIJAKAN PEMBELIAN & PENGEMBALIAN DANA</p>
+    <p style="font-weight: bold; margin-bottom: 6px;">B. PURCHASE & REFUND POLICY</p>
     <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
-        <li>Seluruh pembelian tiket bersifat final dan tidak dapat dibatalkan.</li>
-        <li>Tiket yang telah dibeli tidak dapat dikembalikan dan tidak dapat ditukar (<i>non-refundable</i> &
-            <i>non-exchangeable</i>), kecuali apabila acara dibatalkan secara resmi oleh panitia.</li>
-        <li>Panitia tidak bertanggung jawab atas kegagalan proses pembelian tiket yang disebabkan oleh kesalahan
-            pengisian data oleh pembeli maupun gangguan jaringan dan perangkat yang berada di luar kendali panitia.</li>
-        <li>Apabila acara dibatalkan oleh panitia, mekanisme pengembalian dana akan diinformasikan melalui kanal
-            komunikasi resmi PIFF 2026.</li>
-        <li>Apabila acara mengalami perubahan jadwal (<i>reschedule</i>), tiket tetap berlaku untuk tanggal pengganti.
-        </li>
+        <li>All ticket purchases are final and cannot be canceled.</li>
+        <li>Tickets are non-refundable and non-exchangeable, except in the event of official cancellation by the
+            organizer.</li>
+        <li>The organizer is not responsible for failed transactions caused by user input errors, network issues, or
+            device-related problems beyond the organizer’s control.</li>
+        <li>In the event of cancellation by the organizer, refund procedures will be announced through official PIFF
+            2026 communication channels.</li>
+        <li>In the event of rescheduling, tickets will remain valid for the new date.</li>
     </ol>
 
-    <p style="font-weight: bold; margin-bottom: 6px;">C. AKSES & REGISTRASI MASUK</p>
+    <p style="font-weight: bold; margin-bottom: 6px;">C. ACCESS & ENTRY REGISTRATION</p>
     <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
-        <li>Pengunjung wajib menunjukkan tiket dalam bentuk digital (<i>e-ticket</i>) saat proses registrasi.</li>
-        <li>Tiket digital (<i>e-ticket</i>) akan ditukarkan dengan tiket gelang yang wajib digunakan selama berada di
-            area acara.</li>
-        <li>Pengunjung yang tidak dapat menunjukkan tiket gelang tidak diperkenankan memasuki area acara.</li>
-        <li>Panitia berhak melakukan pemeriksaan ulang terhadap tiket dan identitas apabila diperlukan.</li>
+        <li>Visitors must present their digital ticket (e-ticket) during registration.</li>
+        <li>The e-ticket will be exchanged for a wristband, which must be worn at all times within the event area.</li>
+        <li>Visitors who fail to present a valid wristband will not be permitted to enter the event area.</li>
+        <li>The organizer reserves the right to re-verify tickets and identification when necessary.</li>
     </ol>
 
-    <p style="font-weight: bold; margin-bottom: 6px;">D. KETENTUAN SELAMA ACARA</p>
+    <p style="font-weight: bold; margin-bottom: 6px;">D. EVENT REGULATIONS</p>
     <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
-        <li>Pengunjung wajib menjaga ketertiban dan mematuhi seluruh peraturan yang berlaku selama acara berlangsung.
-        </li>
-        <li>Dilarang membawa barang terlarang sesuai ketentuan panitia (misalnya senjata tajam, narkotika, minuman
-            beralkohol, dan barang berbahaya lainnya).</li>
-        <li>Panitia berhak mengeluarkan pengunjung dari area acara apabila melanggar peraturan tanpa kewajiban
-            pengembalian dana.</li>
-        <li>Tamu bertanggung jawab sepenuhnya atas keamanan semua barang-barang pribadi. Kehilangan barang pribadi bukan
-            tanggung jawab panitia.</li>
-        <li>Dengan membeli tiket, pengunjung memberikan persetujuan untuk didokumentasikan (foto/video) dan digunakan
-            untuk kepentingan publikasi acara.</li>
+        <li>Visitors must maintain order and comply with all applicable rules during the event.</li>
+        <li>Bringing prohibited items is strictly forbidden as per organizer regulations (e.g., weapons, narcotics,
+            alcoholic beverages, and other dangerous items).</li>
+        <li>The organizer reserves the right to remove any visitor who violates the rules without refund.</li>
+        <li>Visitors are fully responsible for the safety of their personal belongings. The organizer is not liable for
+            any loss or damage.</li>
+        <li>By purchasing a ticket, visitors consent to being photographed or recorded for event documentation and
+            promotional purposes.</li>
     </ol>
 
-    <p style="font-weight: bold; margin-bottom: 6px;">E. KEJADIAN KAHAR (FORCE MAJEURE)</p>
+    <p style="font-weight: bold; margin-bottom: 6px;">E. FORCE MAJEURE</p>
     <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
-        <li>Dalam hal terjadi kejadian kahar (<i>Force Majeure</i>), Panitia berhak untuk membatalkan, menunda, mengubah
-            jadwal, memindahkan lokasi, atau menyesuaikan format acara tanpa kewajiban memberikan kompensasi tambahan di
-            luar kebijakan yang ditentukan Panitia.</li>
-        <li>Panitia tidak bertanggung jawab atas kerugian tidak langsung yang mungkin timbul akibat perubahan atau
-            pembatalan acara yang disebabkan oleh <i>Force Majeure</i>.</li>
-        <li>Informasi resmi terkait perubahan akibat <i>Force Majeure</i> akan diumumkan melalui kanal komunikasi resmi
-            PIFF 2026.</li>
+        <li>In the event of force majeure, the organizer reserves the right to cancel, postpone, reschedule, relocate,
+            or modify the event format without obligation to provide additional compensation beyond the organizer’s
+            stated policies.</li>
+        <li>The organizer is not responsible for any indirect losses arising from changes or cancellation due to force
+            majeure.</li>
+        <li>Official updates regarding force majeure will be announced through PIFF 2026 official communication
+            channels.</li>
     </ol>
 </div>

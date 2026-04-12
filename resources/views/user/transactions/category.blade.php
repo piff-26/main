@@ -1,5 +1,5 @@
 @extends('layouts.user')
-@section('title', 'Pilih Tiket - ' . $event->name)
+@section('title', 'Ticket - ' . $event->name)
 
 @section('content')
     <div class="min-h-screen bg-black py-36 px-4">
@@ -126,7 +126,7 @@
                                             @if ($category->description)
                                                 <p class="text-gray-400 text-sm mt-1">{{ $category->description }}</p>
                                             @endif
-                                            <p class="text-yellow-400 font-bold mt-2">Rp
+                                            <p class="text-yellow-400 font-bold mt-2">IDR
                                                 {{ number_format($category->price, 0, ',', '.') }}</p>
                                             @if ($category->quota !== null)
                                                 @php $remaining = max(0, $category->quota - $category->sold_count); @endphp
