@@ -28,7 +28,13 @@
                     </span>
                 </div>
                 <div id="reader" class="overflow-hidden rounded-xl border-0 bg-black shadow-inner"></div>
-                <p class="text-xs text-gray-400 text-center mt-3">Scan akan otomatis mengisi input di bawah</p>
+                <div class="mt-3">
+                    <select id="camera-select"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="">Loading cameras...</option>
+                    </select>
+                </div>
+                <p class="text-xs text-gray-400 text-center mt-2">Scan will auto-fill the input below</p>
             </div>
 
             {{-- Input Manual --}}
@@ -112,19 +118,45 @@
     const csrfToken = $('meta[name="csrf-token"]').attr('content');
     let currentTicketCode = null;
 
-    // QR Scanner — scan mengisi input field, tidak langsung checkin
+    // QR Scanner
     const html5QrCode = new Html5Qrcode("reader", { verbose: false });
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-            html5QrCode.pause();
-            const input = document.getElementById('ticket-code-input');
-            input.value = decodedText.trim().toUpperCase();
-            lookupTicket();
-            setTimeout(() => html5QrCode.resume(), 3000);
+
+    function onScanSuccess(decodedText) {
+        html5QrCode.pause();
+        const input = document.getElementById('ticket-code-input');
+        input.value = decodedText.trim().toUpperCase();
+        lookupTicket();
+        setTimeout(() => html5QrCode.resume(), 3000);
+    }
+
+    function startScanner(deviceId) {
+        const constraint = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'environment' };
+        if (html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => html5QrCode.start(constraint, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess));
+        } else {
+            html5QrCode.start(constraint, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess);
         }
-    );
+    }
+
+    // Enumerate cameras & populate select
+    Html5Qrcode.getCameras().then(cameras => {
+        const select = document.getElementById('camera-select');
+        select.innerHTML = '';
+        cameras.forEach((cam, i) => {
+            const opt = document.createElement('option');
+            opt.value = cam.id;
+            opt.text  = cam.label || `Camera ${i + 1}`;
+            select.appendChild(opt);
+        });
+
+        // Default: prefer back camera
+        const back = cameras.find(c => /back|rear|environment/i.test(c.label));
+        if (back) select.value = back.id;
+
+        startScanner(select.value);
+
+        select.addEventListener('change', () => startScanner(select.value));
+    }).catch(() => startScanner(null));
 
     function lookupTicket() {
         const code = document.getElementById('ticket-code-input').value.trim().toUpperCase().replace(/\s+/g, '');
