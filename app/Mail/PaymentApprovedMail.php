@@ -20,7 +20,7 @@ class PaymentApprovedMail extends BaseMailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '[PIFF 2026] Pembayaran Disetujui - ' . $this->transaction->invoice_code);
+        return new Envelope(subject: '[PIFF 2026] Payment Approved - ' . $this->transaction->invoice_code);
     }
 
     public function content(): Content

@@ -24,8 +24,8 @@
             <p style="color:#ccc; margin:4px 0 0;">Petra International Film Festival</p>
         </div>
         <div class="body">
-            <p>Halo <strong>{{ $transaction->buyer_name }}</strong>,</p>
-            <p>Mohon maaf, pembayaran Anda untuk invoice <strong>{{ $transaction->invoice_code }}</strong> <strong>tidak dapat diverifikasi</strong>.</p>
+            <p>Hello <strong>{{ $transaction->buyer_name }}</strong>,</p>
+            <p>We regret to inform you that your payment for invoice <strong>{{ $transaction->invoice_code }}</strong> <strong>could not be verified</strong>.</p>
 
             <div class="invoice">
                 <div class="row">
@@ -34,20 +34,20 @@
                 </div>
                 <div class="row">
                     <span class="label">Total</span>
-                    <span class="value">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
+                    <span class="value">IDR {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
                 </div>
                 <div class="row" style="border-bottom:none;">
                     <span class="label">Status</span>
-                    <span class="value"><span class="badge">Ditolak</span></span>
+                    <span class="value"><span class="badge">Rejected</span></span>
                 </div>
             </div>
 
             <div class="reason-box">
-                <strong style="color:#991b1b;">Alasan Penolakan:</strong>
+                <strong style="color:#991b1b;">Rejection Reason:</strong>
                 <p style="margin:8px 0 0; color:#7f1d1d;">{{ $transaction->rejection_reason }}</p>
             </div>
 
-            <p style="color:#666; font-size:13px;">Kuota tiket Anda telah dikembalikan. Jika ada pertanyaan, silakan hubungi panitia PIFF 2026.</p>
+            <p style="color:#666; font-size:13px;">If you have any questions, please contact the PIFF 2026 committee.</p>
         </div>
         <div class="footer">
             &copy; 2026 PIFF - Petra International Film Festival

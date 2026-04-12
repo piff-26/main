@@ -13,7 +13,7 @@ class PaymentPendingAdminMail extends BaseMailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '[PIFF 2026] Verifikasi Pembayaran - ' . $this->transaction->invoice_code);
+        return new Envelope(subject: '[PIFF 2026] Payment Verification - ' . $this->transaction->invoice_code);
     }
 
     public function content(): Content

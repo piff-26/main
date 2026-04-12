@@ -23,8 +23,8 @@
             <p style="color:#ccc; margin:4px 0 0;">Petra International Film Festival</p>
         </div>
         <div class="body">
-            <p>Halo <strong>{{ $transaction->buyer_name }}</strong>,</p>
-            <p>Kami telah menerima bukti pembayaran Anda. Tim kami sedang memverifikasi pembayaran Anda.</p>
+            <p>Hello <strong>{{ $transaction->buyer_name }}</strong>,</p>
+            <p>We have received your payment proof. Our team is currently verifying your payment.</p>
 
             <div class="invoice">
                 <div class="row">
@@ -33,15 +33,15 @@
                 </div>
                 <div class="row">
                     <span class="label">Total</span>
-                    <span class="value">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
+                    <span class="value">IDR {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
                 </div>
                 <div class="row" style="border-bottom:none;">
                     <span class="label">Status</span>
-                    <span class="value"><span class="badge">Menunggu Verifikasi</span></span>
+                    <span class="value"><span class="badge">Pending Verification</span></span>
                 </div>
             </div>
 
-            <p style="color:#666; font-size:13px;">Proses verifikasi biasanya memakan waktu 1x24 jam. Harap cek email dan halaman riwayat transaksi Anda secara berkala.</p>
+            <p style="color:#666; font-size:13px;">Verification usually takes up to 24 hours. Please check your email and transaction history page regularly.</p>
         </div>
         <div class="footer">
             &copy; 2026 PIFF - Petra International Film Festival

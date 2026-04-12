@@ -21,7 +21,7 @@
     {{-- Header --}}
     <div style="text-align: center;">
         <h1 style="text-transform: uppercase; letter-spacing: 3px; color: {{ $headingColor }}; margin: 0 0 8px 0;">
-            TIKET {{ $ticket->ticketCategory->name }}
+            TICKET {{ $ticket->ticketCategory->name }}
         </h1>
         <h2 style="margin: 0;">{{ $ticket->ticketCategory->event->name }}</h2>
     </div>
@@ -53,7 +53,7 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 6px 12px; width: 33%;">
-                <div style="font-size: 11px; color: #888; margin-bottom: 2px;">NAMA</div>
+                <div style="font-size: 11px; color: #888; margin-bottom: 2px;">NAME</div>
                 <div style="font-size: 15px; font-weight: bold;">{{ $ticket->holder_name ?? $transaction->buyer_name }}</div>
             </td>
             <td style="padding: 6px 12px; width: 33%;">
@@ -61,14 +61,14 @@
                 <div style="font-size: 13px; font-family: monospace;">{{ $transaction->invoice_code }}</div>
             </td>
             <td style="padding: 6px 12px; width: 33%;">
-                <div style="font-size: 11px; color: #888; margin-bottom: 2px;">KODE TIKET</div>
+                <div style="font-size: 11px; color: #888; margin-bottom: 2px;">TICKET CODE</div>
                 <div style="font-size: 13px; font-family: monospace;">{{ $ticket->ticket_code }}</div>
             </td>
         </tr>
     </table>
 
     <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #999;">
-        Tunjukkan halaman ini saat masuk ke lokasi acara.
+        Show this ticket's QR code at the entrance. Valid for one-time use only. Duplicate or photocopied tickets will not be accepted.
     </div>
 
 </div>

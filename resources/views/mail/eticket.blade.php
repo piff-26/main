@@ -23,8 +23,8 @@
             <p style="color:#ccc; margin:4px 0 0;">Petra International Film Festival</p>
         </div>
         <div class="body">
-            <p>Halo <strong>{{ $transaction->buyer_name }}</strong>,</p>
-            <p>Pembayaran Anda telah berhasil! E-Ticket terlampir dalam email ini sebagai file PDF.</p>
+            <p>Hello <strong>{{ $transaction->buyer_name }}</strong>,</p>
+            <p>Your payment was successful! Your E-Ticket is attached to this email as a PDF file.</p>
 
             <div class="invoice">
                 <div class="row">
@@ -32,16 +32,16 @@
                     <span class="value">{{ $transaction->invoice_code }}</span>
                 </div>
                 <div class="row">
-                    <span class="label">Jumlah Tiket</span>
-                    <span class="value">{{ $transaction->tickets->count() }} tiket</span>
+                    <span class="label">Ticket Count</span>
+                    <span class="value">{{ $transaction->tickets->count() }} ticket(s)</span>
                 </div>
                 <div class="row" style="border-bottom:none;">
-                    <span class="label">Total Dibayar</span>
-                    <span class="value total">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
+                    <span class="label">Total Paid</span>
+                    <span class="value total">IDR {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
                 </div>
             </div>
 
-            <p style="color:#666; font-size:13px;">Tunjukkan QR Code pada tiket saat check-in di lokasi acara.</p>
+            <p style="color:#666; font-size:13px;">Present the QR Code on your ticket during check-in at the event venue.</p>
         </div>
         <div class="footer">
             &copy; 2026 PIFF - Petra International Film Festival

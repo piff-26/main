@@ -13,7 +13,7 @@ class PaymentRejectedMail extends BaseMailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '[PIFF 2026] Pembayaran Ditolak - ' . $this->transaction->invoice_code);
+        return new Envelope(subject: '[PIFF 2026] Payment Rejected - ' . $this->transaction->invoice_code);
     }
 
     public function content(): Content

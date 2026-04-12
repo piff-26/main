@@ -13,7 +13,7 @@ class PaymentPendingUserMail extends BaseMailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '[PIFF 2026] Pembayaran Sedang Diverifikasi - ' . $this->transaction->invoice_code);
+        return new Envelope(subject: '[PIFF 2026] Payment Being Verified - ' . $this->transaction->invoice_code);
     }
 
     public function content(): Content
