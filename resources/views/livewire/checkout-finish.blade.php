@@ -4,20 +4,20 @@
     <div
         class="w-full max-w-6xl glass-card rounded-[2rem] p-6 md:p-8 relative bg-slate-900/40 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
 
-        <div wire:loading.flex wire:target="processToPayment, applyVoucher, uploadPaymentProof"
+        <div wire:loading.flex wire:target="processToPayment, applyVoucher, removeVoucher, nextStep"
             class="absolute inset-0 z-50 flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-[2rem]">
             <div class="w-16 h-16 rounded-full border-4 border-[#ff5b1d]/30 border-t-[#ff5b1d] animate-spin"></div>
-            <span class="text-white text-lg font-bold tracking-widest mt-4 animate-pulse">MEMPROSES DATA...</span>
+            <span class="text-white text-lg font-bold tracking-widest mt-4 animate-pulse">PROCESSING...</span>
         </div>
 
         <div class="text-center mb-8 pt-4">
             <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wider mb-2 uppercase">
                 @if ($currentStep == 1)
-                    Lengkapi Data Diri
+                    Complete Your Profile
                 @elseif($currentStep == 2)
-                    Upload Bukti Pembayaran
+                    Upload Payment proof
                 @else
-                    Menunggu Verifikasi
+                    Wait for Verification
                 @endif
             </h1>
 
@@ -38,7 +38,7 @@
 
             {{-- Progress Steps --}}
             <div class="flex items-center justify-center space-x-4 mt-6">
-                @foreach ([1 => 'Biodata', 2 => 'Pembayaran', 3 => 'Verifikasi'] as $step => $label)
+                @foreach ([1 => 'Data', 2 => 'Payment', 3 => 'Verification'] as $step => $label)
                     <div class="flex flex-col items-center">
                         <div
                             class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
@@ -189,14 +189,14 @@
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-slate-700/50">
-                        <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">KODE VOUCHER
-                            (OPSIONAL)</label>
+                        <label class="block text-xs font-bold text-slate-400 tracking-wider mb-2">Voucher Code
+                            (Optional)</label>
                         <div class="flex flex-col gap-2">
                             <input type="text" wire:model="voucher_code"
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white uppercase focus:border-[#ff5b1d] transition"
-                                placeholder="MASUKKAN KODE">
+                                placeholder="ENTER CODE">
                             <button wire:click.prevent="applyVoucher"
-                                class="w-full bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">TERAPKAN</button>
+                                class="w-full bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">APPLY</button>
                         </div>
                         @error('voucher_code')
                             <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
@@ -211,10 +211,10 @@
                         <input type="checkbox" id="agree_tnc" wire:model="agree_tnc"
                             class="w-4 h-4 accent-[#ff5b1d]" {{ !$tncRead ? 'disabled' : '' }}>
                         <label for="agree_tnc" class="text-sm text-slate-300">
-                            Saya menyetujui
+                            I Agree
                             <button type="button" x-data x-on:click="$dispatch('open-tnc')"
-                                class="text-[#ff5b1d] underline hover:text-[#ff8c3a] transition">Syarat dan
-                                Ketentuan</button>
+                                class="text-[#ff5b1d] underline hover:text-[#ff8c3a] transition">Terms and
+                                Conditions</button>
                         </label>
                     </div>
                     @if ($tncError)
@@ -222,18 +222,29 @@
                     @endif
 
                     <div class="mt-6">
-                        <button wire:click="cancelTransaction"
-                            x-on:click="if(!confirm('Batalkan transaksi ini? Kuota tiket akan dikembalikan.')) $event.preventDefault()"
+                        <button type="button"
+                            x-on:click="Swal.fire({
+                                title: 'Cancel Transaction?',
+                                text: 'This action cannot be undone.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#ef4444',
+                                cancelButtonColor: '#475569',
+                                confirmButtonText: 'Yes, cancel it',
+                                cancelButtonText: 'Go back',
+                                background: '#0f172a',
+                                color: '#f1f5f9'
+                            }).then(result => { if (result.isConfirmed) $wire.cancelTransaction() })"
                             class="inline-flex items-center gap-2 text-red-400 hover:text-red-300 text-sm underline transition">
-                            <i class="fas fa-times-circle"></i> Batalkan Transaksi
+                            <i class="fas fa-times-circle"></i> Cancel Transaction
                         </button>
                     </div>
                 </div>
 
                 <div class="w-full md:w-2/5">
                     <div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 sticky top-6">
-                        <h3 class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3">RINGKASAN
-                            PESANAN</h3>
+                        <h3 class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3">ORDER
+                            SUMMARY</h3>
 
                         <div class="space-y-4 mb-6">
                             @foreach ($transaction->transactionItems as $item)
@@ -242,7 +253,7 @@
                                         <p class="text-white font-semibold">{{ $item->ticketCategory->name }}</p>
                                         <p class="text-slate-400 text-sm">{{ $item->quantity }}x Tiket</p>
                                     </div>
-                                    <p class="text-white">Rp
+                                    <p class="text-white">IDR
                                         {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</p>
                                 </div>
                             @endforeach
@@ -250,21 +261,42 @@
                             @if ($discount_amount > 0)
                                 <div
                                     class="flex justify-between items-center text-green-400 pt-2 border-t border-slate-700/50">
-                                    <p class="font-semibold">Diskon Voucher</p>
-                                    <p>- Rp {{ number_format($discount_amount, 0, ',', '.') }}</p>
+                                    <p class="font-semibold">Voucher Discount</p>
+                                    <p>- IDR {{ number_format($discount_amount, 0, ',', '.') }}</p>
                                 </div>
                             @endif
                         </div>
 
-                        <div class="flex justify-between items-center mb-6 pt-4 border-t border-slate-600">
-                            <p class="text-slate-300 font-bold">TOTAL BAYAR</p>
-                            <p class="text-2xl font-extrabold text-[#ff5b1d]">Rp
-                                {{ number_format($grand_total, 0, ',', '.') }}</p>
+                        <div class="flex flex-col justify-between items-center mb-6 pt-4 border-t border-slate-600"
+                            x-data="{
+                                usd: null,
+                                idr: {{ (int) $grand_total }},
+                                async fetchRate() {
+                                    if (window._usdRate) { this.usd = (this.idr * window._usdRate).toFixed(2); return; }
+                                    try {
+                                        const r = await fetch('https://api.frankfurter.dev/v1/latest?base=IDR&symbols=USD');
+                                        const d = await r.json();
+                                        window._usdRate = d.rates.USD;
+                                        this.usd = (this.idr * window._usdRate).toFixed(2);
+                                    } catch (e) { this.usd = null; }
+                                }
+                            }" x-init="fetchRate()"
+                            x-effect="idr = {{ (int) $grand_total }}; idrFormatted = '{{ number_format($grand_total, 0, ',', '.') }}'; if(window._usdRate) usd = (idr * window._usdRate).toFixed(2)">
+                            <p class="text-slate-300 font-bold">TOTAL</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <p class="text-2xl font-extrabold text-[#ff5b1d]">IDR
+                                    {{ number_format($grand_total, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1" x-show="idr > 0">
+                                <p class="text-2xl text-slate-300">≈ $<span x-text="usd ?? '...'"></span> USD
+                                    <span class="text-slate-600 text-xs">· estimated</span>
+                                </p>
+                            </div>
                         </div>
 
                         <button wire:click="processToPayment"
                             class="w-full bg-[#ff5b1d] hover:bg-[#e04a10] text-white py-4 rounded-xl font-bold tracking-widest transition-all shadow-[0_0_20px_rgba(255,91,29,0.3)] hover:shadow-[0_0_30px_rgba(255,91,29,0.5)] transform hover:-translate-y-1">
-                            LANJUT PEMBAYARAN
+                            CONTINUE TO PAYMENT
                         </button>
                     </div>
                 </div>
@@ -278,9 +310,9 @@
                     <div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50">
                         <h3
                             class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3 flex items-center gap-2">
-                            <i class="fas fa-university text-[#ff5b1d]"></i> INFO PEMBAYARAN
+                            <i class="fas fa-university text-[#ff5b1d]"></i> PAYMENT INFORMATION
                         </h3>
-                        <p class="text-slate-400 text-sm mb-4">Transfer ke salah satu rekening berikut:</p>
+                        <p class="text-slate-400 text-sm mb-4">Transfer to one of the following accounts:</p>
 
                         <div class="space-y-3">
                             @foreach (PaymentAccountEnum::cases() as $account)
@@ -305,9 +337,9 @@
 
                         <div class="mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
                             <p class="text-yellow-400 text-sm font-semibold mb-1"><i
-                                    class="fas fa-exclamation-triangle mr-2"></i>Penting!</p>
-                            <p class="text-yellow-300/80 text-xs mb-3">Transfer tepat sesuai total tagihan. Gunakan
-                                berita transfer berikut:</p>
+                                    class="fas fa-exclamation-triangle mr-2"></i>Important!</p>
+                            <p class="text-yellow-300/80 text-xs mb-3">Transfer the exact total amount due. Use the
+                                following transfer reference:</p>
                             <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
                                 <span class="text-white font-mono text-sm flex-1"
                                     id="transferNote">piff_{{ strtolower(substr($transaction->invoice_code, 4)) }}</span>
@@ -319,11 +351,43 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 pt-4 border-t border-slate-700">
-                            <div class="flex justify-between items-center">
-                                <span class="text-slate-400">Total Tagihan</span>
-                                <span class="text-2xl font-extrabold text-[#ff5b1d]">Rp
-                                    {{ number_format($grand_total, 0, ',', '.') }}</span>
+                        <div class="mt-4 pt-4 border-t border-slate-700" x-data="{
+                            usd: null,
+                            idr: {{ (int) $grand_total }},
+                            idrFormatted: '{{ number_format($grand_total, 0, ',', '.') }}',
+                            async fetchRate() {
+                                if (window._usdRate) { this.usd = (this.idr * window._usdRate).toFixed(2); return; }
+                                try {
+                                    const r = await fetch('https://api.frankfurter.dev/v1/latest?base=IDR&symbols=USD');
+                                    const d = await r.json();
+                                    window._usdRate = d.rates.USD;
+                                    this.usd = (this.idr * window._usdRate).toFixed(2);
+                                } catch (e) { this.usd = null; }
+                            }
+                        }"
+                            x-init="fetchRate()">
+                            <div class="flex justify-between items-start">
+                                <span class="text-slate-400">Total</span>
+                                <div class="text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <span class="text-2xl font-extrabold text-[#ff5b1d]">IDR
+                                            <span x-text="idrFormatted"></span></span>
+                                        <button type="button" x-on:click="copyText(String(idr), $el)"
+                                            class="text-slate-500 hover:text-slate-300 transition p-1 rounded-lg hover:bg-slate-700">
+                                            <i class="fas fa-copy text-xs"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 mt-0.5" x-show="idr > 0">
+                                        <span class="text-2xl text-slate-300">≈ $<span x-text="usd ?? '...'"></span>
+                                            USD
+                                            <span class="text-slate-600 text-xs">· estimated</span>
+                                        </span>
+                                        <button type="button" x-show="usd" x-on:click="copyText(usd, $el)"
+                                            class="text-slate-500 hover:text-slate-300 transition p-1 rounded-lg hover:bg-slate-700">
+                                            <i class="fas fa-copy text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="flex justify-between items-center mt-1">
                                 <span class="text-slate-400 text-sm">Invoice</span>
@@ -338,7 +402,7 @@
                     <div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50">
                         <h3
                             class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3 flex items-center gap-2">
-                            <i class="fas fa-upload text-[#ff5b1d]"></i> UPLOAD BUKTI TRANSFER
+                            <i class="fas fa-upload text-[#ff5b1d]"></i> UPLOAD PAYMENT PROOF
                         </h3>
 
                         <div x-data="{
@@ -374,7 +438,7 @@
                                 <template x-if="!uploading && !preview">
                                     <div>
                                         <i class="fas fa-cloud-upload-alt text-4xl text-slate-500 mb-3"></i>
-                                        <p class="text-slate-400 text-sm">Klik atau drag & drop foto bukti transfer</p>
+                                        <p class="text-slate-400 text-sm">Click or drag & drop</p>
                                         <p class="text-slate-600 text-xs mt-1">JPG, PNG, max 2MB</p>
                                     </div>
                                 </template>
@@ -382,7 +446,7 @@
                                     <div>
                                         <img :src="preview"
                                             class="max-h-48 mx-auto rounded-lg object-contain mb-2">
-                                        <p class="text-slate-500 text-xs">Klik untuk ganti foto</p>
+                                        <p class="text-slate-500 text-xs">Click to change image</p>
                                     </div>
                                 </template>
                             </div>
@@ -398,11 +462,11 @@
                         <div class="flex flex-col gap-3 mt-6">
                             <button wire:click="previousStep"
                                 class="flex-1 px-4 py-3 border border-slate-600 text-slate-300 rounded-xl hover:bg-slate-800 transition font-semibold">
-                                <i class="fas fa-arrow-left mr-2"></i>Kembali
+                                <i class="fas fa-arrow-left mr-2"></i>Back
                             </button>
                             <button wire:click="uploadPaymentProof"
                                 class="flex-1 bg-[#ff5b1d] hover:bg-[#e04a10] text-white py-3 rounded-xl font-bold tracking-wider transition shadow-[0_0_20px_rgba(255,91,29,0.3)]">
-                                <i class="fas fa-paper-plane mr-2"></i>KIRIM BUKTI
+                                <i class="fas fa-paper-plane mr-2"></i>UPLOAD
                             </button>
                         </div>
                     </div>
@@ -416,11 +480,11 @@
                     class="w-24 h-24 bg-yellow-500/20 rounded-full flex items-center justify-center mb-6 border-4 border-yellow-500">
                     <i class="fas fa-clock text-yellow-400 text-4xl"></i>
                 </div>
-                <h2 class="text-3xl font-bold text-white mb-2">Bukti Pembayaran Terkirim!</h2>
-                <p class="text-slate-400 mb-2 max-w-md">Terima kasih! Bukti pembayaran Anda sedang diverifikasi oleh
-                    tim kami.</p>
-                <p class="text-slate-500 text-sm mb-8 max-w-md">Proses verifikasi biasanya memakan waktu 1x24 jam.
-                    Harap cek email dan halaman riwayat transaksi Anda secara berkala.</p>
+                <h2 class="text-3xl font-bold text-white mb-2">Payment Proof Submitted!</h2>
+                <p class="text-slate-400 mb-2 max-w-md">Thank you! Your payment proof is currently being verified by
+                    our team.</p>
+                <p class="text-slate-500 text-sm mb-8 max-w-md">The verification process usually takes up to 24 hours.
+                    Please check your email and transaction history page regularly.</p>
 
                 <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl w-full max-w-md mb-8">
                     <div class="flex justify-between mb-2">
@@ -428,24 +492,24 @@
                         <span class="text-white font-mono font-semibold">{{ $transaction->invoice_code }}</span>
                     </div>
                     <div class="flex justify-between mb-2">
-                        <span class="text-slate-400">Nama</span>
+                        <span class="text-slate-400">Name</span>
                         <span class="text-white font-semibold">{{ $transaction->buyer_name }}</span>
                     </div>
                     <div class="flex justify-between mb-2">
-                        <span class="text-slate-400">Jumlah Tiket</span>
+                        <span class="text-slate-400">Ticket Quantity</span>
                         <span class="text-white font-semibold">{{ $transaction->transactionItems->sum('quantity') }}
                             Tiket</span>
                     </div>
                     <div class="flex justify-between pt-4 border-t border-slate-700 mt-2">
                         <span class="text-slate-300 font-bold">Total</span>
-                        <span class="text-[#ff5b1d] font-bold">Rp
+                        <span class="text-[#ff5b1d] font-bold">IDR
                             {{ number_format($transaction->total_amount, 0, ',', '.') }}</span>
                     </div>
                 </div>
 
                 <a href="{{ route('user.transactions-history') }}"
                     class="px-8 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition flex items-center gap-3">
-                    <i class="fas fa-history"></i> Lihat Riwayat Transaksi
+                    <i class="fas fa-history"></i> Check Transaction History
                 </a>
             </div>
         @endif
@@ -465,65 +529,62 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg flex flex-col"
             style="max-height: 80vh;">
             <div class="px-6 py-4 border-b border-slate-700">
-                <h3 class="text-white font-bold text-lg tracking-wider">SYARAT DAN KETENTUAN</h3>
+                <h3 class="text-white font-bold text-lg tracking-wider">TERMS AND CONDITIONS</h3>
             </div>
 
             <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3" x-ref="tncContent"
                 x-on:scroll="if($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 10) scrolled = true">
 
-                <p class="font-bold text-white">A. KETENTUAN UMUM & VALIDITAS TIKET</p>
-                <p><span class="font-semibold">1.</span> Tiket hanya berlaku untuk tanggal, waktu, dan acara yang
-                    tertera pada tiket.</p>
-                <p><span class="font-semibold">2.</span> Satu (1) tiket berlaku untuk satu (1) orang.</p>
-                <p><span class="font-semibold">3.</span> Tiket tidak dapat dipindahtangankan tanpa persetujuan resmi
-                    dari panitia.</p>
-                <p><span class="font-semibold">4.</span> Tiket yang telah dibeli dianggap sah apabila diperoleh melalui
-                    kanal penjualan resmi yang ditunjuk oleh panitia.</p>
-                <p><span class="font-semibold">5.</span> Panitia berhak untuk:</p>
-                <p class="ml-4"><span class="font-semibold">a.</span> Menolak tiket yang rusak, tidak terbaca,
-                    terduplikasi, atau diperoleh secara tidak sah.</p>
-                <p class="ml-4"><span class="font-semibold">b.</span> Memproses atau mengajukan hukum, baik perdata
-                    atau kriminal kepada pengunjung yang mendapatkan tiket dengan ilegal.</p>
+                <p class="font-bold text-white">A. GENERAL TERMS & TICKET VALIDITY</p>
+                <p><span class="font-semibold">1.</span> Tickets are only valid for the date, time, and event stated on
+                    the ticket.</p>
+                <p><span class="font-semibold">2.</span> One (1) ticket is valid for one (1) person.</p>
+                <p><span class="font-semibold">3.</span> Tickets are non-transferable without official approval from
+                    the organizer.</p>
+                <p><span class="font-semibold">4.</span> Tickets are considered valid only if purchased through
+                    official sales channels designated by the organizer.</p>
+                <p><span class="font-semibold">5.</span> The organizer reserves the right to:</p>
+                <p class="ml-4"><span class="font-semibold">a.</span> Reject tickets that are damaged, unreadable,
+                    duplicated, or obtained unlawfully.</p>
+                <p class="ml-4"><span class="font-semibold">b.</span> Take legal action, both civil and criminal,
+                    against individuals who obtain tickets illegally.</p>
 
-                <p class="font-bold text-white mt-4">B. KEBIJAKAN PEMBELIAN & PENGEMBALIAN DANA</p>
-                <p><span class="font-semibold">1.</span> Seluruh pembelian tiket bersifat final dan tidak dapat
-                    dibatalkan.</p>
-                <p><span class="font-semibold">2.</span> Tiket yang telah dibeli tidak dapat dikembalikan dan tidak
-                    dapat ditukar (<i>non-refundable</i> & <i>non-exchangeable</i>), kecuali apabila acara dibatalkan
-                    secara resmi oleh panitia.</p>
-                <p><span class="font-semibold">3.</span> Panitia tidak bertanggung jawab atas kegagalan proses
-                    pembelian tiket yang disebabkan oleh kesalahan pengisian data oleh pembeli maupun gangguan jaringan.
-                </p>
-                <p><span class="font-semibold">4.</span> Apabila acara dibatalkan oleh panitia, mekanisme pengembalian
-                    dana akan diinformasikan melalui kanal komunikasi resmi PIFF 2026.</p>
-                <p><span class="font-semibold">5.</span> Apabila acara mengalami perubahan jadwal (<i>reschedule</i>),
-                    tiket tetap berlaku untuk tanggal pengganti.</p>
+                <p class="font-bold text-white mt-4">B. PURCHASE & REFUND POLICY</p>
+                <p><span class="font-semibold">1.</span> All ticket purchases are final and cannot be canceled.</p>
+                <p><span class="font-semibold">2.</span> Tickets are non-refundable and non-exchangeable, except in the
+                    event of official cancellation by the organizer.</p>
+                <p><span class="font-semibold">3.</span> The organizer is not responsible for failed transactions
+                    caused by user input errors or network issues.</p>
+                <p><span class="font-semibold">4.</span> In the event of cancellation by the organizer, refund
+                    procedures will be announced through official PIFF 2026 communication channels.</p>
+                <p><span class="font-semibold">5.</span> In the event of rescheduling, tickets will remain valid for
+                    the new date.</p>
 
-                <p class="font-bold text-white mt-4">C. AKSES & REGISTRASI MASUK</p>
-                <p><span class="font-semibold">1.</span> Pengunjung wajib menunjukkan tiket dalam bentuk digital
-                    (<i>e-ticket</i>) saat proses registrasi.</p>
-                <p><span class="font-semibold">2.</span> Tiket digital (<i>e-ticket</i>) akan ditukarkan dengan tiket
-                    gelang yang wajib digunakan selama berada di area acara.</p>
-                <p><span class="font-semibold">3.</span> Pengunjung yang tidak dapat menunjukkan tiket gelang tidak
-                    diperkenankan memasuki area acara.</p>
+                <p class="font-bold text-white mt-4">C. ACCESS & ENTRY REGISTRATION</p>
+                <p><span class="font-semibold">1.</span> Visitors must present their digital ticket (e-ticket) during
+                    registration.</p>
+                <p><span class="font-semibold">2.</span> The e-ticket will be exchanged for a wristband, which must be
+                    worn at all times within the event area.</p>
+                <p><span class="font-semibold">3.</span> Visitors without a valid wristband will not be allowed to
+                    enter the event area.</p>
 
-                <p class="font-bold text-white mt-4">D. KETENTUAN SELAMA ACARA</p>
-                <p><span class="font-semibold">1.</span> Pengunjung wajib menjaga ketertiban dan mematuhi seluruh
-                    peraturan yang berlaku selama acara berlangsung.</p>
-                <p><span class="font-semibold">2.</span> Dilarang membawa barang terlarang sesuai ketentuan panitia.
-                </p>
-                <p><span class="font-semibold">3.</span> Panitia berhak mengeluarkan pengunjung dari area acara apabila
-                    melanggar peraturan tanpa kewajiban pengembalian dana.</p>
-                <p><span class="font-semibold">5.</span> Dengan membeli tiket, pengunjung memberikan persetujuan untuk
-                    didokumentasikan (foto/video) dan digunakan untuk kepentingan publikasi acara.</p>
+                <p class="font-bold text-white mt-4">D. EVENT REGULATIONS</p>
+                <p><span class="font-semibold">1.</span> Visitors must maintain order and comply with all applicable
+                    rules during the event.</p>
+                <p><span class="font-semibold">2.</span> Bringing prohibited items is strictly forbidden as per
+                    organizer regulations.</p>
+                <p><span class="font-semibold">3.</span> The organizer reserves the right to remove any visitor who
+                    violates the rules without refund.</p>
+                <p><span class="font-semibold">5.</span> By purchasing a ticket, visitors consent to being photographed
+                    or recorded for event documentation and promotional purposes.</p>
 
-                <p class="font-bold text-white mt-4">E. KEJADIAN KAHAR (FORCE MAJEURE)</p>
-                <p><span class="font-semibold">1.</span> Dalam hal terjadi kejadian kahar (<i>Force Majeure</i>),
-                    Panitia berhak untuk membatalkan, menunda, atau menyesuaikan format acara.</p>
-                <p><span class="font-semibold">2.</span> Informasi resmi terkait perubahan akibat <i>Force Majeure</i>
-                    akan diumumkan melalui kanal komunikasi resmi PIFF 2026.</p>
+                <p class="font-bold text-white mt-4">E. FORCE MAJEURE</p>
+                <p><span class="font-semibold">1.</span> In the event of force majeure, the organizer reserves the
+                    right to cancel, postpone, or modify the event format.</p>
+                <p><span class="font-semibold">2.</span> Official updates regarding force majeure will be announced
+                    through PIFF 2026 official communication channels.</p>
 
-                <p class="text-slate-500 text-xs mt-4">Scroll ke bawah untuk menyetujui.</p>
+                <p class="text-slate-500 text-xs mt-4">Scroll down to agree.</p>
             </div>
 
             <div class="px-6 py-4 border-t border-slate-700">
@@ -537,7 +598,7 @@
                         document.getElementById('navigation-bar')?.classList.remove('nav-hidden');
                     "
                     class="w-full text-white font-bold py-3 rounded-xl transition">
-                    Saya Setuju
+                    AGREE
                 </button>
             </div>
         </div>
@@ -569,7 +630,7 @@
         }, 1500);
 
         Toastify({
-            text: 'Disalin!',
+            text: 'Copied!',
             duration: 1500,
             gravity: 'top',
             position: 'right',
