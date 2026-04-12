@@ -44,7 +44,56 @@ const eventsData = {!! json_encode($events->map(function($event) {
     ];
 })) !!};
 
+// Global image dropzone helpers — must be global for onclick attributes in Swal HTML
+function imageDropzone(inputId, existingUrl = null) {
+    const previewId = inputId + '_preview';
+    const zoneId    = inputId + '_zone';
+    const emptyHtml = `<div class="text-gray-400 py-4"><i class="fas fa-cloud-upload-alt text-3xl mb-2 block"></i><p class="text-sm">Click or drag &amp; drop image here</p><p class="text-xs mt-1">Max 2MB</p></div>`;
+    const existingHtml = existingUrl
+        ? `<div class="relative inline-block"><img src="${existingUrl}" class="max-h-32 mx-auto rounded object-contain"><button type="button" onclick="event.stopPropagation();clearImage('${inputId}')" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow">&times;</button></div>`
+        : emptyHtml;
+    return `<div id="${zoneId}" class="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition bg-gray-50" ondragover="event.preventDefault();this.classList.add('border-blue-400','bg-blue-50')" ondragleave="this.classList.remove('border-blue-400','bg-blue-50')" ondrop="event.preventDefault();this.classList.remove('border-blue-400','bg-blue-50');handleDrop(event,'${inputId}')" onclick="document.getElementById('${inputId}').click()"><div id="${previewId}">${existingHtml}</div><input id="${inputId}" type="file" accept="image/*" class="hidden" onchange="previewImage(this,'${previewId}')"></div>`;
+}
+
+function handleDrop(ev, inputId) {
+    const file = ev.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const input = document.getElementById(inputId);
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    previewImage(input, inputId + '_preview');
+}
+
+function previewImage(input, previewId) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(previewId).innerHTML =
+            `<div class="relative inline-block"><img src="${e.target.result}" class="max-h-32 mx-auto rounded object-contain"><button type="button" onclick="event.stopPropagation();clearImage('${input.id}')" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow">&times;</button></div>`;
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImage(inputId) {
+    document.getElementById(inputId).value = '';
+    document.getElementById(inputId + '_preview').innerHTML =
+        `<div class="text-gray-400 py-4"><i class="fas fa-cloud-upload-alt text-3xl mb-2 block"></i><p class="text-sm">Click or drag &amp; drop image here</p><p class="text-xs mt-1">Max 2MB</p></div>`;
+}
+
 $(document).ready(function() {
+    const MAX_MB = 2;
+    const MAX_BYTES = MAX_MB * 1024 * 1024;
+
+    function validateImageSize(inputId, label) {
+        const file = document.getElementById(inputId)?.files[0];
+        if (file && file.size > MAX_BYTES) {
+            Swal.showValidationMessage(`${label} must be under ${MAX_MB}MB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+            return false;
+        }
+        return true;
+    }
     function renderEvents() {
         let html = '';
         eventsData.forEach((event, index) => {
@@ -230,12 +279,12 @@ $(document).ready(function() {
                         <input id="eventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter location">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(opsional)</span></label>
-                        <input id="eventImage" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(optional)</span></label>
+                        ${imageDropzone('eventImage')}
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Seat Map Image <span class="text-gray-400 font-normal">(opsional)</span></label>
-                        <input id="eventSeatMap" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Seat Map Image <span class="text-gray-400 font-normal">(optional)</span></label>
+                        ${imageDropzone('eventSeatMap')}
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(opsional)</span></label>
@@ -278,6 +327,9 @@ $(document).ready(function() {
                     Swal.showValidationMessage('End time must be after start time');
                     return false;
                 }
+
+                if (!validateImageSize('eventImage', 'Banner Image')) return false;
+                if (!validateImageSize('eventSeatMap', 'Seat Map Image')) return false;
 
                 const formData = new FormData();
                 formData.append('name', name);
@@ -352,14 +404,12 @@ $(document).ready(function() {
                         <input id="editEventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.location}">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(kosongkan jika tidak diganti)</span></label>
-                        ${event.image ? `<img src="${event.image}" class="w-full h-32 object-cover rounded-lg mb-2">` : ''}
-                        <input id="editEventImage" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(leave empty to keep current)</span></label>
+                        ${imageDropzone('editEventImage', event.image)}
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Seat Map Image <span class="text-gray-400 font-normal">(kosongkan jika tidak diganti)</span></label>
-                        ${event.seatMapImage ? `<img src="${event.seatMapImage}" class="w-full h-32 object-contain rounded-lg mb-2 bg-gray-50">` : ''}
-                        <input id="editEventSeatMap" type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Seat Map Image <span class="text-gray-400 font-normal">(leave empty to keep current)</span></label>
+                        ${imageDropzone('editEventSeatMap', event.seatMapImage)}
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(opsional)</span></label>
@@ -377,6 +427,9 @@ $(document).ready(function() {
             cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
             confirmButtonColor: '#27b4f7',
             preConfirm: () => {
+                if (!validateImageSize('editEventImage', 'Banner Image')) return false;
+                if (!validateImageSize('editEventSeatMap', 'Seat Map Image')) return false;
+
                 const formData = new FormData();
                 formData.append('name', $('#editEventName').val());
                 formData.append('event_date', $('#editEventDate').val());
@@ -395,6 +448,11 @@ $(document).ready(function() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Saving...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
                 $.ajax({
                     url: `/admin/event/${eventId}`,
                     method: 'POST',
