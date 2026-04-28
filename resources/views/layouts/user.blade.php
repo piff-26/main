@@ -4,11 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="@yield('og_title', 'Petra International Film Festival 2026')">
-    <meta property="og:description" content="@yield('og_description', 'PIFF serves as a platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas.')">
+    <meta name="description" content="@yield('meta_description', 'Petra International Film Festival (PIFF) 2026 — presented by ASFS at Petra Christian University. A platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas.')">
+    <meta name="keywords" content="PIFF, Petra International Film Festival, film festival, Petra Christian University, ASFS, film competition, screening, Surabaya">
+    <meta name="author" content="ASFS Petra Christian University">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('og_title', 'Petra International Film Festival 2026 | PIFF')">
+    <meta property="og:description" content="@yield('og_description', 'PIFF serves as a platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas. Film competitions, screenings, and dialogue at Petra Christian University.')">
     <meta property="og:image" content="@yield('og_image', asset('assets/img/og_main.png'))">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PIFF 2026">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', 'Petra International Film Festival 2026 | PIFF')">
+    <meta name="twitter:description" content="@yield('og_description', 'PIFF serves as a platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('assets/img/og_main.png'))">
     {{-- <title>{{ $title }}</title> --}}
     <title>PIFF 2026 | @yield('title', $title ?? 'Welcome')</title>
     <link rel="icon" href="{{ asset('assets/logo/logo_browser_piff.png') }}" type="image/x-icon" />

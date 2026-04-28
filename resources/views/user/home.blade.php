@@ -1,6 +1,10 @@
 @extends('layouts.user')
 @section('title', 'Home')
 
+@section('og_title', 'Petra International Film Festival 2026 | PIFF')
+@section('og_description', 'PIFF serves as a platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas. Join us for film competitions, screenings, and dialogue at Petra Christian University.')
+@section('og_image', asset('assets/img/og_main.png'))
+
 @push('styles')
     <style>
         #title_wrapper {
