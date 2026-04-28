@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             DivisionSeeder::class,
             AdminSeeder::class,
             EventSeeder::class,
-            VoucherSeeder::class,
+            // VoucherSeeder::class,
             // UserSeeder::class,
             // DummyDataSeeder::class,
         ]);
