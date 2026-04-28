@@ -1,4 +1,5 @@
 @extends('layouts.user')
+@section('no_loader', '1')
 
 @section('content')
     <div class="min-h-screen bg-black py-36 px-4">

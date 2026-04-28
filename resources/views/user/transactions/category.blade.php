@@ -1,4 +1,5 @@
 @extends('layouts.user')
+@section('no_loader', '1')
 @section('title', 'Ticket - ' . $event->name)
 
 @section('content')

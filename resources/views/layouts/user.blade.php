@@ -240,7 +240,7 @@
 
 <body>
 
-    @include('components.loader')
+    @if(trim($__env->yieldContent('no_loader')) !== '1') @include('components.loader') @endif
     @include('components.navbar')
 
 
