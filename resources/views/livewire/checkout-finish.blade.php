@@ -209,8 +209,8 @@
                     {{-- TNC --}}
                     <div class="mt-6 flex items-center gap-3">
                         <input type="checkbox" id="agree_tnc" wire:model="agree_tnc"
-                            class="w-4 h-4 accent-[#ff5b1d]" {{ !$tncRead ? 'disabled' : '' }}>
-                        <label for="agree_tnc" class="text-sm text-slate-300">
+                            class="w-4 h-4 accent-[#ff5b1d] cursor-pointer">
+                        <label for="agree_tnc" class="text-sm text-slate-300 cursor-pointer">
                             I Agree
                             <button type="button" x-data x-on:click="$dispatch('open-tnc')"
                                 class="text-[#ff5b1d] underline hover:text-[#ff8c3a] transition">Terms and
