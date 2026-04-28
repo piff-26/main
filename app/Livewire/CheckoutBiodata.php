@@ -293,10 +293,10 @@ class CheckoutBiodata extends Component
             SystemLog::success('email', "Email pending dikirim ke {$user->email}", $this->transaction->invoice_code);
         }
 
-        // Kirim email ke semua admin (delay 5 detik agar tidak rate limit)
-        $adminEmails = \App\Models\Admin::pluck('email')->filter()->toArray();
+        $adminEmails = \App\Models\Admin::whereHas('division', fn($q) => $q->whereIn('slug', ['it', 'bph', 'sc', 'sekkon']))
+            ->pluck('email')->filter()->toArray();
         if (!empty($adminEmails)) {
-            Mail::to($adminEmails)->later(now()->addSeconds(5), new PaymentPendingAdminMail($this->transaction));
+            Mail::to($adminEmails)->send(new PaymentPendingAdminMail($this->transaction));
             SystemLog::success('email', 'Email notifikasi admin dijadwalkan', $this->transaction->invoice_code);
         }
 
