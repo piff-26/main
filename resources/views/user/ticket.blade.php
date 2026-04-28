@@ -21,22 +21,22 @@
                 <div class="flex flex-col gap-6">
                     @foreach ($events as $event)
                         <div
-                            class="bg-white/10 border border-white/20 rounded-2xl overflow-hidden flex flex-row hover:border-yellow-400/50 transition-all group">
-                            <div class="overflow-hidden w-72 shrink-0">
+                            class="bg-white/10 border border-white/20 rounded-2xl overflow-hidden flex flex-col md:flex-row hover:border-yellow-400/50 transition-all group">
+                            <div class="overflow-hidden w-full md:w-72 shrink-0">
                                 <img src="{{ $event->image ? asset('storage/' . $event->image) : 'https://ui-avatars.com/api/?name=' . urlencode($event->name) . '&background=111&color=fec401&size=512' }}"
                                     alt="{{ $event->name }}"
-                                    class="w-full h-full object-cover aspect-video group-hover:scale-105 transition-transform duration-300">
+                                    class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
-                            <div class="p-6 flex-1 flex flex-col justify-between">
+                            <div class="p-4 md:p-6 flex-1 flex flex-col justify-between">
                                 <div>
-                                    <h3 class="text-white font-bold text-xl mb-2">{{ $event->name }}</h3>
+                                    <h3 class="text-white font-bold text-lg md:text-xl mb-2">{{ $event->name }}</h3>
                                     <p class="text-gray-400 text-sm line-clamp-3">
                                         {{ $event->description ?? 'Pesan tiketmu sekarang dan jadilah bagian dari keseruan ' . $event->name . '.' }}
                                     </p>
                                 </div>
                                 <div class="mt-4 pt-4 border-t border-white/10">
                                     <a href="{{ route('checkout.step1', $event->slug) }}"
-                                        class="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0">
+                                        class="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0 w-full md:w-auto">
                                         View Event <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
