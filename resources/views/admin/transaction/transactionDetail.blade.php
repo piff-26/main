@@ -11,10 +11,12 @@
             </div>
             <div class="flex gap-2 flex-wrap justify-end">
                 {{-- Export PDF --}}
+                @if($transaction->transaction_status === TransactionStatusEnum::PAID->value)
                 <a href="{{ route('admin.transaction.export-pdf', $transaction->invoice_code) }}" target="_blank"
                     class="px-4 py-2 text-sm bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition font-semibold">
                     <i class="fas fa-file-pdf mr-2"></i>Export PDF
                 </a>
+                @endif
 
                 {{-- Validate / Reject untuk PENDING --}}
                 @if($transaction->transaction_status === TransactionStatusEnum::PENDING->value)

@@ -161,9 +161,7 @@ $(document).ready(function() {
                     <a href="/admin/transaction/detail/${data.invoice_code}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition font-semibold" title="View Details">
                         <i class="fas fa-eye"></i> View
                     </a>
-                    <button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition font-semibold btn-export-pdf" data-invoice="${data.invoice_code}" title="Export PDF">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
+                    ${data.transaction_status === STATUS_PAID ? `<button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition font-semibold btn-export-pdf" data-invoice="${data.invoice_code}" title="Export PDF"><i class="fas fa-file-pdf"></i> PDF</button>` : ''}
                 `
             },
             {
