@@ -81,9 +81,9 @@
 @endsection
 
 @section('scripts')
-    <script
+    {{-- <script
         src="{{ env('MIDTRANS_IS_PRODUCTION') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-        data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+        data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script> --}}
 
     <script type="text/javascript">
         document.getElementById('pay-button').onclick = function() {

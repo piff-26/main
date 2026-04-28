@@ -376,7 +376,7 @@
         </li>
     </ul>
 
-    <div class="burger">
+    <div class="burger" role="button" aria-label="Toggle navigation menu" aria-expanded="false" tabindex="0">
         <div class="line1"></div>
         <div class="line2"></div>
         <div class="line3"></div>
@@ -397,8 +397,11 @@
             nav.classList.toggle('nav-active');
             overlay.classList.toggle('active');
             logoContainer.classList.toggle('hide');
+            
+            const isActive = nav.classList.contains('nav-active');
+            burger.setAttribute('aria-expanded', isActive);
 
-            if (nav.classList.contains('nav-active')) {
+            if (isActive) {
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
                 if (typeof window.disableLenis === 'function') {
@@ -424,6 +427,12 @@
         }
 
         burger.addEventListener('click', toggleMenu);
+        burger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleMenu();
+            }
+        });
         overlay.addEventListener('click', toggleMenu);
 
         navLinks.forEach(link => {

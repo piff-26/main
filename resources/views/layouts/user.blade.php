@@ -380,8 +380,8 @@
         </script>
     @endif
 
-    <script src="https://app.{{ env('MIDTRANS_IS_PRODUCTION') ? '' : 'sandbox.' }}midtrans.com/snap/snap.js"
-        data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    {{-- <script src="https://app.{{ env('MIDTRANS_IS_PRODUCTION') ? '' : 'sandbox.' }}midtrans.com/snap/snap.js" --}}
+        {{-- data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script> --}}
 
 
 
