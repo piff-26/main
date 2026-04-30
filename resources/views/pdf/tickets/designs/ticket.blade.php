@@ -2,19 +2,18 @@
     $categoryName = strtolower(trim($ticket->ticketCategory->name));
     $colors = [
         'gold' => '#b78727',
-        'platinum' => '#494949',
+        'platinum' => '#615d5d',
         'silver' => '#c1c1c1',
-        'regular' => '#cecece',
+        'regular' => '#9c734f',
     ];
     $headingColor = $colors[$categoryName] ?? '#fff';
 
-    $qrCodeSvg     = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($ticket->ticket_code);
-    $qrCodeBase64  = base64_encode($qrCodeSvg);
+    $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($ticket->ticket_code);
+    $qrCodeBase64 = base64_encode($qrCodeSvg);
 
-    $generator     = new \Picqer\Barcode\BarcodeGeneratorPNG();
-    $barcodePng    = $generator->getBarcode($ticket->ticket_code, $generator::TYPE_CODE_128, 3, 80);
+    $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+    $barcodePng = $generator->getBarcode($ticket->ticket_code, $generator::TYPE_CODE_128, 3, 80);
     $barcodeBase64 = base64_encode($barcodePng);
-
 @endphp
 
 <style>
@@ -30,17 +29,17 @@
 
 {{-- Main Container --}}
 <div
-    style="background-color: #111; background-image: url('{{ asset('assets/mail/bg_email.jpg') }}'); background-size: cover; background-position: center; padding: 40px 30px; border-radius: 12px; margin-top: 50px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; max-width: 600px; margin-left: auto; margin-right: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    style="background-color: #111; padding: 40px 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
 
     {{-- Header --}}
     <div
         style="text-align: center; margin-bottom: 25px;background-color: {{ $headingColor }}; border-radius: 10px; padding: 20px;">
-        <h1 style="text-transform: uppercase; letter-spacing: 2px; font-size: 36px; font-weight: 900; margin: 0 0 10px 0;"
-            class="font-montech-medium">
-            {{ $ticket->ticketCategory->name }} TICKET 
+        <h1
+            style="text-transform: uppercase; letter-spacing: 2px; font-size: 36px; font-weight: 900; margin: 0 0 10px 0; font-weight: bold;">
+            {{ $ticket->ticketCategory->name }} TICKET
         </h1>
         <h2 style="margin: 0; font-size: 18px; font-weight: normal; color: #fff; letter-spacing: 1px;">
-            {{ $ticket->ticketCategory->event->name }} 
+            {{ $ticket->ticketCategory->event->name }}
         </h2>
     </div>
 
@@ -89,7 +88,7 @@
                     INVOICE</div>
                 <div
                     style="font-size: 13px; font-family: monospace; color: #00bfff; font-style: italic; font-weight: bold;">
-                    {{ $transaction->invoice_code }} 
+                    {{ $transaction->invoice_code }}
                 </div>
             </td>
             <td style="padding: 10px; width: 33%;">

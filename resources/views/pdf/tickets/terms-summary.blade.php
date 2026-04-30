@@ -1,4 +1,4 @@
-<div style="padding: 20px; border: 2px solid #000;">
+<div style="padding: 20px; border-top: 2px solid #000;">
     <h1 class="text-center" style="margin-bottom: 0;">INVOICE</h1>
     <h3 class="text-center" style="margin-top: 5px; color: #555;">{{ $transaction->invoice_code }}</h3>
 
