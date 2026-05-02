@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class SystemLog extends Model
 {
+    use HasUuids;
     protected $fillable = ['type', 'status', 'message', 'reference', 'context'];
     protected $casts = ['context' => 'array'];
 

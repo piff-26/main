@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ticket_categories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('event_id')->constrained('events')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
             $table->double('price');

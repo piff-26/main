@@ -8,6 +8,15 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TransactionHistoryController;
 use App\Http\Controllers\TransactionController;
 
+// Route::get('/cektiket',function(){
+//     return view('pdf.tickets.designs.ticket');
+// });
+
+// Route::get('/cekbundle',function(){
+//     return view('pdf.tickets.bundle');
+// });
+
+
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/ticket', [UserController::class, 'ticketView'])->name('user.ticket');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
@@ -42,6 +51,8 @@ Route::prefix('admin')->group(function(){
 
             // event
             Route::get('/event',[AdminController::class, 'listEvents'])->name('admin.event');
+            Route::get('/event/{id}/detail',[AdminController::class, 'eventDetail'])->name('admin.event.detail');
+            Route::get('/event/{id}/export-excel',[AdminController::class, 'exportEventTicketsExcel'])->name('admin.event.export-excel');
             Route::post('/event',[AdminController::class, 'storeEvent'])->name('admin.event.store');
             Route::put('/event/{id}',[AdminController::class, 'updateEvent'])->name('admin.event.update');
             Route::delete('/event/{id}',[AdminController::class, 'deleteEvent'])->name('admin.event.delete');

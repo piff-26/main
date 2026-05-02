@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('transaction_id')->constrained('transactions')->cascadeOnDelete();
-            $table->foreignId('ticket_category_id')->constrained('ticket_categories')->cascadeOnDelete();
+            $table->foreignUuid('ticket_category_id')->constrained('ticket_categories')->cascadeOnDelete();
             $table->string('ticket_code')->unique();
             
             $table->boolean('is_checked_in')->default(false);

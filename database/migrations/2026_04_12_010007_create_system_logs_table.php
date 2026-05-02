@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('system_logs', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('type');           // email, ticket, checkin
             $table->string('status');         // success, failed, info
             $table->string('message');

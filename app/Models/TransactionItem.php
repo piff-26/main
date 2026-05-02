@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TransactionItem extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
     protected $fillable = ['transaction_id', 'ticket_category_id', 'quantity', 'price', 'holder_names'];
     protected $casts = ['holder_names' => 'array'];
 

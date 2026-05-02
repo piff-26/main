@@ -16,14 +16,14 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('invoice_code')->unique();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             
             $table->string('buyer_name')->nullable();
             $table->string('buyer_phone')->nullable();
             $table->string('city')->nullable();
             $table->enum('source_info', array_column(SourceInfoEnum::cases(), 'value'))->nullable();
             
-            $table->foreignId('voucher_id')->nullable()->constrained('vouchers')->nullOnDelete();
+            $table->foreignUuid('voucher_id')->nullable()->constrained('vouchers')->nullOnDelete();
             $table->double('discount_amount')->default(0);
             $table->double('total_amount')->default(0);
             

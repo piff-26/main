@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vouchers', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('code')->unique();
             $table->enum('discount_type', ['nominal', 'percentage'])->default('nominal');
             $table->double('discount_nominal')->nullable();
             $table->double('discount_percentage')->nullable();
-            $table->foreignId('event_id')->nullable()->constrained('events')->nullOnDelete();
-            $table->foreignId('ticket_category_id')->nullable()->constrained('ticket_categories')->nullOnDelete();
+            $table->foreignUuid('event_id')->nullable()->constrained('events')->nullOnDelete();
+            $table->foreignUuid('ticket_category_id')->nullable()->constrained('ticket_categories')->nullOnDelete();
             $table->integer('max_uses');
             $table->integer('used_count')->default(0);
             $table->dateTime('expired_at')->nullable();

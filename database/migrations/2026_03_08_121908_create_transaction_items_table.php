@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transaction_items', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignUuid('transaction_id')->constrained('transactions')->cascadeOnDelete();
-            $table->foreignId('ticket_category_id')->constrained('ticket_categories')->cascadeOnDelete();
+            $table->foreignUuid('ticket_category_id')->constrained('ticket_categories')->cascadeOnDelete();
             $table->integer('quantity');
             $table->double('price');
             $table->timestamps();
