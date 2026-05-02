@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="@yield('meta_description', 'Petra International Film Festival (PIFF) 2026 — presented by ASFS at Petra Christian University. A platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas.')">
-    <meta name="keywords" content="PIFF, Petra International Film Festival, film festival, Petra Christian University, ASFS, film competition, screening, Surabaya">
+    <meta name="keywords"
+        content="PIFF, Petra International Film Festival, film festival, Petra Christian University, ASFS, film competition, screening, Surabaya">
     <meta name="author" content="ASFS Petra Christian University">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
@@ -20,6 +21,8 @@
     <meta name="twitter:title" content="@yield('og_title', 'Petra International Film Festival 2026 | PIFF')">
     <meta name="twitter:description" content="@yield('og_description', 'PIFF serves as a platform for emerging filmmakers to stand in the gaps between perspectives, cultures, and ideas.')">
     <meta name="twitter:image" content="@yield('og_image', asset('assets/img/og_main.png'))">
+    <meta name="theme-color" content="#000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     {{-- <title>{{ $title }}</title> --}}
     <title>PIFF 2026 | @yield('title', $title ?? 'Welcome')</title>
     <link rel="icon" href="{{ asset('assets/logo/logo_browser_piff.png') }}" type="image/x-icon" />
@@ -251,7 +254,9 @@
 
 <body>
 
-    @if(trim($__env->yieldContent('no_loader')) !== '1') @include('components.loader') @endif
+    @if (trim($__env->yieldContent('no_loader')) !== '1')
+        @include('components.loader')
+    @endif
     @include('components.navbar')
 
 
@@ -381,7 +386,7 @@
     @endif
 
     {{-- <script src="https://app.{{ env('MIDTRANS_IS_PRODUCTION') ? '' : 'sandbox.' }}midtrans.com/snap/snap.js" --}}
-        {{-- data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script> --}}
+    {{-- data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script> --}}
 
 
 
