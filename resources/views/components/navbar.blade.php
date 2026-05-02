@@ -158,6 +158,10 @@
         z-index: 1;
     }
 
+    .submit-btn.auth-btn {
+        min-width: 6.5rem;
+    }
+
     .submit-btn::after {
         content: '';
         position: absolute;
@@ -315,6 +319,11 @@
             min-width: 200px;
         }
 
+        .submit-btn.auth-btn {
+            min-width: 8rem;
+            margin-top: 10px;
+        }
+
         .nav-links-main li .submit-btn {
             display: inline-block;
             width: auto;
@@ -368,12 +377,26 @@
         <li><a href="{{ route('user.home') }}#title">HOME</a></li>
         <li><a href="{{ route('user.home') }}#submission">PROGRAMS</a></li>
         <li><a href="{{ route('user.home') }}#ticket">TICKETS</a></li>
+        <!-- <li><a href="{{ route('user.ticket') }}">TICKETS</a></li> -->
+        <!-- <li><a href="{{ route('user.transactions-history') }}">HISTORY</a></li> -->
 
         <li>
             <a href="{{ route('user.submit') }}" class="submit-btn">
                 SUBMIT FILMS
             </a>
         </li>
+<!-- 
+        <li>
+            @if(session()->has('user_id'))
+                <a href="{{ route('logout') }}" class="submit-btn auth-btn">
+                    LOGOUT
+                </a>
+            @else
+                <a href="{{ route('user.login') }}" class="submit-btn auth-btn">
+                    LOGIN
+                </a>
+            @endif
+        </li> -->
     </ul>
 
     <div class="burger" role="button" aria-label="Toggle navigation menu" aria-expanded="false" tabindex="0">
