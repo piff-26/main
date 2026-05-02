@@ -64,7 +64,7 @@
 
     {{-- Kode tiket di bawah barcode --}}
     <div style="text-align: center; margin-bottom: 30px;">
-        <span style="font-size: 14px; font-weight: bold; letter-spacing: 3px; color: #ffffff; font-family: monospace;">
+        <span style="font-size: 14px; font-weight: bold; letter-spacing: 3px; color: #ffffff;">
             {{ $ticket->ticket_code }}
         </span>
     </div>
@@ -87,7 +87,7 @@
                     style="font-size: 11px; color: #ffffff; font-weight: bold; margin-bottom: 6px; letter-spacing: 1px;">
                     INVOICE</div>
                 <div
-                    style="font-size: 13px; font-family: monospace; color: #00bfff; font-style: italic; font-weight: bold;">
+                    style="font-size: 13px; color: #00bfff; font-style: italic; font-weight: bold;">
                     {{ $transaction->invoice_code }}
                 </div>
             </td>
@@ -96,7 +96,7 @@
                     style="font-size: 11px; color: #ffffff; font-weight: bold; margin-bottom: 6px; letter-spacing: 1px;">
                     TICKET CODE</div>
                 <div
-                    style="font-size: 13px; font-family: monospace; color: #00bfff; font-style: italic; font-weight: bold;">
+                    style="font-size: 13px; color: #00bfff; font-style: italic; font-weight: bold;">
                     {{ $ticket->ticket_code }}
                 </div>
             </td>
