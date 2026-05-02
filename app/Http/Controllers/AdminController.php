@@ -54,8 +54,22 @@ class AdminController extends BaseController
                 SUM(CASE WHEN (tickets.is_checked_in = 0 OR tickets.is_checked_in IS NULL) AND tickets.is_canceled = 0 THEN 1 ELSE 0 END) as not_checked_in')
             ->groupBy('ticket_categories.id', 'ticket_categories.name')
             ->get();
+
+        $eventStats = Event::with('ticketCategories')->get()->map(function($event) {
+            $pendingCount = Transaction::where('transaction_status', TransactionStatusEnum::PENDING->value)
+                ->whereHas('transactionItems.ticketCategory', fn($q) => $q->where('event_id', $event->id))
+                ->count();
+            $totalRevenue = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)
+                ->whereHas('transactionItems.ticketCategory', fn($q) => $q->where('event_id', $event->id))
+                ->sum('total_amount');
+            return [
+                'name'          => $event->name,
+                'pending_count' => $pendingCount,
+                'total_revenue' => (float) $totalRevenue,
+            ];
+        });
         
-        return view('admin.dashboard', compact('totalRevenue', 'ticketsSold', 'totalTickets', 'totalTransactions', 'totalCheckin', 'totalUsers', 'paidTransactions', 'failedTransactions', 'ticketCategories', 'checkinByCategory'));
+        return view('admin.dashboard', compact('totalRevenue', 'ticketsSold', 'totalTickets', 'totalTransactions', 'totalCheckin', 'totalUsers', 'paidTransactions', 'failedTransactions', 'ticketCategories', 'checkinByCategory', 'eventStats'));
     }
 
     public function listEvents()

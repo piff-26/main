@@ -68,7 +68,7 @@
     </div>
 
     {{-- Quick Numbers --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
             <div class="flex items-center justify-between">
                 <div>
@@ -90,6 +90,39 @@
                     <i class="fas fa-times-circle text-xl" style="color: #ff362d;"></i>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Per Event Stats --}}
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-800">Statistics per Event</h2>
+            <i class="fas fa-calendar-alt" style="color: #27b4f7;"></i>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            @foreach ($eventStats as $stat)
+            <div class="border border-gray-100 rounded-xl p-5 hover:shadow-md transition-shadow">
+                <h3 class="font-bold text-gray-800 text-sm mb-4 truncate" title="{{ $stat['name'] }}">{{ $stat['name'] }}</h3>
+                <div class="flex gap-3">
+                    <div class="flex-1 bg-blue-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs text-blue-600 font-semibold">Pending</span>
+                            <i class="fas fa-clock text-blue-400 text-xs"></i>
+                        </div>
+                        <div class="text-xl font-bold text-blue-600">{{ $stat['pending_count'] }}</div>
+                        <div class="text-xs text-blue-400 mt-0.5">need approval</div>
+                    </div>
+                    <div class="flex-1 bg-green-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs text-green-600 font-semibold">Revenue</span>
+                            <i class="fas fa-money-bill-wave text-green-400 text-xs"></i>
+                        </div>
+                        <div class="text-sm font-bold text-green-600">Rp {{ number_format($stat['total_revenue'], 0, ',', '.') }}</div>
+                        <div class="text-xs text-green-400 mt-0.5">status paid</div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 @endsection
