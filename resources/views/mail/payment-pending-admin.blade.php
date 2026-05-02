@@ -113,7 +113,7 @@
 
             <p>Silakan login ke dashboard admin untuk memverifikasi bukti pembayaran.</p>
             <a href="{{ url('/admin/transaction/detail/' . $transaction->invoice_code) }}"
-                class="btn text-white">Verifikasi Sekarang</a>
+                class="btn" style="color: #ffffff;">Verifikasi Sekarang</a>
         </div>
         <div class="footer">
             &copy; 2026 PIFF - Petra International Film Festival
