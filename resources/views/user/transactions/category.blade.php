@@ -139,13 +139,13 @@
                                             @endif
                                         </div>
                                         <div class="flex items-center gap-3">
-                                            <button type="button" onclick="changeQty({{ $category->id }}, -1)"
+                                            <button type="button" onclick="changeQty('{{ $category->id }}', -1)"
                                                 class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg transition">−</button>
                                             <span id="qty-display-{{ $category->id }}"
                                                 class="text-white font-bold w-6 text-center">0</span>
                                             <input type="hidden" name="items[{{ $category->id }}]"
                                                 id="qty-{{ $category->id }}" value="0">
-                                            <button type="button" onclick="changeQty({{ $category->id }}, 1)"
+                                            <button type="button" onclick="changeQty('{{ $category->id }}', 1)"
                                                 {{ $category->quota !== null && $category->sold_count >= $category->quota ? 'disabled' : '' }}
                                                 class="w-9 h-9 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
                                         </div>

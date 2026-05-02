@@ -18,9 +18,17 @@ class TransactionController extends Controller
     public function storeStep1(Request $request, $eventSlug)
     {
         $request->validate([
-            'items' => 'required|array',
+            'items'   => 'required|array',
             'items.*' => 'integer|min:0|max:10',
         ]);
+
+        // Pastikan semua key adalah UUID yang terdaftar di ticket_categories
+        $validCategoryIds = TicketCategory::whereIn('id', array_keys($request->items ?? []))->pluck('id')->all();
+        foreach (array_keys($request->items ?? []) as $key) {
+            if (!in_array($key, $validCategoryIds)) {
+                return back()->with('error', 'Kategori tiket tidak valid.');
+            }
+        }
 
         // Filter hanya item yang qty > 0
         $selectedItems = collect($request->items)->filter(fn($qty) => $qty > 0);
