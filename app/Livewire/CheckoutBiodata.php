@@ -75,11 +75,26 @@ class CheckoutBiodata extends Component
         }
 
         $this->buyer_name     = $this->transaction->buyer_name;
-        // Split existing buyer_phone into code + number if it starts with +
+        // Split existing buyer_phone into code + number.
+        // Regex (\+\d+) is greedy and would consume all digits (e.g. +62123 → code=+62123, number="").
+        // Instead, match against known dial codes (longest first) from countries.json.
         if ($this->transaction->buyer_phone && str_starts_with($this->transaction->buyer_phone, '+')) {
-            preg_match('/^(\+\d+)(.*)$/', $this->transaction->buyer_phone, $m);
-            $this->phone_code   = $m[1] ?? '+62';
-            $this->phone_number = $m[2] ?? '';
+            $countries  = json_decode(file_get_contents(resource_path('data/countries.json')), true);
+            $dialCodes  = collect($countries)
+                ->pluck('dial_code')
+                ->unique()
+                ->sortByDesc(fn($c) => strlen($c)) // terpanjang dulu agar +1868 tidak salah cocok ke +1
+                ->values();
+
+            $matched = '+62'; // fallback
+            foreach ($dialCodes as $code) {
+                if (str_starts_with($this->transaction->buyer_phone, $code)) {
+                    $matched = $code;
+                    break;
+                }
+            }
+            $this->phone_code   = $matched;
+            $this->phone_number = substr($this->transaction->buyer_phone, strlen($matched));
         } else {
             $this->phone_number = $this->transaction->buyer_phone ?? '';
         }
