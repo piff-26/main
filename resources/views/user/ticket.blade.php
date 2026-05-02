@@ -22,10 +22,10 @@
                     @foreach ($events as $event)
                         <div
                             class="bg-white/10 border border-white/20 rounded-2xl overflow-hidden flex flex-col md:flex-row hover:border-yellow-400/50 transition-all group">
-                            <div class="overflow-hidden w-full md:w-72 shrink-0">
+                            <div class="overflow-hidden w-full md:w-96 shrink-0">
                                 <img src="{{ $event->image ? asset('storage/' . $event->image) : 'https://ui-avatars.com/api/?name=' . urlencode($event->name) . '&background=111&color=fec401&size=512' }}"
                                     alt="{{ $event->name }}"
-                                    class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300">
+                                    class="w-full h-full aspect-video md:aspect-auto object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
                             <div class="p-4 md:p-6 flex-1 flex flex-col justify-between">
                                 <div>
