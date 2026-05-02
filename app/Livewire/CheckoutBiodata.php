@@ -187,7 +187,16 @@ class CheckoutBiodata extends Component
         if ($voucher->discount_type === 'nominal') {
             $this->discount_amount = $voucher->discount_nominal;
         } else {
-            $this->discount_amount = $this->original_total * ($voucher->discount_percentage / 100);
+            // Jika voucher terikat ke kategori tertentu, hitung basis diskon
+            // hanya dari subtotal tiket yang kategorinya cocok (bukan semua tiket).
+            if ($voucher->ticket_category_id !== null) {
+                $applicableSubtotal = $this->transaction->transactionItems
+                    ->where('ticket_category_id', $voucher->ticket_category_id)
+                    ->sum(fn($item) => $item->price * $item->quantity);
+            } else {
+                $applicableSubtotal = $this->original_total;
+            }
+            $this->discount_amount = $applicableSubtotal * ($voucher->discount_percentage / 100);
         }
 
         if ($this->discount_amount > $this->original_total) {

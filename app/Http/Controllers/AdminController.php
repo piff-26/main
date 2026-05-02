@@ -106,6 +106,130 @@ class AdminController extends BaseController
         return view('admin.event-create', ['title' => 'Create Event']);
     }
 
+    public function eventDetail($id)
+    {
+        $event = Event::with(['ticketCategories'])->findOrFail($id);
+
+        // Stats per kategori
+        $categoryStats = $event->ticketCategories->map(function ($cat) {
+            $revenue = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)
+                ->whereHas('transactionItems', fn($q) => $q->where('ticket_category_id', $cat->id))
+                ->join('transaction_items', function($join) use ($cat) {
+                    $join->on('transactions.id', '=', 'transaction_items.transaction_id')
+                         ->where('transaction_items.ticket_category_id', $cat->id);
+                })
+                ->sum('transaction_items.price');
+
+            // Hitung revenue sebagai: price * quantity dari transaction items yang paid
+            $revenueCalc = \DB::table('transaction_items')
+                ->join('transactions', 'transactions.id', '=', 'transaction_items.transaction_id')
+                ->where('transactions.transaction_status', TransactionStatusEnum::PAID->value)
+                ->where('transaction_items.ticket_category_id', $cat->id)
+                ->selectRaw('SUM(transaction_items.price * transaction_items.quantity) as total')
+                ->value('total') ?? 0;
+
+            $ticketsSold = Ticket::where('ticket_category_id', $cat->id)
+                ->where('is_canceled', false)->count();
+
+            $transactions = Transaction::whereHas('transactionItems', fn($q) => $q->where('ticket_category_id', $cat->id))
+                ->where('transaction_status', TransactionStatusEnum::PAID->value)
+                ->count();
+
+            $checkins = Ticket::where('ticket_category_id', $cat->id)
+                ->where('is_canceled', false)
+                ->where('is_checked_in', true)
+                ->count();
+
+            return [
+                'id'          => $cat->id,
+                'name'        => $cat->name,
+                'price'       => $cat->price,
+                'quota'       => $cat->quota,
+                'sold_count'  => $cat->sold_count,
+                'revenue'     => $revenueCalc,
+                'tickets_sold'=> $ticketsSold,
+                'transactions'=> $transactions,
+                'checkins'    => $checkins,
+            ];
+        });
+
+        // Total stats
+        $totalRevenue = $categoryStats->sum('revenue');
+        $totalTicketsSold = $categoryStats->sum('tickets_sold');
+        $totalTransactions = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)
+            ->whereHas('transactionItems.ticketCategory', fn($q) => $q->where('event_id', $id))
+            ->count();
+        $totalCheckins = $categoryStats->sum('checkins');
+
+        // Semua tiket individu untuk event ini (pagination via JS / DataTables)
+        $tickets = Ticket::with(['ticketCategory', 'transaction.user', 'checker'])
+            ->whereHas('ticketCategory', fn($q) => $q->where('event_id', $id))
+            ->where('is_canceled', false)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($t) => [
+                'id'              => $t->id,
+                'ticket_code'     => $t->ticket_code,
+                'holder_name'     => $t->holder_name ?? '-',
+                'category_name'   => $t->ticketCategory->name ?? '-',
+                'category_id'     => $t->ticket_category_id,
+                'buyer_name'      => $t->transaction->buyer_name ?? ($t->transaction->user->name ?? '-'),
+                'buyer_email'     => $t->transaction->user->email ?? '-',
+                'invoice_code'    => $t->transaction->invoice_code ?? '-',
+                'is_checked_in'   => $t->is_checked_in,
+                'checked_in_at'   => $t->checked_in_at ? $t->checked_in_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') : null,
+                'checker_name'    => $t->checker->name ?? '-',
+            ]);
+
+        return view('admin.event-detail', compact(
+            'event', 'categoryStats', 'tickets',
+            'totalRevenue', 'totalTicketsSold', 'totalTransactions', 'totalCheckins'
+        ));
+    }
+
+    public function exportEventTicketsExcel($id)
+    {
+        $event = Event::findOrFail($id);
+
+        $tickets = Ticket::with(['ticketCategory', 'transaction.user', 'checker'])
+            ->whereHas('ticketCategory', fn($q) => $q->where('event_id', $id))
+            ->where('is_canceled', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $rows = [['No', 'Ticket Code', 'Holder Name', 'Category', 'Buyer Name', 'Email', 'Invoice', 'Status', 'Checked In At', 'Staff']];
+        foreach ($tickets as $i => $t) {
+            $rows[] = [
+                $i + 1,
+                $t->ticket_code,
+                $t->holder_name ?? '-',
+                $t->ticketCategory->name ?? '-',
+                $t->transaction->buyer_name ?? ($t->transaction->user->name ?? '-'),
+                $t->transaction->user->email ?? '-',
+                $t->transaction->invoice_code ?? '-',
+                $t->is_checked_in ? 'Checked In' : 'Not Checked In',
+                $t->checked_in_at ? $t->checked_in_at->setTimezone('Asia/Jakarta')->format('d M Y H:i') : '-',
+                $t->checker->name ?? '-',
+            ];
+        }
+
+        $filename = 'Tickets_' . str_replace(' ', '_', $event->name) . '_' . now()->format('Ymd_His') . '.csv';
+
+        $handle = fopen('php://output', 'w');
+        ob_start();
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        $content = ob_get_clean();
+        fclose($handle);
+
+        return response($content, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+
     public function listCategories()
     {
         $categories = TicketCategory::with('event')->get();

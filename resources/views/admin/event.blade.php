@@ -32,6 +32,7 @@ const eventsData = {!! json_encode($events->map(function($event) {
         'startTime' => $event->start_time->format('H:i'),
         'endTime' => $event->end_time ? $event->end_time->format('H:i') : '',
         'location' => $event->location,
+        'detailUrl' => route('admin.event.detail', $event->id),
         'ticketCategories' => $event->ticketCategories->map(function($cat) {
             return [
                 'name' => $cat->name,
@@ -128,9 +129,9 @@ $(document).ready(function() {
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <button class="px-3 py-2 hover:bg-blue-50 rounded-lg transition btn-view" style="color: #27b4f7;" data-id="${event.id}" title="View Details">
+                                <a href="${event.detailUrl}" class="px-3 py-2 hover:bg-blue-50 rounded-lg transition" style="color: #27b4f7;" title="View Detail">
                                     <i class="fas fa-eye"></i>
-                                </button>
+                                </a>
                                 <button class="px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition btn-edit" data-id="${event.id}" title="Edit Event">
                                     <i class="fas fa-edit"></i>
                                 </button>
