@@ -90,6 +90,12 @@ Route::prefix('admin')->group(function(){
             // system log
             Route::get('/log', [AdminController::class, 'systemLog'])->name('admin.log');
         });
+
+        Route::middleware('admin.division:it')->group(function () {
+            // email broadcast
+            Route::get('/email', [AdminController::class, 'emailView'])->name('admin.email');
+            Route::post('/email/send', [AdminController::class, 'sendEmail'])->name('admin.email.send');
+        });
     });
     
 });
