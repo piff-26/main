@@ -26,7 +26,7 @@
             position: relative;
             z-index: 2;
             min-width: 280px;
-            width: 280px;
+            width: 20rem;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid var(--primary-white);
             border-radius: 16px;
@@ -74,7 +74,7 @@
         }
 
         .card-body {
-            width: 280px;
+            width: 20rem;
             background: transparent;
             display: flex;
             align-items: center;
