@@ -391,7 +391,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: `/admin/transaction/${invoiceCode}`,
                     method: 'DELETE',
-                    beforeSend: () => showLoading('Membatalkan transaksi...'),
+                    beforeSend: () => showLoading('Cancelling transaction...'),
                     success: function() {
                         hideLoading();
                         Swal.fire({ icon: 'success', title: 'Transaction Cancelled!', confirmButtonColor: '#27b4f7', timer: 2000 }).then(() => location.reload());

@@ -5,7 +5,7 @@
     <div class="min-h-screen bg-black py-36 px-4">
 
         <div class="max-w-3xl mx-auto mb-8 text-center">
-            <h2 class="text-3xl font-bold text-white">TRANSAKSI</h2>
+            <h2 class="text-3xl font-bold text-white">TRANSACTION</h2>
             <p class="text-gray-400 mt-2">Ensure your personal information is accurate for E-ticket purposes.</p>
 
             @if (session('warning'))
@@ -53,8 +53,8 @@
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('transaction-expired', () => {
                 Swal.fire({
-                    title: 'Transaksi Expired',
-                    text: 'Waktu pembayaran telah habis. Silakan buat transaksi baru.',
+                    title: 'Transaction Expired',
+                    text: 'Your transaction has expired due to non-payment. Please start a new transaction to purchase tickets.',
                     icon: 'error',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#ef4444',
@@ -69,8 +69,8 @@
 
         function confirmCancel() {
             Swal.fire({
-                title: 'Batalkan Transaksi?',
-                text: 'Transaksi akan dibatalkan dan kuota tiket dikembalikan.',
+                title: 'Cancel Transaction',
+                text: 'Are you sure you want to cancel this transaction? This action cannot be undone.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Batalkan',

@@ -49,7 +49,7 @@ class UserController extends BaseController
             ->get();
 
         return view('user.history', [
-            'title' => 'Riwayat Transaksi & Tiket',
+            'title' => 'History',
             'transactions' => $transactions
         ]);
     }
