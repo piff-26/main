@@ -11,6 +11,7 @@
         ['route' => 'admin.insight',        'label' => 'Insight',         'icon' => 'fa-chart-line',        'access' => ['bph','sc','acara','sekkon','it']],
         ['route' => 'admin.ticketScan',     'label' => 'Ticket Scan',     'icon' => 'fa-qrcode',            'access' => ['bph','sc','acara','sekkon','it']],
         ['route' => 'admin.manageVouchers', 'label' => 'Vouchers',        'icon' => 'fa-ticket',            'access' => ['bph','sc','acara','sekkon','it']],
+        ['route' => 'admin.email',          'label' => 'Broadcast Email', 'icon' => 'fa-envelope',          'access' => ['it']],
         ['route' => 'admin.log',            'label' => 'System Log',      'icon' => 'fa-terminal',          'access' => ['it','bph','sc']],
     ];
 
