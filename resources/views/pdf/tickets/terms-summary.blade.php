@@ -12,7 +12,7 @@
             </td>
             <td style="width: 50%; text-align: right;">
                 <strong>Transaction Date:</strong><br>
-                {{ $transaction->created_at->format('d F Y, H:i') }} WIB
+                {{ $transaction->created_at->format('d F Y, H:i') }} UTC+7
             </td>
         </tr>
     </table>

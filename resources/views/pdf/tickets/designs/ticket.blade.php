@@ -4,7 +4,7 @@
         'gold' => '#b78727',
         'platinum' => '#615d5d',
         'silver' => '#c1c1c1',
-        'regular' => '#9c734f',
+        'regular' => '#000',
     ];
     $headingColor = $colors[$categoryName] ?? '#fff';
 
