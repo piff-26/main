@@ -783,4 +783,63 @@ class AdminController extends BaseController
             'sources' => $sources
         ]);
     }
+    public function emailView()
+    {
+        $transactions = Transaction::with(['user', 'transactionItems.ticketCategory.event'])->get()->map(function($transaction) {
+            $eventName = $transaction->transactionItems->first()?->ticketCategory?->event?->name ?? '-';
+            return [
+                'invoice_code' => $transaction->invoice_code,
+                'event_name' => $eventName,
+                'buyer_name' => $transaction->buyer_name ?? ($transaction->user ? $transaction->user->name : '-'),
+                'email' => $transaction->user ? $transaction->user->email : null,
+                'city' => $transaction->city ?? '-',
+                'transaction_status' => $transaction->transaction_status,
+            ];
+        })->filter(function($transaction) {
+            return !empty($transaction['email']); // Only keep transactions with valid user emails
+        });
+        
+        $events = Event::pluck('name')->unique()->values();
+        $cities = Transaction::whereNotNull('city')->pluck('city')->unique()->values();
+        
+        return view('admin.email', [
+            'title' => 'Email Broadcast',
+            'transactions' => $transactions, 
+            'events' => $events, 
+            'cities' => $cities
+        ]);
+    }
+
+    public function sendEmail(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+            'emails' => 'required|string', // Comma separated emails
+        ]);
+
+        $emails = explode(',', $request->emails);
+        // Trim and filter valid emails, ensure uniqueness
+        $emails = array_filter(array_map('trim', $emails), function($email) {
+            return filter_var($email, FILTER_VALIDATE_EMAIL);
+        });
+        $emails = array_unique($emails);
+
+        if (empty($emails)) {
+            return redirect()->back()->with('error', 'Tidak ada email valid yang dipilih.');
+        }
+
+        try {
+            foreach ($emails as $email) {
+                Mail::to($email)->send(new \App\Mail\CustomAdminMail($request->subject, $request->message));
+            }
+            
+            SystemLog::success('email', "Broadcast email dikirim ke " . count($emails) . " user", 'SYSTEM');
+
+            return redirect()->back()->with('success', 'Email berhasil dikirim ke ' . count($emails) . ' penerima.');
+        } catch (\Exception $e) {
+            SystemLog::fail('email', "Gagal broadcast email: {$e->getMessage()}", 'SYSTEM');
+            return redirect()->back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
+        }
+    }
 }
