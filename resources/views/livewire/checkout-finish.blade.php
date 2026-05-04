@@ -2,7 +2,7 @@
     @php use App\Enums\PaymentAccountEnum; @endphp
 
     <div
-        class="w-full max-w-6xl glass-card rounded-[2rem] p-6 md:p-8 relative bg-slate-900/40 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
+        class="w-full max-w-6xl glass-card rounded-[2rem] p-3 md:p-8 relative bg-slate-900/40 backdrop-blur-lg border border-slate-700/50 shadow-2xl">
 
         <div wire:loading.flex wire:target="processToPayment, applyVoucher, removeVoucher, nextStep"
             class="absolute inset-0 z-50 flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-[2rem]">
@@ -312,16 +312,31 @@
                             class="text-white font-bold tracking-wider mb-4 border-b border-slate-600 pb-3 flex items-center gap-2">
                             <i class="fas fa-university text-[#ff5b1d]"></i> PAYMENT INFORMATION
                         </h3>
-                        <p class="text-slate-400 text-sm mb-4">Transfer to one of the following accounts:</p>
+                        <p class="text-slate-400 text-sm mb-4">Transfer to <strong>one of the following accounts: </strong></p>
 
                         <div class="space-y-3">
+                            <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700 flex flex-col items-center">
+                                <div class="w-full text-left mb-3">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">QRIS</p>
+                                    <p class="text-white font-bold text-lg tracking-widest">SCAN QRIS</p>
+                                </div>
+                                <a href="{{ asset('assets/img/qris.jpeg') }}" target="_blank" class="relative group block w-full max-w-[200px] rounded-xl overflow-hidden shadow-md border border-slate-600 transition-transform hover:scale-[1.02]">
+                                    <img src="{{ asset('assets/img/qris.jpeg') }}" alt="QRIS PIFF 2026" class="w-full h-auto">
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
+                                        <span class="text-white font-medium text-sm flex items-center gap-2">
+                                            <i class="fas fa-external-link-alt"></i> Click to expand
+                                        </span>
+                                    </div>
+                                </a>
+                            </div>
+
                             @foreach (PaymentAccountEnum::cases() as $account)
                                 <div
                                     class="bg-slate-900/60 rounded-xl p-4 border border-slate-700 flex items-center justify-between">
                                     <div>
                                         <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">
                                             {{ $account->label() }}</p>
-                                        <p class="text-white font-bold text-lg tracking-widest"
+                                        <p class="text-white font-bold text-md tracking-widest"
                                             data-norek="{{ $account->accountNumber() }}">
                                             {{ $account->accountNumber() }}</p>
                                         <p class="text-slate-400 text-sm">a.n. {{ $account->accountName() }}</p>
