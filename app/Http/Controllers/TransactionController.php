@@ -43,9 +43,19 @@ class TransactionController extends Controller
             $itemsToCreate = [];
 
             foreach ($selectedItems as $categoryId => $qty) {
-                $category = TicketCategory::where('id', $categoryId)->lockForUpdate()->first();
+                $category = TicketCategory::with('event')->where('id', $categoryId)->lockForUpdate()->first();
 
                 if (!$category) continue;
+
+                // Check if category is manually closed
+                if ($category->is_closed) {
+                    return back()->with('error', "Tiket kategori '{$category->name}' sudah ditutup.");
+                }
+
+                // Check if parent event is past its event_closed datetime
+                if ($category->event && $category->event->isClosed()) {
+                    return back()->with('error', "Penjualan tiket untuk event '{$category->event->name}' sudah ditutup.");
+                }
 
                 if ($category->quota !== null && ($category->sold_count + $qty > $category->quota)) {
                     return back()->with('error', "Sisa tiket {$category->name} tidak mencukupi.");
