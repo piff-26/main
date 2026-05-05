@@ -45,7 +45,7 @@
     {{-- 2, 3, dst: Lembaran Tiket --}}
     @foreach ($transaction->tickets as $ticket)
         <div class="ticket-page" style="page: ticket;">
-            @include('pdf.tickets.designs.ticket', ['ticket' => $ticket, 'transaction' => $transaction])
+            @include('pdf.tickets.designs.ticket', ['ticket' => $ticket, 'transaction' => $transaction, 'bgImageSrc' => $bgImageSrc ?? ''])
         </div>
     @endforeach
 

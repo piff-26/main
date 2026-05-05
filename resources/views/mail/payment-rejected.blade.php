@@ -5,8 +5,7 @@
     <style>
         body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #111; padding: 24px; text-align: center; border-radius: 8px 8px 0 0; }
-        .header h1 { color: #ff5b1d; margin: 0; font-size: 24px; }
+        .header { background: #111; padding: 0; text-align: center; border-radius: 8px 8px 0 0; overflow: hidden; }
         .body { background: #f9f9f9; padding: 24px; border: 1px solid #eee; }
         .invoice { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin: 16px 0; }
         .row { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
@@ -20,8 +19,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>PIFF 2026</h1>
-            <p style="color:#ccc; margin:4px 0 0;">Petra International Film Festival</p>
+            <img src="{{ $message->embed(public_path('assets/mail/header_email.png')) }}" alt="PIFF 2026" style="width: 100%; display: block; border-radius: 8px 8px 0 0;">
         </div>
         <div class="body">
             <p>Hello <strong>{{ $transaction->buyer_name }}</strong>,</p>

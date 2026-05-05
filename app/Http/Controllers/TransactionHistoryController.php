@@ -19,8 +19,15 @@ class TransactionHistoryController extends Controller
             ->with(['tickets.ticketCategory.event', 'voucher'])
             ->firstOrFail();
 
+        // Encode background image untuk tiket Regular
+        $bgImageSrc = '';
+        $bgPath = public_path('assets/mail/bg_email.jpg');
+        if (file_exists($bgPath)) {
+            $bgImageSrc = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+        }
+
         // Render view bundle.blade.php menjadi PDF
-        $pdf = Pdf::loadView('pdf.tickets.bundle', ['transaction' => $transaction]);
+        $pdf = Pdf::loadView('pdf.tickets.bundle', ['transaction' => $transaction, 'bgImageSrc' => $bgImageSrc]);
         
         // Set ukuran kertas (A4 biasanya paling aman untuk di-print)
         $pdf->setPaper('A4', 'portrait');

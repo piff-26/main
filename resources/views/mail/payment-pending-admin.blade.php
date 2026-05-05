@@ -18,15 +18,10 @@
 
         .header {
             background: #111;
-            padding: 24px;
+            padding: 0;
             text-align: center;
             border-radius: 8px 8px 0 0;
-        }
-
-        .header h1 {
-            color: #ff5b1d;
-            margin: 0;
-            font-size: 24px;
+            overflow: hidden;
         }
 
         .body {
@@ -82,8 +77,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>PIFF 2026 — Admin</h1>
-            <p style="color:#ccc; margin:4px 0 0;">Notifikasi Pembayaran Masuk</p>
+            <img src="{{ $message->embed(public_path('assets/mail/header_email.png')) }}" alt="PIFF 2026" style="width: 100%; display: block; border-radius: 8px 8px 0 0;">
         </div>
         <div class="body">
             <p>Ada transaksi baru yang perlu diverifikasi:</p>

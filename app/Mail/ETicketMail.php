@@ -28,7 +28,13 @@ class ETicketMail extends BaseMailable
         $transaction = Transaction::with('tickets.ticketCategory.event', 'transactionItems.ticketCategory')
             ->find($this->transaction->id);
 
-        $pdf = Pdf::loadView('pdf.tickets.bundle', ['transaction' => $transaction])
+        $bgImageSrc = '';
+        $bgPath = public_path('assets/mail/bg_email.jpg');
+        if (file_exists($bgPath)) {
+            $bgImageSrc = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+        }
+
+        $pdf = Pdf::loadView('pdf.tickets.bundle', ['transaction' => $transaction, 'bgImageSrc' => $bgImageSrc])
             ->setPaper('A4', 'portrait');
 
         return [
