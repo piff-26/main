@@ -1,21 +1,21 @@
 @push('styles')
 <style>
 /* Efek Fade In saat Halaman Dimuat */
-body {
+/* body {
     margin: 0;
     padding: 0;
     background: #fec401;
     opacity: 0;
     transition: opacity 0.8s ease-in-out;
-}
+} */
 
-body.fade-in {
+/* body.fade-in {
     opacity: 1;
 }
 
 body.fade-out {
     opacity: 0;
-}
+} */
 
 .perspective-wrap { 
     perspective: 1000px; 
@@ -195,7 +195,7 @@ body.fade-out {
         </div>
 
         <!-- CARD 1 -->
-        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-duration="1000">
+        <!-- <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-duration="1000">
             <svg class="ticket-border-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
                 <rect x="2" y="2" width="496" height="156" rx="15" class="ticket-path"/>
             </svg>
@@ -218,10 +218,10 @@ body.fade-out {
                     <button class="btn-animate">Claim Free Tickets</button>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- CARD 2 -->
-        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="200">
+        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="200" onclick="document.body.classList.add('fade-out'); setTimeout(() => { window.location.href='{{ route('user.ticket') }}' }, 800);">
             <svg class="ticket-border-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
                 <rect x="2" y="2" width="496" height="156" rx="15" class="ticket-path"/>
             </svg>
@@ -244,7 +244,7 @@ body.fade-out {
         </div>
 
         <!-- CARD 3 -->
-        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="400">
+        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="400" onclick="document.body.classList.add('fade-out'); setTimeout(() => { window.location.href='{{ route('user.ticket') }}' }, 800);">
             <svg class="ticket-border-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
                 <rect x="2" y="2" width="496" height="156" rx="15" class="ticket-path"/>
             </svg>
@@ -252,12 +252,12 @@ body.fade-out {
             <div class="ticket-card">
                 <div class="ticket-left">
                     <p class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">Day 2</p>
-                    <h3 class="font-montech-bold text-lg border-b-2 border-black pb-1 mb-2 uppercase">
-                        Gap In A Minute / Talkshow
+                    <h3 class="font-montech-bold text-lg pb-1 mb-2 uppercase">
+                        Final Day and Talkshow With <br>Chandra Liow
                     </h3>
-                    <h3 class="font-montech-bold text-lg leading-tight uppercase">
+                    <!-- <h3 class="font-montech-bold text-lg leading-tight uppercase">
                         Awarding Ceremony
-                    </h3>
+                    </h3> -->
                 </div>
 
                 <div class="ticket-right">
