@@ -1,12 +1,5 @@
 @php
     $categoryName = strtolower(trim($ticket->ticketCategory->name));
-    $colors = [
-        'gold' => '#b78727',
-        'platinum' => '#615d5d',
-        'silver' => '#c1c1c1',
-        'regular' => '#000',
-    ];
-    $headingColor = $colors[$categoryName] ?? '#fff';
 
     $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($ticket->ticket_code);
     $qrCodeBase64 = base64_encode($qrCodeSvg);
@@ -15,9 +8,36 @@
     $barcodePng = $generator->getBarcode($ticket->ticket_code, $generator::TYPE_CODE_128, 3, 80);
     $barcodeBase64 = base64_encode($barcodePng);
 
-    // $bgImageSrc dikirim dari controller sebagai base64 data URI
-    $isRegular = ($categoryName === 'regular');
-    $showBg    = $isRegular && !empty($bgImageSrc);
+    // Background Image Handling
+    if ($categoryName === 'gold') {
+        $path = public_path('assets/mail/ticket/ticket_gold.jpg');
+        if (file_exists($path)) {
+            $bgImageSrc = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($path));
+            $showBg = true;
+        } else {
+            $showBg = false;
+        }
+    } elseif ($categoryName === 'platinum') {
+        $path = public_path('assets/mail/ticket/ticket_platinum.jpg');
+        if (file_exists($path)) {
+            $bgImageSrc = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($path));
+            $showBg = true;
+        } else {
+            $showBg = false;
+        }
+    } elseif ($categoryName === 'silver') {
+        $path = public_path('assets/mail/ticket/ticket_silver.jpg');
+        if (file_exists($path)) {
+            $bgImageSrc = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($path));
+            $showBg = true;
+        } else {
+            $showBg = false;
+        }
+    } else {
+        // $bgImageSrc dikirim dari controller sebagai base64 data URI
+        $isRegular = ($categoryName === 'regular');
+        $showBg    = $isRegular && !empty($bgImageSrc);
+    }
 @endphp
 
 <style>
@@ -45,7 +65,7 @@
 
     {{-- Header --}}
     <div
-        style="text-align: center; margin-bottom: 25px;background-color: {{ $headingColor }}; border-radius: 10px; padding: 20px; margin-top:20px;">
+        style="text-align: center; margin-bottom: 25px; padding: 20px; margin-top:20px;">
         <h1
             style="text-transform: uppercase; letter-spacing: 2px; font-size: 45px; font-weight: 900; margin: 0 0 10px 0; font-weight: bold;">
             {{ $ticket->ticketCategory->name }} TICKET
