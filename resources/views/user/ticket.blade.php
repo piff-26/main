@@ -31,7 +31,7 @@
                                 <div>
                                     <h3 class="text-white font-bold text-lg md:text-xl mb-2">{{ $event->name }}</h3>
                                     <p class="text-gray-400 text-sm line-clamp-3">
-                                        {{ $event->description ?? 'Pesan tiketmu sekarang dan jadilah bagian dari keseruan ' . $event->name . '.' }}
+                                        {{ $event->description ?? 'Order your ticket now and be part of the excitement for the ' . $event->name . '.' }}
                                     </p>
                                 </div>
                                 <div class="mt-4 pt-4 border-t border-white/10">
