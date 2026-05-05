@@ -49,6 +49,13 @@
                         <span>@piff.pcu</span>
                     </a>
 
+                    {{-- WhatsApp --}}
+                    <a href="https://api.whatsapp.com/send?phone=6282151985640" target="_blank"
+                        class="footer-social-link hover:text-gray-300 transition">
+                        <i class="fa-brands fa-whatsapp text-[32px] w-8 h-8 flex items-center justify-center"></i>
+                        <span>Whatsapp Official</span>
+                    </a>
+
                     {{-- Email --}}
                     <a href="mailto:piff.pcu@gmail.com" class="footer-social-link hover:text-gray-300 transition">
                         <img src="{{ asset('assets/icons/icon_email.png') }}" alt="Email" class="w-8 h-8">
