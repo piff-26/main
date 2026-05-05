@@ -278,7 +278,13 @@ class AdminController extends BaseController
             ->where('invoice_code', $invoice_code)
             ->firstOrFail();
 
-        $pdf = Pdf::loadView('pdf.tickets.bundle', compact('transaction'));
+        $bgImageSrc = '';
+        $bgPath = public_path('assets/mail/bg_email.jpg');
+        if (file_exists($bgPath)) {
+            $bgImageSrc = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+        }
+
+        $pdf = Pdf::loadView('pdf.tickets.bundle', compact('transaction', 'bgImageSrc'));
 
         return $pdf->download('E-Ticket_' . $invoice_code . '.pdf');
     }
