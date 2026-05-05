@@ -392,6 +392,7 @@ class AdminController extends BaseController
                 'start_time' => $request->start_time,
                 'end_time'   => $request->end_time,
                 'location'   => $request->location,
+                'event_closed' => $request->event_closed ?: null,
             ];
 
             if ($request->hasFile('image')) {
@@ -435,6 +436,7 @@ class AdminController extends BaseController
                 'start_time' => $request->start_time,
                 'end_time'   => $request->end_time,
                 'location'   => $request->location,
+                'event_closed' => $request->event_closed ?: null,
             ];
 
             if ($request->hasFile('image')) {
@@ -520,6 +522,32 @@ class AdminController extends BaseController
         ]);
 
         return response()->json(['success' => true, 'message' => 'Category updated successfully']);
+    }
+
+    public function toggleCategory($id)
+    {
+        try {
+            $category = TicketCategory::with('event')->findOrFail($id);
+
+            // Cannot open a category if the parent event is already closed by event_closed
+            if ($category->is_closed && $category->event && $category->event->isClosed()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak bisa membuka kategori karena event sudah ditutup (event_closed sudah lewat).'
+                ], 422);
+            }
+
+            $category->update(['is_closed' => !$category->is_closed]);
+
+            $status = $category->is_closed ? 'closed' : 'opened';
+            return response()->json([
+                'success'   => true,
+                'is_closed' => $category->is_closed,
+                'message'   => "Category {$status} successfully."
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
     }
 
     public function deleteCategory($id)
