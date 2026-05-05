@@ -62,6 +62,7 @@ Route::prefix('admin')->group(function(){
             Route::post('/category',[AdminController::class, 'storeCategory'])->name('admin.category.store');
             Route::put('/category/{id}',[AdminController::class, 'updateCategory'])->name('admin.category.update');
             Route::delete('/category/{id}',[AdminController::class, 'deleteCategory'])->name('admin.category.delete');
+            Route::patch('/category/{id}/toggle',[AdminController::class, 'toggleCategory'])->name('admin.category.toggle');
 
             // transaction
             Route::delete('/transaction/{invoice_code}',[AdminController::class, 'cancelTransaction'])->name('admin.transaction.cancel');

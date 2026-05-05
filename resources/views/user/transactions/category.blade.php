@@ -25,6 +25,12 @@
                     <p class="text-gray-400 text-sm mt-1">Saat ini belum ada kategori tiket yang tersedia untuk event ini.
                     </p>
                 </div>
+            @elseif ($event->isClosed())
+                <div class="bg-white/10 border border-white/20 rounded-2xl px-6 py-12 text-center">
+                    <i class="fas fa-lock text-4xl text-red-400 mb-4 block"></i>
+                    <p class="text-white font-semibold">Ticket Sales Closed</p>
+                    <p class="text-gray-400 text-sm mt-1">Penjualan tiket untuk event ini sudah ditutup.</p>
+                </div>
             @else
                 <div
                     class="flex flex-col-reverse {{ $event->seat_map_image || $event->description || $event->tnc ? 'lg:flex-row' : '' }} gap-8">
@@ -119,7 +125,12 @@
                             @endif
 
                             <div class="space-y-4 mb-8">
+                                @php $hasVisibleCategories = false; @endphp
                                 @foreach ($event->ticketCategories as $category)
+                                    @if ($category->is_closed)
+                                        @continue
+                                    @endif
+                                    @php $hasVisibleCategories = true; @endphp
                                     <div
                                         class="bg-white/10 border border-white/20 rounded-2xl p-5 flex flex-row sm:items-center justify-between gap-4">
                                         <div>
@@ -151,6 +162,13 @@
                                         </div>
                                     </div>
                                 @endforeach
+                                @if (!$hasVisibleCategories)
+                                    <div class="bg-white/10 border border-white/20 rounded-2xl px-6 py-10 text-center">
+                                        <i class="fas fa-lock text-3xl text-red-400 mb-3 block"></i>
+                                        <p class="text-white font-semibold">Semua tiket sudah ditutup</p>
+                                        <p class="text-gray-400 text-sm mt-1">Penjualan tiket untuk event ini sudah ditutup.</p>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="text-center">

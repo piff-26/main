@@ -32,6 +32,8 @@ const eventsData = {!! json_encode($events->map(function($event) {
         'startTime' => $event->start_time->format('H:i'),
         'endTime' => $event->end_time ? $event->end_time->format('H:i') : '',
         'location' => $event->location,
+        'eventClosed' => $event->event_closed ? $event->event_closed->setTimezone('Asia/Jakarta')->format('Y-m-d\TH:i') : '',
+        'isEventClosed' => $event->isClosed(),
         'detailUrl' => route('admin.event.detail', $event->id),
         'ticketCategories' => $event->ticketCategories->map(function($cat) {
             return [
@@ -121,7 +123,10 @@ $(document).ready(function() {
                     <div class="p-6">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
-                                <h2 class="text-xl font-bold text-gray-800 mb-2">${event.name}</h2>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h2 class="text-xl font-bold text-gray-800">${event.name}</h2>
+                                    ${event.isEventClosed ? '<span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700"><i class="fas fa-lock mr-1"></i>Sales Closed</span>' : ''}
+                                </div>
                                 <div class="flex flex-wrap gap-4 text-sm text-gray-600">
                                     <div><i class="fas fa-calendar mr-2 text-gray-400"></i>${event.date}</div>
                                     <div><i class="fas fa-clock mr-2 text-gray-400"></i>${event.startTime} - ${event.endTime}</div>
@@ -405,6 +410,11 @@ $(document).ready(function() {
                         <input id="editEventLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.location}">
                     </div>
                     <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Ticket Sales Close Date & Time <span class="text-gray-400 font-normal">(optional — leave empty to keep open)</span></label>
+                        <input id="editEventClosed" type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-lg" value="${event.eventClosed}">
+                        <p class="text-xs text-gray-500 mt-1">After this date & time, all ticket categories of this event will be automatically closed.</p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Banner Image <span class="text-gray-400 font-normal">(leave empty to keep current)</span></label>
                         ${imageDropzone('editEventImage', event.image)}
                     </div>
@@ -437,6 +447,7 @@ $(document).ready(function() {
                 formData.append('start_time', $('#editStartTime').val());
                 formData.append('end_time', $('#editEndTime').val());
                 formData.append('location', $('#editEventLocation').val());
+                formData.append('event_closed', $('#editEventClosed').val());
                 formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
                 formData.append('_method', 'PUT');
                 const imageFile = document.getElementById('editEventImage').files[0];

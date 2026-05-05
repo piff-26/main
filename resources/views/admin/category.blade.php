@@ -47,6 +47,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sold</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Remaining</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
                     </tr>
                 </thead>
@@ -66,7 +67,9 @@ const categoriesData = {!! json_encode($categories->map(function($cat) {
         'name' => $cat->name,
         'price' => $cat->price,
         'quota' => $cat->quota,
-        'sold_count' => $cat->sold_count
+        'sold_count' => $cat->sold_count,
+        'is_closed' => (bool) $cat->is_closed,
+        'is_event_closed' => $cat->event ? $cat->event->isClosed() : false,
     ];
 })) !!};
 
@@ -119,14 +122,36 @@ $(document).ready(function() {
             },
             { 
                 data: null,
-                render: (data) => `
-                    <button class="text-green-600 hover:text-green-800 mr-2 btn-edit" data-id="${data.id}" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="hover:text-red-800 btn-delete" style="color: #ff362d;" data-id="${data.id}" data-name="${data.name}" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `
+                render: (data) => {
+                    if (data.is_event_closed) {
+                        return `<span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-500">Event Closed</span>`;
+                    }
+                    return data.is_closed
+                        ? `<span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700"><i class="fas fa-lock mr-1"></i>Closed</span>`
+                        : `<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700"><i class="fas fa-lock-open mr-1"></i>Open</span>`;
+                }
+            },
+            { 
+                data: null,
+                render: (data) => {
+                    const isEventClosed = data.is_event_closed;
+                    const isClosed = data.is_closed;
+                    const toggleTitle = isClosed ? 'Open Ticket Sales' : 'Close Ticket Sales';
+                    const toggleIcon = isClosed ? 'fa-lock-open' : 'fa-lock';
+                    const toggleColor = isClosed ? 'text-green-600 hover:text-green-800' : 'text-orange-500 hover:text-orange-700';
+                    const disabledAttr = isEventClosed && !isClosed ? 'disabled title="Event sudah closed otomatis"' : '';
+                    return `
+                        <button class="text-green-600 hover:text-green-800 mr-2 btn-edit" data-id="${data.id}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="${toggleColor} btn-toggle ${isEventClosed && !isClosed ? 'opacity-40 cursor-not-allowed' : ''}" 
+                            data-id="${data.id}" data-name="${data.name}" data-closed="${isClosed}" 
+                            ${isEventClosed && !isClosed ? 'disabled' : ''}
+                            title="${toggleTitle}">
+                            <i class="fas ${toggleIcon}"></i>
+                        </button>
+                    `;
+                }
             }
         ],
         pageLength: 10,
@@ -137,10 +162,12 @@ $(document).ready(function() {
                 editCategory(catId);
             });
             
-            $('.btn-delete').off('click').on('click', function() {
+            $('.btn-toggle').off('click').on('click', function() {
+                if ($(this).prop('disabled') || $(this).attr('disabled')) return;
                 const catId = $(this).data('id');
                 const catName = $(this).data('name');
-                deleteCategory(catId, catName);
+                const isClosed = $(this).data('closed') === true || $(this).data('closed') === 'true';
+                toggleCategory(catId, catName, isClosed);
             });
         }
     });
@@ -293,26 +320,31 @@ $(document).ready(function() {
         });
     }
 
-    function deleteCategory(catId, catName) {
+    function toggleCategory(catId, catName, currentlyClosed) {
+        const action = currentlyClosed ? 'open' : 'close';
+        const actionLabel = currentlyClosed ? 'Open' : 'Close';
+        const icon = currentlyClosed ? 'fa-lock-open' : 'fa-lock';
+        const color = currentlyClosed ? '#27b4f7' : '#f97316';
+
         Swal.fire({
-            title: '<span class="font-bold">Delete Category</span>',
-            html: `<p class="text-gray-600 mb-4">Are you sure you want to delete category <strong>"${catName}"</strong>?</p>`,
-            icon: 'warning',
+            title: `<span class="font-bold">${actionLabel} Ticket Sales</span>`,
+            html: `<p class="text-gray-600 mb-4">Are you sure you want to <strong>${action}</strong> ticket sales for <strong>"${catName}"</strong>?</p>`,
+            icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-trash mr-2"></i>Yes, Delete',
+            confirmButtonText: `<i class="fas ${icon} mr-2"></i>${actionLabel}`,
             cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
-            confirmButtonColor: '#ef4444',
+            confirmButtonColor: color,
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/admin/category/${catId}`,
-                    method: 'DELETE',
-                    success: function() {
-                        Swal.fire({ icon: 'success', title: 'Deleted!', confirmButtonColor: '#27b4f7', timer: 2000 })
+                    url: `/admin/category/${catId}/toggle`,
+                    method: 'PATCH',
+                    success: function(response) {
+                        Swal.fire({ icon: 'success', title: 'Success!', text: response.message, confirmButtonColor: '#27b4f7', timer: 2000 })
                             .then(() => location.reload());
                     },
                     error: function(xhr) {
-                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to delete category', confirmButtonColor: '#ef4444' });
+                        Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Failed to toggle category', confirmButtonColor: '#ef4444' });
                     }
                 });
             }
