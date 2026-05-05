@@ -18,26 +18,26 @@ class EventSeeder extends Seeder
         $day1 = Event::create([
             'name' => 'Screening Session-Student Gap Standers',
             'slug' => 'piff-day1',
-            'location' => 'Auditorium Gedung Q, Petra Christian University',
+            'location' => 'Auditorium of Q Building, Petra Christian University',
             'event_date' => '2026-05-29',
-            'start_time' => '09:30:00',
-            'end_time' => '12:00:00',
+            'start_time' => '14:00:00',
+            'end_time' => '16:00:00',
         ]);
 
-        TicketCategory::create(['event_id' => $day1->id, 'name' => 'Regular', 'slug' => 'regular', 'price' => 20000, 'quota' => 600]);
+        TicketCategory::create(['event_id' => $day1->id, 'name' => 'Regular', 'slug' => 'regular', 'price' => 20000, 'quota' => 230]);
 
         // Day 2
         $day2 = Event::create([
-            'name' => 'Final Day and Talkshow With Bayu Skak',
+            'name' => 'Final Day and Talkshow With Chandra Liow',
             'slug' => 'piff-day2',
-            'location' => 'Auditorium Gedung Q, Petra Christian University',
+            'location' => 'Auditorium of Q Building, Petra Christian University',
             'event_date' => '2026-05-30', 
             'start_time' => '12:00:00',
             'end_time' => '15:00:00',
         ]);
 
-        TicketCategory::create(['event_id' => $day2->id, 'name' => 'Platinum', 'slug' => 'platinum', 'price' => 79000, 'quota' => 100]);
-        TicketCategory::create(['event_id' => $day2->id, 'name' => 'Gold', 'slug' => 'gold', 'price' => 59000, 'quota' => 200]);
-        TicketCategory::create(['event_id' => $day2->id, 'name' => 'Silver', 'slug' => 'silver', 'price' => 49000, 'quota' => 300]);
+        TicketCategory::create(['event_id' => $day2->id, 'name' => 'Platinum', 'slug' => 'platinum', 'price' => 59000, 'quota' => 150]);
+        TicketCategory::create(['event_id' => $day2->id, 'name' => 'Gold', 'slug' => 'gold', 'price' => 45000, 'quota' => 200]);
+        TicketCategory::create(['event_id' => $day2->id, 'name' => 'Silver', 'slug' => 'silver', 'price' => 39000, 'quota' => 250]);
     }
 }
