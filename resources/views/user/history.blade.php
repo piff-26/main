@@ -16,7 +16,7 @@
                 <div class="bg-white/10 border border-white/20 rounded-2xl px-6 py-12 text-center">
                     <i class="fas fa-ticket-alt text-4xl text-gray-500 mb-4 block"></i>
                     <p class="text-gray-400 text-base">You have no transactions yet.</p>
-                    <a href="{{ route('user.home') }}"
+                    <a href="{{ route('user.ticket') }}"
                         class="inline-block mt-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-6 py-2.5 rounded-full transition">
                         Buy Tickets Now
                     </a>
