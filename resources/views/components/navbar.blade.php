@@ -281,7 +281,7 @@
         visibility: visible;
     }
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 1024px) {
         .nav-links-main {
             position: fixed;
             right: 0;
@@ -293,8 +293,12 @@
             /* Manual Black */
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
+            padding-top: 100px;
+            padding-bottom: 50px;
+            overflow-y: auto;
+            gap: 10px;
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
             transform: translateX(100%);
             transition: transform 0.4s ease-in-out;
@@ -302,26 +306,26 @@
         }
 
         .nav-links-main li {
-            margin: 20px 0;
+            margin: 10px 0;
             opacity: 0;
             width: 100%;
             text-align: center;
         }
 
         .nav-links-main li a {
-            font-size: 20px;
+            font-size: 18px;
             display: block;
         }
 
         .submit-btn {
-            margin-top: 20px;
-            padding: 15px 0;
-            min-width: 200px;
+            margin-top: 10px;
+            padding: 12px 0;
+            min-width: 180px;
         }
 
         .submit-btn.auth-btn {
             min-width: 8rem;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .nav-links-main li .submit-btn {
@@ -376,16 +380,18 @@
     <ul class="nav-links-main">
         <li><a href="{{ route('user.home') }}#title">HOME</a></li>
         <li><a href="{{ route('user.home') }}#submission">PROGRAMS</a></li>
-        <li><a href="{{ route('user.home') }}#ticket">TICKETS</a></li>
-        <!-- <li><a href="{{ route('user.ticket') }}">TICKETS</a></li> -->
-        <!-- <li><a href="{{ route('user.transactions-history') }}">HISTORY</a></li> -->
+        <!-- <li><a href="{{ route('user.home') }}#ticket">TICKETS</a></li> -->
+        <li><a href="{{ route('user.ticket') }}">TICKETS</a></li>
+        @if(session()->has('user_id'))
+            <li><a href="{{ route('user.transactions-history') }}">HISTORY</a></li>
+        @endif
 
         <li>
             <a href="{{ route('user.submit') }}" class="submit-btn">
                 SUBMIT FILMS
             </a>
         </li>
-<!-- 
+
         <li>
             @if(session()->has('user_id'))
                 <a href="{{ route('logout') }}" class="submit-btn auth-btn">
@@ -396,7 +402,7 @@
                     LOGIN
                 </a>
             @endif
-        </li> -->
+        </li>
     </ul>
 
     <div class="burger" role="button" aria-label="Toggle navigation menu" aria-expanded="false" tabindex="0">

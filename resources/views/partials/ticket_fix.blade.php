@@ -186,7 +186,7 @@ body.fade-out {
 @endpush
 
 
-<div class="relative w-screen left-1/2 -translate-x-1/2 h-auto bg-[#fec401] min-h-screen py-20 overflow-x-hidden">
+<div class="relative w-screen left-1/2 -translate-x-1/2 h-auto bg-[#fec401] py-20 overflow-x-hidden">
     <div class="relative z-10 container mx-auto px-4 max-w-2xl">
         
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-12">

@@ -56,17 +56,17 @@
         </div>
 
         {{-- ticket --}}
-        <div class="relative flex items-center justify-center" id="ticket">
+        {{--<div class="relative flex items-center justify-center" id="ticket">
             <div class="relative z-31">
                 @include('partials.ticket')
             </div>
-        </div>
+        </div> --}}
         {{-- ticket --}}
-        {{-- <div class="relative flex items-center justify-center" id="ticket">
+        <div class="relative flex items-center justify-center" id="ticket">
             <div class="relative z-31">
                 @include('partials.ticket_fix')
             </div>
-        </div> --}}
+        </div>
     </div>
 
     @push('scripts')
