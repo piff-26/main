@@ -59,12 +59,16 @@ class AdminController extends BaseController
             $pendingCount = Transaction::where('transaction_status', TransactionStatusEnum::PENDING->value)
                 ->whereHas('transactionItems.ticketCategory', fn($q) => $q->where('event_id', $event->id))
                 ->count();
+            $paidCount = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)
+                ->whereHas('transactionItems.ticketCategory', fn($q) => $q->where('event_id', $event->id))
+                ->count();
             $totalRevenue = Transaction::where('transaction_status', TransactionStatusEnum::PAID->value)
                 ->whereHas('transactionItems.ticketCategory', fn($q) => $q->where('event_id', $event->id))
                 ->sum('total_amount');
             return [
                 'name'          => $event->name,
                 'pending_count' => $pendingCount,
+                'paid_count'    => $paidCount,
                 'total_revenue' => (float) $totalRevenue,
             ];
         });
