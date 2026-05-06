@@ -1,6 +1,18 @@
 <div style="padding: 20px; border-top: 2px solid #000;">
-    <h1 class="text-center" style="margin-bottom: 0;">INVOICE</h1>
-    <h3 class="text-center" style="margin-top: 5px; color: #555;">{{ $transaction->invoice_code }}</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="width: 25%; text-align: left; vertical-align: middle;">
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/logo/logo_piff_black.png'))) }}" style="height: 140px; max-width: 100%;" alt="PIFF Logo">
+            </td>
+            <td style="width: 50%; text-align: center; vertical-align: middle;">
+                <h1 class="text-center" style="margin-bottom: 0;">INVOICE</h1>
+                <h3 class="text-center" style="margin-top: 5px; color: #555;">{{ $transaction->invoice_code }}</h3>
+            </td>
+            <td style="width: 25%; text-align: right; vertical-align: middle;">
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/logo/logo_asfs_black.png'))) }}" style="height: 100px; max-width: 100%;" alt="ASFS Logo">
+            </td>
+        </tr>
+    </table>
 
     <hr style="margin: 20px 0;">
 
