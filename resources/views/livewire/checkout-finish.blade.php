@@ -196,7 +196,7 @@
                                 class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white uppercase focus:border-[#ff5b1d] transition"
                                 placeholder="ENTER CODE">
                             <button wire:click.prevent="applyVoucher"
-                                class="w-full bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">APPLY</button>
+                                class="w-full bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold tracking-wider transition">APPLY VOUCHER</button>
                         </div>
                         @error('voucher_code')
                             <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span>
