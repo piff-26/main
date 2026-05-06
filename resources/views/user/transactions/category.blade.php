@@ -70,7 +70,7 @@
                             @endif
 
                             @if ($event->description)
-                                <div id="tab-desc" class="tab-content hidden">
+                                <div id="tab-desc" class="tab-content {{ $event->seat_map_image ? 'hidden' : '' }}">
                                     <div
                                         class="bg-white/5 border border-white/10 rounded-2xl p-5 text-gray-300 text-sm leading-relaxed whitespace-pre-line">
                                         {{ $event->description }}
@@ -79,7 +79,7 @@
                             @endif
 
                             @if ($event->tnc)
-                                <div id="tab-tnc" class="tab-content hidden">
+                                <div id="tab-tnc" class="tab-content {{ ($event->seat_map_image || $event->description) ? 'hidden' : '' }}">
                                     <div
                                         class="bg-white/5 border border-white/10 rounded-2xl p-5 text-gray-300 text-sm leading-relaxed whitespace-pre-line">
                                         {{ $event->tnc }}
