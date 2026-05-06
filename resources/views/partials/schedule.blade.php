@@ -273,6 +273,7 @@
 @push('scripts')
     <script>
         gsap.registerPlugin(ScrollTrigger);
+        ScrollTrigger.config({ ignoreMobileResize: true });
 
         $(window).on('load', function() {
 
@@ -288,8 +289,7 @@
                     start: "top top",
                     end: "+=2000",
                     pin: true,
-                    scrub: 1,
-                    invalidateOnRefresh: true
+                    scrub: 1
                 }
             });
 
@@ -303,14 +303,6 @@
             });
 
             ScrollTrigger.refresh();
-
-            let resizeTimer;
-            $(window).on('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    ScrollTrigger.refresh();
-                }, 250);
-            });
         });
     </script>
 @endpush

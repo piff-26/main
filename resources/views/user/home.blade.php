@@ -46,8 +46,8 @@
         </div>
 
         {{-- schedule --}}
-        <div class="relative min-h-screen pb-24 flex items-center justify-center" id="schedule">
-            <div class="relative z-31">
+        <div class="relative min-h-screen pb-24 flex items-center justify-center w-full" id="schedule">
+            <div class="relative z-31 w-full">
                 @include('partials.schedule')
             </div>
         </div>
