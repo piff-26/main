@@ -38,7 +38,12 @@
                 </div>
             </div>
         </div>
-
+        {{-- ticket --}}
+        <div class="relative flex items-center justify-center" id="ticket">
+            <div class="relative z-31">
+                @include('partials.ticket_fix')
+            </div>
+        </div>
 
         {{-- schedule --}}
         <div class="relative min-h-screen pb-24 flex items-center justify-center" id="schedule">
@@ -61,12 +66,6 @@
                 @include('partials.ticket')
             </div>
         </div> --}}
-        {{-- ticket --}}
-        <div class="relative flex items-center justify-center" id="ticket">
-            <div class="relative z-31">
-                @include('partials.ticket_fix')
-            </div>
-        </div>
     </div>
 
     @push('scripts')

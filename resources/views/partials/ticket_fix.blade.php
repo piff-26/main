@@ -220,29 +220,6 @@ body.fade-out {
             </div>
         </div> -->
 
-        <!-- CARD 2 -->
-        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="200" onclick="document.body.classList.add('fade-out'); setTimeout(() => { window.location.href='{{ route('user.ticket') }}' }, 800);">
-            <svg class="ticket-border-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
-                <rect x="2" y="2" width="496" height="156" rx="15" class="ticket-path"/>
-            </svg>
-
-            <div class="ticket-card">
-                <div class="ticket-left">
-                    <p class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">Day 1</p>
-                    <h3 class="font-montech-bold text-lg leading-tight uppercase">
-                        Student Gap Standers<br>Screening Session
-                    </h3>
-                </div>
-
-                <div class="ticket-right">
-                    <p class="font-bold text-sm uppercase">
-                        May 29th 2026<br>14.00 WIB
-                    </p>
-                    <button class="btn-animate">Purchase Tickets</button>
-                </div>
-            </div>
-        </div>
-
         <!-- CARD 3 -->
         <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="400" onclick="document.body.classList.add('fade-out'); setTimeout(() => { window.location.href='{{ route('user.ticket') }}' }, 800);">
             <svg class="ticket-border-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
@@ -263,6 +240,29 @@ body.fade-out {
                 <div class="ticket-right">
                     <p class="font-bold text-sm uppercase">
                         May 30th 2026<br>12.00 WIB
+                    </p>
+                    <button class="btn-animate">Purchase Tickets</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="ticket-wrapper js-tilt-card" data-aos="fade-right" data-aos-delay="200" onclick="document.body.classList.add('fade-out'); setTimeout(() => { window.location.href='{{ route('user.ticket') }}' }, 800);">
+            <svg class="ticket-border-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
+                <rect x="2" y="2" width="496" height="156" rx="15" class="ticket-path"/>
+            </svg>
+
+            <div class="ticket-card">
+                <div class="ticket-left">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">Day 1</p>
+                    <h3 class="font-montech-bold text-lg leading-tight uppercase">
+                        Student Gap Standers<br>Screening Session
+                    </h3>
+                </div>
+
+                <div class="ticket-right">
+                    <p class="font-bold text-sm uppercase">
+                        May 29th 2026<br>14.00 WIB
                     </p>
                     <button class="btn-animate">Purchase Tickets</button>
                 </div>
