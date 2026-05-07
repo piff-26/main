@@ -138,7 +138,15 @@
 @section('content')
     <div class="login-section"
         style="background-image: url('{{ asset('assets/background/bg_login_admin.png') }}'); background-size: cover; background-position: center;">
-        <div class="login-card cursor-pointer">
+        <div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;">
+            <div class="warning-box w-[22rem] md:w-[25rem]" style=" background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); padding: 0.75rem; border-radius: 1rem; text-align: center; margin-bottom: 1.5rem; backdrop-filter: blur(4px);">
+                <div style="color: #fca5a5; font-size: 0.875rem; font-weight: 500; line-height: 1.4;">
+                    <span style="font-size: 1.25rem; display: block; margin-bottom: 0.25rem;"></span>
+                    ⚠ Mahasiswa PCU wajib menggunakan email @John.<br>
+                    <span style="font-size: 0.75rem; opacity: 0.9;">Digunakan untuk proses pencairan SKKK.</span>
+                </div>
+            </div>
+            <div class="login-card cursor-pointer">
             <div class="card-head">
                 <div class="card-title">LOGIN</div>
             </div>
@@ -158,6 +166,7 @@
                     <span class="relative z-10">Log in with Google</span>
                 </a>
             </div>
+        </div>
         </div>
     </div>
 @endsection
