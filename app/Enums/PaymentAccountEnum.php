@@ -18,7 +18,7 @@ enum PaymentAccountEnum
     public function label(): string
     {
         return match($this) {
-            self::BCA    => 'Chaterine Cristela',
+            self::BCA    => 'BCA (INDONESIA)',
             // self::PAYPAL => 'PayPal (INTERNATIONAL)',
         };
     }
@@ -26,7 +26,7 @@ enum PaymentAccountEnum
     public function accountName(): string
     {
         return match($this) {
-            self::BCA    => 'PIFF 2026',
+            self::BCA    => 'Chaterine Cristela',
             // self::PAYPAL => 'PIFF 2026',
         };
     }
