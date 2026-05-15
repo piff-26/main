@@ -51,4 +51,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class);
     }
+
+    // Cek tiket online yang dimiliki user
+    public function onlinePasses()
+    {
+        return $this->hasMany(UserOnlinePass::class);
+    }
 }
