@@ -12,6 +12,28 @@
         </div>
     @endif
 
+    {{-- Search & Filter Bar --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <div class="relative flex-1 min-w-48">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" id="passSearch" placeholder="Search by user or ticket..." oninput="filterPasses()"
+                class="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-400">
+        </div>
+        <select id="filterPassStatus" onchange="filterPasses()" class="py-2 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-400">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+        <button onclick="resetPassFilter()" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1">
+            <i class="fas fa-times-circle"></i> Reset
+        </button>
+    </div>
+
+    <div id="passEmptyState" class="hidden text-center py-12 text-gray-400">
+        <i class="fas fa-users text-3xl mb-2"></i>
+        <p>No passes match your search.</p>
+    </div>
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[800px]">
@@ -27,7 +49,10 @@
                 </thead>
                 <tbody>
                     @forelse($passes as $pass)
-                    <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+                    <tr class="border-b border-gray-50 hover:bg-gray-50/50 pass-row"
+                        data-user="{{ strtolower($pass->user->name ?? '') }} {{ strtolower($pass->user->email ?? '') }}"
+                        data-ticket="{{ strtolower($pass->onlineTicket->name ?? '') }}"
+                        data-status="{{ strtolower($pass->status->value ?? $pass->status) }}">
                         <td class="py-3 px-4">
                             <p class="font-medium text-gray-800">{{ $pass->user->name ?? 'Unknown User' }}</p>
                             <p class="text-xs text-gray-500">{{ $pass->user->email ?? '-' }}</p>
@@ -103,6 +128,26 @@
                 btn.closest('form').submit();
             }
         });
+    }
+
+    function filterPasses() {
+        const q      = document.getElementById('passSearch').value.toLowerCase().trim();
+        const status = document.getElementById('filterPassStatus').value.toLowerCase();
+        let visible  = 0;
+        document.querySelectorAll('.pass-row').forEach(row => {
+            const matchQ      = !q      || row.dataset.user.includes(q) || row.dataset.ticket.includes(q);
+            const matchStatus = !status || row.dataset.status === status;
+            const show = matchQ && matchStatus;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('passEmptyState').classList.toggle('hidden', visible > 0);
+    }
+
+    function resetPassFilter() {
+        document.getElementById('passSearch').value = '';
+        document.getElementById('filterPassStatus').value = '';
+        filterPasses();
     }
 </script>
 @endpush

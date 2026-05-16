@@ -15,6 +15,39 @@
         </div>
     @endif
 
+    {{-- Search & Filter Bar --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <div class="relative flex-1 min-w-48">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" id="movieSearch" placeholder="Search by title..." oninput="filterMovies()"
+                class="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-400">
+        </div>
+        <select id="filterCategory" onchange="filterMovies()" class="py-2 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-400">
+            <option value="">All Categories</option>
+            @foreach($categories as $cat)
+                <option value="{{ $cat->name }}">{{ $cat->name }}</option>
+            @endforeach
+        </select>
+        <select id="filterType" onchange="filterMovies()" class="py-2 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-400">
+            <option value="">All Types</option>
+            <option value="live">Live</option>
+            <option value="vod">VOD</option>
+        </select>
+        <select id="filterStatus" onchange="filterMovies()" class="py-2 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-400">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+        <button onclick="resetMovieFilter()" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1">
+            <i class="fas fa-times-circle"></i> Reset
+        </button>
+    </div>
+
+    <div id="movieEmptyState" class="hidden text-center py-12 text-gray-400">
+        <i class="fas fa-film text-3xl mb-2"></i>
+        <p>No movies match your filter.</p>
+    </div>
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[800px]">
@@ -30,7 +63,11 @@
                 </thead>
                 <tbody>
                     @foreach($movies as $movie)
-                    <tr class="border-b border-gray-50 hover:bg-gray-50/50">
+                    <tr class="border-b border-gray-50 hover:bg-gray-50/50 movie-row"
+                        data-title="{{ strtolower($movie->title) }}"
+                        data-category="{{ $movie->category->name }}"
+                        data-type="{{ $movie->is_live ? 'live' : 'vod' }}"
+                        data-status="{{ $movie->is_active ? 'active' : 'inactive' }}">
                         <td class="py-3 px-4">
                             @if($movie->thumbnail)
                                 <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="{{ $movie->title }}" class="w-16 h-24 object-cover rounded shadow-sm">
@@ -289,5 +326,31 @@
         document.getElementById('editSubmitBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
         Swal.fire({ title: 'Saving...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     });
+
+    function filterMovies() {
+        const q      = document.getElementById('movieSearch').value.toLowerCase().trim();
+        const cat    = document.getElementById('filterCategory').value;
+        const type   = document.getElementById('filterType').value;
+        const status = document.getElementById('filterStatus').value;
+        let visible  = 0;
+        document.querySelectorAll('.movie-row').forEach(row => {
+            const matchQ      = !q      || row.dataset.title.includes(q);
+            const matchCat    = !cat    || row.dataset.category === cat;
+            const matchType   = !type   || row.dataset.type    === type;
+            const matchStatus = !status || row.dataset.status  === status;
+            const show = matchQ && matchCat && matchType && matchStatus;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('movieEmptyState').classList.toggle('hidden', visible > 0);
+    }
+
+    function resetMovieFilter() {
+        document.getElementById('movieSearch').value = '';
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterType').value = '';
+        document.getElementById('filterStatus').value = '';
+        filterMovies();
+    }
 </script>
 @endpush
