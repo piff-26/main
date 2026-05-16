@@ -175,7 +175,7 @@
                         <h3 class="text-3xl font-bold text-white mb-2">Discover</h3>
                         <p class="text-slate-400">Get an Online Pass today and access these amazing films and live streaming</p>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach($allMovies as $movie)
                             <div class="bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-slate-500 transition group cursor-pointer relative">
                                 <div class="aspect-video relative overflow-hidden bg-slate-800">
@@ -189,10 +189,18 @@
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-slate-500"><i class="fas fa-film text-3xl"></i></div>
                                     @endif
+                                    @if($movie->category)
+                                        <span class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600">{{ $movie->category->name }}</span>
+                                    @endif
+                                    <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5 border border-slate-600">
+                                        <i class="fas fa-lock text-slate-400 text-xs"></i>
+                                    </div>
                                 </div>
                                 <div class="p-4">
                                     <h4 class="text-white font-semibold mb-1 line-clamp-1">{{ $movie->title }}</h4>
-                                    <p class="text-slate-400 text-sm line-clamp-1">{{ $movie->director ?? 'Various Directors' }}</p>
+                                    @if($movie->description)
+                                        <p class="text-slate-400 text-xs line-clamp-2 leading-snug">{{ $movie->description }}</p>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
