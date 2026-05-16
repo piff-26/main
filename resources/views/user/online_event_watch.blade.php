@@ -343,4 +343,7 @@
     });
 </script>
 @endpush
+
+@include('partials.content_security')
+
 @endsection
