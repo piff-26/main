@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // Contoh: 'Documentary'
             $table->string('slug')->unique(); // Contoh: 'documentary'
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
