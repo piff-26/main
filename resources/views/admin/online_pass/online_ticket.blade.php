@@ -58,10 +58,12 @@
                             </span>
                         </td>
                         <td class="py-3 px-4">
-                            <form action="{{ route('admin.online_ticket.toggle', $ticket->id) }}" method="POST">
+                            <form action="{{ route('admin.online_ticket.toggle', $ticket->id) }}" method="POST" class="toggle-form">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $ticket->is_active ? 'bg-indigo-600' : 'bg-gray-200' }}">
+                                <button type="button"
+                                    onclick="confirmToggle(this, '{{ addslashes($ticket->name) }}', {{ $ticket->is_active ? 'true' : 'false' }})"
+                                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $ticket->is_active ? 'bg-indigo-600' : 'bg-gray-200' }}">
                                     <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $ticket->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
                                 </button>
                             </form>
@@ -71,13 +73,11 @@
                                 <button onclick="editTicket({{ json_encode($ticket) }}, {{ json_encode($ticket->movies->pluck('id')) }})" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg transition-colors">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <form action="{{ route('admin.online_ticket.destroy', $ticket->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this ticket?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button"
+                                    onclick="confirmDelete('{{ route('admin.online_ticket.destroy', $ticket->id) }}', '{{ addslashes($ticket->name) }}')"
+                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -126,11 +126,17 @@
                         <input type="datetime-local" name="access_end_date" required class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     <div class="mb-4 md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Movies Included</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-medium text-gray-700">Movies Included</label>
+                            <label class="flex items-center gap-1.5 text-xs text-indigo-600 cursor-pointer hover:text-indigo-800 select-none">
+                                <input type="checkbox" id="add_select_all" class="rounded text-indigo-600" onchange="toggleAllMovies('add_select_all', '.add-movie-checkbox')">
+                                Select All
+                            </label>
+                        </div>
                         <div class="h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 bg-gray-50">
                             @foreach($movies as $movie)
                                 <label class="flex items-center gap-2 p-1 hover:bg-gray-100 rounded cursor-pointer">
-                                    <input type="checkbox" name="movies[]" value="{{ $movie->id }}" class="rounded text-indigo-600 focus:ring-indigo-500">
+                                    <input type="checkbox" name="movies[]" value="{{ $movie->id }}" class="rounded text-indigo-600 focus:ring-indigo-500 add-movie-checkbox">
                                     <span class="text-sm">{{ $movie->title }}</span>
                                 </label>
                             @endforeach
@@ -144,7 +150,7 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save</button>
+                    <button type="submit" id="addSubmitBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save</button>
                 </div>
             </form>
         </div>
@@ -194,7 +200,13 @@
                         <input type="datetime-local" name="access_end_date" id="edit_access_end_date" required class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     <div class="mb-4 md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Movies Included</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-medium text-gray-700">Movies Included</label>
+                            <label class="flex items-center gap-1.5 text-xs text-indigo-600 cursor-pointer hover:text-indigo-800 select-none">
+                                <input type="checkbox" id="edit_select_all" class="rounded text-indigo-600" onchange="toggleAllMovies('edit_select_all', '.edit-movie-checkbox')">
+                                Select All
+                            </label>
+                        </div>
                         <div class="h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 bg-gray-50">
                             @foreach($movies as $movie)
                                 <label class="flex items-center gap-2 p-1 hover:bg-gray-100 rounded cursor-pointer">
@@ -211,13 +223,16 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save Changes</button>
+                    <button type="submit" id="editSubmitBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+@endsection
+
+@push('scripts')
 <script>
     function editTicket(ticket, movieIds) {
         document.getElementById('editForm').action = `/admin/online-ticket/${ticket.id}`;
@@ -233,7 +248,6 @@
             document.getElementById('edit_image_preview').classList.add('hidden');
         }
         
-        // Format dates
         if (ticket.access_start_date) {
             document.getElementById('edit_access_start_date').value = new Date(ticket.access_start_date).toISOString().slice(0, 16);
         }
@@ -241,7 +255,6 @@
             document.getElementById('edit_access_end_date').value = new Date(ticket.access_end_date).toISOString().slice(0, 16);
         }
 
-        // Check boxes
         const checkboxes = document.querySelectorAll('.edit-movie-checkbox');
         checkboxes.forEach(cb => {
             cb.checked = movieIds.includes(parseInt(cb.value));
@@ -249,6 +262,83 @@
 
         document.getElementById('editModal').classList.remove('hidden');
     }
-</script>
-@endsection
 
+    function toggleAllMovies(selectAllId, checkboxClass) {
+        const checked = document.getElementById(selectAllId).checked;
+        document.querySelectorAll(checkboxClass).forEach(cb => cb.checked = checked);
+    }
+
+    // Sync "Select All" state when individual checkboxes change
+    document.querySelectorAll('.add-movie-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const all = document.querySelectorAll('.add-movie-checkbox');
+            document.getElementById('add_select_all').checked = [...all].every(c => c.checked);
+        });
+    });
+    document.querySelectorAll('.edit-movie-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const all = document.querySelectorAll('.edit-movie-checkbox');
+            document.getElementById('edit_select_all').checked = [...all].every(c => c.checked);
+        });
+    });
+
+    const deleteForm = document.createElement('form');
+    deleteForm.id = 'deleteForm';
+    deleteForm.method = 'POST';
+    deleteForm.style.display = 'none';
+    deleteForm.innerHTML = `@csrf @method('DELETE')`;
+    document.body.appendChild(deleteForm);
+
+    function confirmDelete(url, name) {
+        Swal.fire({
+            title: 'Delete Online Ticket?',
+            text: `"${name}" will be permanently deleted.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                document.getElementById('deleteForm').action = url;
+                document.getElementById('deleteForm').submit();
+            }
+        });
+    }
+
+    function confirmToggle(btn, name, isActive) {
+        const action = isActive ? 'Deactivate' : 'Activate';
+        Swal.fire({
+            title: `${action} Ticket?`,
+            text: `"${name}" will be ${isActive ? 'deactivated' : 'activated'}.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: isActive ? '#ef4444' : '#4f46e5',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: `Yes, ${action.toLowerCase()}`,
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                btn.closest('form').submit();
+            }
+        });
+    }
+
+    document.getElementById('addModal').querySelector('form').addEventListener('submit', function() {
+        const btn = document.getElementById('addSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+        Swal.fire({ title: 'Saving...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function() {
+        const btn = document.getElementById('editSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+        Swal.fire({ title: 'Saving...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    });
+</script>
+@endpush

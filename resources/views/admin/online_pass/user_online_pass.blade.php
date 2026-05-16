@@ -51,16 +51,20 @@
                             {{ $pass->created_at->format('d M Y H:i') }}
                         </td>
                         <td class="py-3 px-4">
-                            <form action="{{ route('admin.user_online_pass.update_status', $pass->id) }}" method="POST">
+                            <form action="{{ route('admin.user_online_pass.update_status', $pass->id) }}" method="POST" class="pass-form">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="{{ ($pass->status->value ?? $pass->status) === 'active' ? 'inactive' : 'active' }}">
                                 @if(($pass->status->value ?? $pass->status) === 'active')
-                                    <button type="submit" class="text-xs px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-medium transition-colors" onsubmit="return confirm('Deactivate this pass?');">
+                                    <button type="button"
+                                        onclick="confirmPassStatus(this, '{{ $pass->user->name ?? 'User' }}', true)"
+                                        class="text-xs px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-medium transition-colors">
                                         <i class="fas fa-ban mr-1"></i> Deactivate
                                     </button>
                                 @else
-                                    <button type="submit" class="text-xs px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg font-medium transition-colors">
+                                    <button type="button"
+                                        onclick="confirmPassStatus(this, '{{ $pass->user->name ?? 'User' }}', false)"
+                                        class="text-xs px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg font-medium transition-colors">
                                         <i class="fas fa-check mr-1"></i> Activate
                                     </button>
                                 @endif
@@ -79,5 +83,28 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function confirmPassStatus(btn, userName, isActive) {
+        const action = isActive ? 'Deactivate' : 'Activate';
+        Swal.fire({
+            title: `${action} Online Pass?`,
+            text: `${action} the online pass for "${userName}"?`,
+            icon: isActive ? 'warning' : 'question',
+            showCancelButton: true,
+            confirmButtonColor: isActive ? '#ef4444' : '#16a34a',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: `Yes, ${action.toLowerCase()}`,
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                btn.closest('form').submit();
+            }
+        });
+    }
+</script>
+@endpush
 @endsection
 

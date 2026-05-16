@@ -62,10 +62,12 @@
                             @endif
                         </td>
                         <td class="py-3 px-4">
-                            <form action="{{ route('admin.movie.toggle', $movie->id) }}" method="POST">
+                            <form action="{{ route('admin.movie.toggle', $movie->id) }}" method="POST" class="toggle-form">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $movie->is_active ? 'bg-indigo-600' : 'bg-gray-200' }}">
+                                <button type="button"
+                                    onclick="confirmToggle(this, '{{ $movie->title }}', {{ $movie->is_active ? 'true' : 'false' }})"
+                                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $movie->is_active ? 'bg-indigo-600' : 'bg-gray-200' }}">
                                     <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $movie->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
                                 </button>
                             </form>
@@ -75,13 +77,11 @@
                                 <button onclick="editMovie({{ json_encode($movie) }})" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg transition-colors">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <form action="{{ route('admin.movie.destroy', $movie->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this movie?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button"
+                                    onclick="confirmDelete('{{ route('admin.movie.destroy', $movie->id) }}', '{{ addslashes($movie->title) }}')"
+                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -143,7 +143,7 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save</button>
+                    <button type="submit" id="addSubmitBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save</button>
                 </div>
             </form>
         </div>
@@ -202,13 +202,16 @@
                 </div>
                 <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save Changes</button>
+                    <button type="submit" id="editSubmitBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+@endsection
+
+@push('scripts')
 <script>
     function editMovie(movie) {
         document.getElementById('editForm').action = `/admin/movie/${movie.id}`;
@@ -219,7 +222,6 @@
         document.getElementById('edit_is_live').value = movie.is_live ? '1' : '0';
         
         if (movie.scheduled_at) {
-            // Format datetime for input type="datetime-local" (YYYY-MM-DDThh:mm)
             const date = new Date(movie.scheduled_at);
             const formatted = date.toISOString().slice(0, 16);
             document.getElementById('edit_scheduled_at').value = formatted;
@@ -229,6 +231,63 @@
 
         document.getElementById('editModal').classList.remove('hidden');
     }
-</script>
-@endsection
 
+    // Hidden delete form
+    const deleteForm = document.createElement('form');
+    deleteForm.id = 'deleteForm';
+    deleteForm.method = 'POST';
+    deleteForm.style.display = 'none';
+    deleteForm.innerHTML = `@csrf @method('DELETE')`;
+    document.body.appendChild(deleteForm);
+
+    function confirmDelete(url, name) {
+        Swal.fire({
+            title: 'Delete Movie?',
+            text: `"${name}" will be permanently deleted.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                document.getElementById('deleteForm').action = url;
+                document.getElementById('deleteForm').submit();
+            }
+        });
+    }
+
+    function confirmToggle(btn, name, isActive) {
+        const action = isActive ? 'Deactivate' : 'Activate';
+        Swal.fire({
+            title: `${action} Movie?`,
+            text: `"${name}" will be ${isActive ? 'deactivated' : 'activated'}.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: isActive ? '#ef4444' : '#4f46e5',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: `Yes, ${action.toLowerCase()}`,
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                btn.closest('form').submit();
+            }
+        });
+    }
+
+    document.getElementById('addModal').querySelector('form').addEventListener('submit', function() {
+        document.getElementById('addSubmitBtn').disabled = true;
+        document.getElementById('addSubmitBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+        Swal.fire({ title: 'Saving...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function() {
+        document.getElementById('editSubmitBtn').disabled = true;
+        document.getElementById('editSubmitBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+        Swal.fire({ title: 'Saving...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    });
+</script>
+@endpush
