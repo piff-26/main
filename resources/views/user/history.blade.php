@@ -64,23 +64,40 @@
                             </div>
 
                             {{-- Body: PAID --}}
-                            @if ($isPaid && $transaction->tickets->isNotEmpty())
+                            {{-- Body: PAID --}}
+                            @if ($isPaid)
                                 <div class="px-6 py-4">
-                                    <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">Ticket
-                                        Details</p>
+                                    <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">Order Details</p>
                                     <div class="space-y-2">
-                                        @foreach ($transaction->tickets as $ticket)
-                                            <div
-                                                class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5">
-                                                <div>
-                                                    <p class="text-white text-sm font-semibold">
-                                                        {{ $ticket->ticketCategory->name }}</p>
-                                                    <p class="text-gray-500 text-xs font-mono">{{ $ticket->ticket_code }}
-                                                    </p>
+                                        @if($transaction->tickets->isNotEmpty())
+                                            @foreach ($transaction->tickets as $ticket)
+                                                <div
+                                                    class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5">
+                                                    <div>
+                                                        <p class="text-white text-sm font-semibold">
+                                                            {{ $ticket->ticketCategory->name }}</p>
+                                                        <p class="text-gray-500 text-xs font-mono">{{ $ticket->ticket_code }}
+                                                        </p>
+                                                    </div>
+                                                    <span
+                                                        class="text-gray-400 text-xs">{{ $ticket->ticketCategory->event->name ?? '-' }}</span>
                                                 </div>
-                                                <span
-                                                    class="text-gray-400 text-xs">{{ $ticket->ticketCategory->event->name ?? '-' }}</span>
-                                            </div>
+                                            @endforeach
+                                        @endif
+                                        @foreach ($transaction->transactionItems as $item)
+                                            @if ($item->online_ticket_id && $item->onlineTicket)
+                                                <div
+                                                    class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5">
+                                                    <div>
+                                                        <p class="text-white text-sm font-semibold">
+                                                            Online Pass - {{ $item->onlineTicket->name }}</p>
+                                                        <p class="text-gray-500 text-xs font-mono">Digital Access (Terkoneksi Akun)
+                                                        </p>
+                                                    </div>
+                                                    <a href="{{ route('user.online_event') }}"
+                                                        class="text-[#ff5b1d] hover:text-[#e04a10] text-xs font-bold transition">Watch Now &rarr;</a>
+                                                </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </div>
@@ -100,15 +117,15 @@
 
                                     @if ($transaction->transactionItems->isNotEmpty())
                                         <p class="text-gray-400 text-xs font-semibold uppercase tracking-wider mt-4 mb-2">
-                                            Ordered Tickets</p>
+                                            Order Summary</p>
                                         <div class="space-y-2">
                                             @foreach ($transaction->transactionItems as $item)
                                                 <div
                                                     class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5">
                                                     <div>
                                                         <p class="text-white text-sm font-semibold">
-                                                            {{ $item->ticketCategory->name }}</p>
-                                                        <p class="text-gray-500 text-xs">{{ $item->quantity }}x ticket</p>
+                                                            {{ $item->ticketCategory ? $item->ticketCategory->name : ('Online Pass - ' . ($item->onlineTicket->name ?? '')) }}</p>
+                                                        <p class="text-gray-500 text-xs">{{ $item->quantity }}x {{ $item->ticket_category_id ? 'ticket' : 'pass' }}</p>
                                                     </div>
                                                     <span class="text-gray-400 text-sm">IDR
                                                         {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
@@ -194,7 +211,7 @@
                                         <a href="{{ route('ticket.download', $transaction->invoice_code) }}"
                                             class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm px-5 py-2.5 rounded-full transition hover:-translate-y-0.5 active:translate-y-0">
                                             <i class="fas fa-file-pdf"></i>
-                                            Download E-Ticket
+                                            {{ $transaction->tickets->isNotEmpty() ? 'Download E-Ticket' : 'Download Invoice' }}
                                         </a>
                                     </div>
                                 @elseif ($isPending)
