@@ -10,9 +10,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Voucher extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
-    protected $fillable = ['code', 'discount_type', 'discount_nominal', 'discount_percentage', 'event_id', 'ticket_category_id', 'max_uses', 'used_count', 'expired_at', 'status'];
-    protected $casts = ['expired_at' => 'datetime'];
+    protected $fillable = ['code', 'discount_type', 'discount_nominal', 'discount_percentage', 'event_id', 'ticket_category_id', 'online_ticket_id', 'usage_type', 'max_uses', 'used_count', 'expired_at', 'status'];
+    protected $casts = [
+        'expired_at' => 'datetime',
+        'usage_type' => \App\Enums\VoucherUsageTypeEnum::class,
+    ];
 
     public function event() { return $this->belongsTo(Event::class); }
     public function ticketCategory() { return $this->belongsTo(TicketCategory::class); }
+    public function onlineTicket() { return $this->belongsTo(OnlineTicket::class); }
 }

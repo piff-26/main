@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserOnlinePass extends Model
 {
-    protected $guarded = [];
+    protected $fillable = ['user_id', 'transaction_id', 'online_ticket_id', 'status'];
+
+    protected $casts = [
+        'status' => \App\Enums\UserOnlinePassStatusEnum::class,
+    ];
 
     public function user()
     {
