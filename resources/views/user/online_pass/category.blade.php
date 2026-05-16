@@ -20,10 +20,10 @@
                 <div class="lg:w-1/2">
                         {{-- Tab Buttons --}}
                         <div class="flex gap-1 bg-white/5 p-1 rounded-xl mb-4">
-                            <button onclick="switchTab('tab-included')" id="btn-tab-included"
+                            <!-- <button onclick="switchTab('tab-included')" id="btn-tab-included"
                                 class="tab-btn flex-1 py-2 text-sm font-semibold rounded-lg transition text-white bg-white/20">
                                 What's Included
-                            </button>
+                            </button> -->
                             @if ($ticket->description)
                                 <button onclick="switchTab('tab-desc')" id="btn-tab-desc"
                                     class="tab-btn flex-1 py-2 text-sm font-semibold rounded-lg transition text-gray-400 hover:text-white">
@@ -39,7 +39,7 @@
                         </div>
 
                         {{-- Tab Contents --}}
-                        <div id="tab-included" class="tab-content">
+                        <!-- <div id="tab-included" class="tab-content">
                             <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
                                 @if($ticket->movies->count() > 0)
                                     <div class="grid grid-cols-1 gap-4">
@@ -70,7 +70,7 @@
                                     <p class="text-gray-400 text-sm text-center py-4">No specific movies listed. Grants access to the general portal.</p>
                                 @endif
                             </div>
-                        </div>
+                        </div> -->
 
                         @if ($ticket->description)
                             <div id="tab-desc" class="tab-content hidden">
@@ -184,13 +184,20 @@
                 btn.classList.remove('text-white', 'bg-white/20');
                 btn.classList.add('text-gray-400');
             });
-            document.getElementById(activeId).classList.remove('hidden');
-            const btnId = 'btn-' + activeId;
-            const activeBtn = document.getElementById(btnId);
+            document.getElementById(activeId)?.classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + activeId);
             if (activeBtn) {
                 activeBtn.classList.add('text-white', 'bg-white/20');
                 activeBtn.classList.remove('text-gray-400');
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const firstBtn = document.querySelector('.tab-btn');
+            if (firstBtn) {
+                const tabId = firstBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                switchTab(tabId);
+            }
+        });
     </script>
 @endsection
