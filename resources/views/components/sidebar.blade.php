@@ -7,11 +7,22 @@
         ['route' => 'admin.transaction',    'label' => 'Transactions',    'icon' => 'fa-receipt',           'access' => ['bph','sc','acara','sekkon','it']],
         ['route' => 'admin.event',          'label' => 'Events',          'icon' => 'fa-calendar-days',     'access' => ['bph','sc','acara','sekkon','it']],
         ['route' => 'admin.category',       'label' => 'Ticket Category', 'icon' => 'fa-tags',              'access' => ['bph','sc','acara','sekkon','it']],
-        ['route' => 'admin.monitor',        'label' => 'Monitor',         'icon' => 'fa-tower-broadcast',   'access' => ['bph','sc','acara','sekkon','it']],
-        ['route' => 'admin.insight',        'label' => 'Insight',         'icon' => 'fa-chart-line',        'access' => ['bph','sc','acara','sekkon','it']],
-        ['route' => 'admin.ticketScan',     'label' => 'Ticket Scan',     'icon' => 'fa-qrcode',            'access' => ['bph','sc','acara','sekkon','it']],
         ['route' => 'admin.manageVouchers', 'label' => 'Vouchers',        'icon' => 'fa-ticket',            'access' => ['bph','sc','acara','sekkon','it']],
-        ['route' => 'admin.email',          'label' => 'Broadcast Email', 'icon' => 'fa-envelope',          'access' => ['it']],
+        ['route' => 'admin.insight',        'label' => 'Insight',         'icon' => 'fa-chart-line',        'access' => ['bph','sc','acara','sekkon','it']],
+
+        // Check in
+        ['route' => 'admin.monitor',        'label' => 'Monitor',         'icon' => 'fa-tower-broadcast',   'access' => ['bph','sc','acara','sekkon','it'], 'header' => 'Check in'],
+
+        ['route' => 'admin.ticketScan',     'label' => 'Ticket Scan',     'icon' => 'fa-qrcode',            'access' => ['bph','sc','acara','sekkon','it']],
+        
+        // Online pass 
+        ['route' => 'admin.movie_category', 'label' => 'Movie Category',  'icon' => 'fa-film',              'access' => ['bph','sc','acara','it'], 'header' => 'Online Pass'],
+        ['route' => 'admin.movie',          'label' => 'Movies',          'icon' => 'fa-video',             'access' => ['bph','sc','acara','it']],
+        ['route' => 'admin.online_ticket',  'label' => 'Online Tickets',  'icon' => 'fa-ticket-simple',     'access' => ['bph','sc','acara','it']],
+        ['route' => 'admin.user_online_pass','label' => 'User Passes',    'icon' => 'fa-users',             'access' => ['bph','sc','acara','it']],
+        
+        // System 
+        ['route' => 'admin.email',          'label' => 'Broadcast Email', 'icon' => 'fa-envelope',          'access' => ['it'], 'header' => 'System'],
         ['route' => 'admin.log',            'label' => 'System Log',      'icon' => 'fa-terminal',          'access' => ['it','bph','sc']],
     ];
 
@@ -43,6 +54,9 @@
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
         <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-3 mb-2">Menu</p>
         @foreach ($navItems as $item)
+            @if(isset($item['header']))
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-3 mb-2 pt-5">{{ $item['header'] }}</p>
+            @endif
             @php $isActive = $currentRoute === $item['route']; @endphp
             <a href="{{ route($item['route']) }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150
