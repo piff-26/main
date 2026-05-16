@@ -23,8 +23,9 @@
         </div>
         <div class="body">
             @php
-                $hasOffline = $transaction->tickets->isNotEmpty();
-                $hasOnline = $transaction->transactionItems->whereNotNull('online_ticket_id')->isNotEmpty();
+                $hasOffline = $transaction->transactionItems->whereNotNull('ticket_category_id')->isNotEmpty();
+                $hasOnline  = $transaction->transactionItems->whereNotNull('online_ticket_id')->isNotEmpty();
+                $offlineCount = $hasOffline ? $transaction->tickets->count() : 0;
                 $onlineQuantity = $hasOnline ? $transaction->transactionItems->whereNotNull('online_ticket_id')->sum('quantity') : 0;
             @endphp
             <p>Hello <strong>{{ $transaction->buyer_name }}</strong>,</p>
@@ -44,7 +45,7 @@
                 @if($hasOffline)
                 <div class="row">
                     <span class="label">Ticket Count</span>
-                    <span class="value">{{ $transaction->tickets->count() }} ticket(s)</span>
+                    <span class="value">{{ $offlineCount }} ticket(s)</span>
                 </div>
                 @endif
                 @if($hasOnline)
