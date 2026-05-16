@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('online_ticket_id')->constrained('online_tickets')->cascadeOnDelete();
             
             // Status jika misal user melanggar aturan dan aksesnya mau dicabut admin
-            $table->enum('status', ['active', 'revoked'])->default('active'); 
+            $table->enum('status', ['active', 'inactive'])->default('active'); 
             $table->timestamps();
         });
     }
