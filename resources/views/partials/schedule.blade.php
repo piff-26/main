@@ -55,6 +55,7 @@
                 flex-direction: row;
                 gap: 2rem;
                 max-width: none;
+                justify-content: center;
             }
         }
 
