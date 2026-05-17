@@ -43,6 +43,27 @@
                 </div>
                 @endif
 
+                @if($myMovies->count() === 0 && $allMovies->count() === 0)
+                <div class="flex flex-col items-center justify-center py-24 text-center">
+                    <div class="relative mb-8">
+                        <div class="w-28 h-28 bg-slate-800/80 rounded-full flex items-center justify-center border border-slate-700 shadow-inner mx-auto">
+                            <i class="fas fa-satellite-dish text-5xl text-[#ff5b1d]"></i>
+                        </div>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-[#ff5b1d] rounded-full animate-ping opacity-70"></span>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-[#ff5b1d] rounded-full"></span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">Stay Tuned!</h2>
+                    <p class="text-slate-400 text-base md:text-lg max-w-xl leading-relaxed">
+                        Stay tuned for upcoming live streams and movies on
+                        <span class="text-[#ff5b1d] font-semibold">30 May 2026 at 12:00 PM (UTC+7)</span>
+                    </p>
+                    <div class="mt-8 inline-flex items-center gap-2 px-4 py-2 bg-slate-800/60 border border-slate-700 rounded-full text-slate-400 text-sm">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        Your Online Pass is active and ready
+                    </div>
+                </div>
+                @else
+
                 {{-- Search & Filter Bar --}}
                 <div class="flex flex-col sm:flex-row gap-3 mb-8">
                     <div class="relative flex-1">
@@ -162,6 +183,9 @@
                     </div>
                     <p id="empty-all" class="hidden text-slate-500 text-sm text-center py-6">No films match your search.</p>
                 </div>
+            </div>
+
+                @endif {{-- end movies check --}}
             </div>
 
         @else
