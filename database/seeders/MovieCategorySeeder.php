@@ -30,5 +30,12 @@ class MovieCategorySeeder extends Seeder
             'slug' => 'voices-in-the-gap', 
             'description' => 'Documentary Film Competition',
         ]);
+
+        MovieCategory::create([
+            'name' => 'Live Streaming',
+            'slug' => 'live-streaming', 
+            'description' => 'Live Streaming',
+        ]);
+
     }
 }
