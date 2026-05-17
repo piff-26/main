@@ -163,8 +163,8 @@
                 <tbody class="divide-y divide-gray-100">
                     @foreach($transaction->transactionItems as $item)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $item->ticketCategory->name }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $item->ticketCategory->event->name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $item->ticket_category_id ? $item->ticketCategory->name : 'Online Pass - ' . ($item->onlineTicket->name ?? '') }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ $item->ticket_category_id ? $item->ticketCategory->event->name : 'Digital Access (Terkoneksi Akun)' }}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">{{ $item->quantity }}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm font-semibold text-gray-900">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
@@ -258,7 +258,7 @@
 const transactionData = {
     invoice_code: '{{ $transaction->invoice_code }}',
     buyer_name: '{{ addslashes($transaction->buyer_name ?? $transaction->user->name) }}',
-    event_name: '{{ addslashes($transaction->transactionItems->first()?->ticketCategory?->event?->name ?? "-") }}',
+    event_name: '{{ addslashes($transaction->transactionItems->first()?->ticketCategory?->event?->name ?? ($transaction->transactionItems->first()?->onlineTicket ? "Online Pass - " . $transaction->transactionItems->first()->onlineTicket->name : "-")) }}',
     total_amount: {{ $transaction->total_amount }},
     transaction_status: '{{ $transaction->transaction_status }}'
 };

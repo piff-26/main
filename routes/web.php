@@ -19,6 +19,8 @@ use App\Http\Controllers\TransactionController;
 
 Route::get('/', [UserController::class, 'homeView'])->name('user.home');
 Route::get('/ticket', [UserController::class, 'ticketView'])->name('user.ticket');
+Route::get('/online-event', [UserController::class, 'onlineEventView'])->name('user.online_event');
+Route::get('/online-event/{slug}', [UserController::class, 'watchMovie'])->name('user.online_event.watch');
 Route::get('/submit', [UserController::class, 'submitView'])->name('user.submit');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -27,6 +29,7 @@ Route::get('/auth/google', [AuthController::class, 'userGoogleAuth'])->name('use
 Route::get('/auth/google/callback', [AuthController::class, 'userProcessLogin'])->name('user.auth.google.callback');
 
 Route::get('/checkout/{event_slug}', [TransactionController::class, 'step1'])->name('checkout.step1');
+Route::get('/online-pass/{slug}', [\App\Http\Controllers\OnlinePassCheckoutController::class, 'step1'])->name('online-pass.step1');
 
 Route::prefix('admin')->group(function(){
     Route::get('/',function(){
@@ -85,6 +88,30 @@ Route::prefix('admin')->group(function(){
             Route::post('/managevouchers/store', [AdminController::class, 'storeVoucher'])->name('admin.voucher.store');
             Route::delete('/managevouchers/{id}', [AdminController::class, 'destroyVoucher'])->name('admin.voucher.destroy');
             Route::put('/managevouchers/{id}', [AdminController::class, 'updateVoucher'])->name('admin.voucher.update');
+
+            // Online Event Portal - Movie Category
+            Route::get('/movie-category', [\App\Http\Controllers\MovieCategoryController::class, 'index'])->name('admin.movie_category');
+            Route::post('/movie-category', [\App\Http\Controllers\MovieCategoryController::class, 'store'])->name('admin.movie_category.store');
+            Route::put('/movie-category/{id}', [\App\Http\Controllers\MovieCategoryController::class, 'update'])->name('admin.movie_category.update');
+            Route::delete('/movie-category/{id}', [\App\Http\Controllers\MovieCategoryController::class, 'destroy'])->name('admin.movie_category.destroy');
+
+            // Online Event Portal - Movie
+            Route::get('/movie', [\App\Http\Controllers\MovieController::class, 'index'])->name('admin.movie');
+            Route::post('/movie', [\App\Http\Controllers\MovieController::class, 'store'])->name('admin.movie.store');
+            Route::put('/movie/{id}', [\App\Http\Controllers\MovieController::class, 'update'])->name('admin.movie.update');
+            Route::delete('/movie/{id}', [\App\Http\Controllers\MovieController::class, 'destroy'])->name('admin.movie.destroy');
+            Route::patch('/movie/{id}/toggle', [\App\Http\Controllers\MovieController::class, 'toggle'])->name('admin.movie.toggle');
+
+            // Online Event Portal - Online Ticket
+            Route::get('/online-ticket', [\App\Http\Controllers\OnlineTicketController::class, 'index'])->name('admin.online_ticket');
+            Route::post('/online-ticket', [\App\Http\Controllers\OnlineTicketController::class, 'store'])->name('admin.online_ticket.store');
+            Route::put('/online-ticket/{id}', [\App\Http\Controllers\OnlineTicketController::class, 'update'])->name('admin.online_ticket.update');
+            Route::delete('/online-ticket/{id}', [\App\Http\Controllers\OnlineTicketController::class, 'destroy'])->name('admin.online_ticket.destroy');
+            Route::patch('/online-ticket/{id}/toggle', [\App\Http\Controllers\OnlineTicketController::class, 'toggle'])->name('admin.online_ticket.toggle');
+
+            // Online Event Portal - User Online Pass
+            Route::get('/user-online-pass', [\App\Http\Controllers\UserOnlinePassController::class, 'index'])->name('admin.user_online_pass');
+            Route::patch('/user-online-pass/{id}/status', [\App\Http\Controllers\UserOnlinePassController::class, 'updateStatus'])->name('admin.user_online_pass.update_status');
         });
 
         Route::middleware('admin.division:it,bph,sc')->group(function () {
@@ -112,6 +139,11 @@ Route::middleware('auth')->group(function () {
         // Isi Biodata & Pembayaran
         Route::get('/transaction/{invoice_code}', [TransactionController::class, 'step2'])->name('step2');
         Route::post('/{event_slug}/store', [TransactionController::class, 'storeStep1'])->name('storeStep1');
+    });
+
+    Route::prefix('online-pass')->name('online-pass.')->group(function () {
+        Route::get('/checkout/{invoice_code}', [\App\Http\Controllers\OnlinePassCheckoutController::class, 'step2'])->name('checkout.step2');
+        Route::post('/{slug}/store', [\App\Http\Controllers\OnlinePassCheckoutController::class, 'storeStep1'])->name('checkout.storeStep1');
     });
 });
 

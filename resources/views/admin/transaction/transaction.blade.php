@@ -22,6 +22,14 @@
                 </select>
             </div>
             <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                <select id="filterType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                    <option value="">All Types</option>
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+            <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
                 <select id="filterStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                     <option value="">All Status</option>
@@ -87,6 +95,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buyer Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
@@ -133,6 +142,7 @@ $(document).ready(function() {
         data: transactionsData,
         columns: [
             { data: 'invoice_code', render: (data) => `<span class="font-medium text-gray-900">${data}</span>` },
+            { data: 'ticket_type', render: (data) => data === 'Online' ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"><i class="fas fa-globe mr-1"></i>${data}</span>` : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"><i class="fas fa-ticket-alt mr-1"></i>${data}</span>` },
             { data: 'event_name' },
             { data: 'buyer_name' },
             { data: 'email' },
@@ -195,10 +205,10 @@ $(document).ready(function() {
             }
         ],
         columnDefs: [
-            { targets: 5, type: 'currency' }
+            { targets: 6, type: 'currency' }
         ],
         pageLength: 10,
-        order: [[8, 'desc']],
+        order: [[9, 'desc']],
         drawCallback: function() {
             $('.btn-quick-validate').off('click').on('click', function() {
                 const invoice = $(this).data('invoice');
@@ -419,11 +429,12 @@ $(document).ready(function() {
             return;
         }
         
-        const headers = ['Invoice', 'Event', 'Buyer', 'Email', 'Phone', 'City', 'Total', 'Payment', 'Status', 'Created'];
+        const headers = ['Invoice', 'Type', 'Event', 'Buyer', 'Email', 'Phone', 'City', 'Total', 'Payment', 'Status', 'Created'];
         const csvContent = [
             headers.join(','),
             ...currentData.map(row => [
                 row.invoice_code,
+                row.ticket_type,
                 row.event_name,
                 row.buyer_name,
                 row.email,
@@ -458,16 +469,18 @@ $(document).ready(function() {
         const city = $('#filterCity').val();
         const dateStart = $('#filterDateStart').val();
         const dateEnd = $('#filterDateEnd').val();
+        const type = $('#filterType').val();
 
         table.columns().search('');
         
-        if (event) table.column(1).search(event);
-        if (status) table.column(7).search(status);
-        if (city) table.column(4).search(city);
+        if (event) table.column(2).search(event);
+        if (status) table.column(8).search(status);
+        if (city) table.column(5).search(city);
+        if (type) table.column(1).search(type);
         
         // Date range filter
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-            const createdAt = data[8]; // Created At column
+            const createdAt = data[9]; // Created At column
             if (!dateStart && !dateEnd) return true;
             
             const rowDate = new Date(createdAt);
@@ -484,7 +497,7 @@ $(document).ready(function() {
     });
 
     $('#btnResetFilter').on('click', function() {
-        $('#filterEvent, #filterStatus, #filterPayment, #filterCity, #filterDateStart, #filterDateEnd').val('');
+        $('#filterEvent, #filterType, #filterStatus, #filterPayment, #filterCity, #filterDateStart, #filterDateEnd').val('');
         $.fn.dataTable.ext.search.pop();
         table.columns().search('').draw();
     });

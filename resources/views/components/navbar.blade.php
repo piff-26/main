@@ -387,8 +387,8 @@
         @endif
 
         <li>
-            <a href="{{ route('user.submit') }}" class="submit-btn">
-                SUBMIT FILMS
+            <a href="{{ route('user.online_event') }}" class="submit-btn">
+                ONLINE EVENT
             </a>
         </li>
 

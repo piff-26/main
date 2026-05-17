@@ -74,11 +74,20 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            {{-- Gunakan withTrashed() pada relasi jika model Event/Category juga pakai SoftDelete --}}
-                            <span class="block text-sm text-gray-800 font-medium">{{ $voucher->event->name ?? 'Global Event' }}</span>
-                            <span class="text-[10px] text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded uppercase font-bold tracking-tighter">
-                                {{ $voucher->ticketCategory->name ?? 'All Categories' }}
-                            </span>
+                            @if(($voucher->usage_type->value ?? $voucher->usage_type) === 'offline_only')
+                                <span class="block text-sm text-gray-800 font-medium">{{ $voucher->event->name ?? 'Global Event' }}</span>
+                                <span class="text-[10px] text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded uppercase font-bold tracking-tighter">
+                                    {{ $voucher->ticketCategory->name ?? 'All Categories' }}
+                                </span>
+                            @elseif(($voucher->usage_type->value ?? $voucher->usage_type) === 'online_only')
+                                <span class="block text-sm text-gray-800 font-medium">Online Pass</span>
+                                <span class="text-[10px] text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded uppercase font-bold tracking-tighter">
+                                    {{ $voucher->onlineTicket->name ?? 'All Online Passes' }}
+                                </span>
+                            @else
+                                <span class="block text-sm text-gray-800 font-medium">Global</span>
+                                <span class="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded uppercase font-bold tracking-tighter">All Tickets</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
                             {{-- Pastikan expired_at sudah di-cast sebagai datetime di Model --}}
@@ -156,23 +165,46 @@
                         <input type="date" name="expired_at" id="input_expiry" required class="w-full border rounded-xl px-4 py-2.5">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Event <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
-                    <select name="event_id" id="input_event" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white" onchange="filterCategories()">
-                        <option value="">— Global (semua event) —</option>
-                        @foreach($events as $event)
-                            <option value="{{ $event->id }}">{{ $event->name }}</option>
-                        @endforeach
-                    </select>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Usage Type</label>
+                        <select name="usage_type" id="input_usage_type" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white" onchange="toggleUsageType()">
+                            <option value="all">Global (All)</option>
+                            <option value="offline_only">Offline Only (Physical Events)</option>
+                            <option value="online_only">Online Only (Online Passes)</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Ticket Category <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
-                    <select name="ticket_category_id" id="input_category" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white">
-                        <option value="">— Semua kategori —</option>
-                        @foreach($ticketCategories as $cat)
-                            <option value="{{ $cat->id }}" data-event="{{ $cat->event_id }}">{{ $cat->event->name ?? '' }} — {{ $cat->name }}</option>
-                        @endforeach
-                    </select>
+                <div id="offline_fields" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Event <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
+                        <select name="event_id" id="input_event" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white" onchange="filterCategories()">
+                            <option value="">— Global (semua event) —</option>
+                            @foreach($events as $event)
+                                <option value="{{ $event->id }}">{{ $event->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Ticket Category <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
+                        <select name="ticket_category_id" id="input_category" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white">
+                            <option value="">— Semua kategori —</option>
+                            @foreach($ticketCategories as $cat)
+                                <option value="{{ $cat->id }}" data-event="{{ $cat->event_id }}">{{ $cat->event->name ?? '' }} — {{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div id="online_fields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 uppercase">Online Ticket <span class="text-gray-400 font-normal normal-case">(opsional)</span></label>
+                        <select name="online_ticket_id" id="input_online_ticket" class="w-full border rounded-xl px-4 py-2.5 outline-none bg-white">
+                            <option value="">— Semua Online Pass —</option>
+                            @foreach($onlineTickets as $ot)
+                                <option value="{{ $ot->id }}">{{ $ot->name }} (Rp {{ number_format($ot->price, 0, ',', '.') }})</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="mt-8 flex gap-3">
@@ -194,7 +226,9 @@
         document.getElementById('voucherForm').action = "{{ route('admin.voucher.store') }}";
         document.getElementById('methodField').innerHTML = "";
         document.getElementById('voucherForm').reset();
+        document.getElementById('input_usage_type').value = 'all';
         filterCategories();
+        toggleUsageType();
         openModal('modalCreate');
     }
 
@@ -210,10 +244,19 @@
         document.getElementById('input_event').value   = data.event_id ?? '';
         filterCategories();
         document.getElementById('input_category').value = data.ticket_category_id ?? '';
+        document.getElementById('input_online_ticket').value = data.online_ticket_id ?? '';
+        
+        let uType = data.usage_type;
+        if (typeof uType === 'object' && uType !== null) {
+            uType = uType.value || uType.name?.toLowerCase() || 'all';
+        }
+        document.getElementById('input_usage_type').value = uType || 'all';
 
         if (data.expired_at) {
             document.getElementById('input_expiry').value = data.expired_at.split('T')[0].split(' ')[0];
         }
+        
+        toggleUsageType();
         openModal('modalCreate');
     }
 
@@ -231,6 +274,20 @@
         const selected = document.getElementById('input_category');
         if (selected.value && eventId && selected.options[selected.selectedIndex]?.dataset.event !== eventId) {
             selected.value = '';
+        }
+    }
+
+    function toggleUsageType() {
+        const type = document.getElementById('input_usage_type').value;
+        if (type === 'offline_only') {
+            document.getElementById('offline_fields').classList.remove('hidden');
+            document.getElementById('online_fields').classList.add('hidden');
+        } else if (type === 'online_only') {
+            document.getElementById('offline_fields').classList.add('hidden');
+            document.getElementById('online_fields').classList.remove('hidden');
+        } else {
+            document.getElementById('offline_fields').classList.add('hidden');
+            document.getElementById('online_fields').classList.add('hidden');
         }
     }
 </script>

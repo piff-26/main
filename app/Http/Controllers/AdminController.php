@@ -244,10 +244,21 @@ class AdminController extends BaseController
     // --- TRANSACTIONS ---
     public function transaction()
     {
-        $transactions = Transaction::with(['user', 'voucher', 'transactionItems.ticketCategory.event'])->get()->map(function($transaction) {
-            $eventName = $transaction->transactionItems->first()?->ticketCategory?->event?->name ?? '-';
+        $transactions = Transaction::with(['user', 'voucher', 'transactionItems.ticketCategory.event', 'transactionItems.onlineTicket'])->get()->map(function($transaction) {
+            $firstItem = $transaction->transactionItems->first();
+            $ticketType = 'Offline';
+            $eventName = '-';
+
+            if ($firstItem && $firstItem->online_ticket_id) {
+                $ticketType = 'Online';
+                $eventName = 'Online Pass - ' . ($firstItem->onlineTicket->name ?? '');
+            } else if ($firstItem && $firstItem->ticketCategory) {
+                $eventName = $firstItem->ticketCategory->event->name;
+            }
+
             return [
                 'invoice_code' => $transaction->invoice_code,
+                'ticket_type' => $ticketType,
                 'event_name' => $eventName,
                 'buyer_name' => $transaction->buyer_name ?? $transaction->user->name,
                 'email' => $transaction->user->email,
@@ -269,7 +280,7 @@ class AdminController extends BaseController
 
     public function transactionDetail($invoice_code)
     {
-        $transaction = Transaction::with(['user', 'voucher', 'transactionItems.ticketCategory.event', 'tickets.ticketCategory'])
+        $transaction = Transaction::with(['user', 'voucher', 'transactionItems.ticketCategory.event', 'transactionItems.onlineTicket', 'tickets.ticketCategory'])
             ->where('invoice_code', $invoice_code)
             ->firstOrFail();
         
@@ -591,28 +602,41 @@ class AdminController extends BaseController
                 'paid_at'            => now(),
             ]);
 
-            // Generate tiket
-            if ($transaction->tickets()->count() === 0) {
+            // Generate tiket atau online pass
+            if ($transaction->tickets()->count() === 0 && !\App\Models\UserOnlinePass::where('transaction_id', $transaction->id)->exists()) {
                 foreach ($transaction->transactionItems as $item) {
-                    $holderNames = $item->holder_names ?? [];
-                    for ($i = 0; $i < $item->quantity; $i++) {
-                        $ticket = Ticket::create([
-                            'transaction_id'     => $transaction->id,
-                            'ticket_category_id' => $item->ticket_category_id,
-                            'ticket_code'        => 'TEMP-' . Str::random(10),
-                            'holder_name'        => $holderNames[$i] ?? null,
+                    if ($item->online_ticket_id) {
+                        // Create UserOnlinePass
+                        \App\Models\UserOnlinePass::firstOrCreate([
+                            'user_id' => $transaction->user_id,
+                            'transaction_id' => $transaction->id,
+                            'online_ticket_id' => $item->online_ticket_id,
+                        ], [
+                            'status' => \App\Enums\UserOnlinePassStatusEnum::ACTIVE->value,
                         ]);
-                        $categorySlug  = strtoupper($item->ticketCategory->slug);
-                        $invRandom     = substr($transaction->invoice_code, 4);
-                        $newTicketCode = "INV-{$categorySlug}-{$invRandom}-" . strtoupper(Str::random(3));
-                        $ticket->update(['ticket_code' => $newTicketCode]);
-                        SystemLog::success('ticket', "Tiket digenerate: {$newTicketCode}", $invoice_code, ['holder' => $holderNames[$i] ?? '-', 'category' => $item->ticketCategory->name]);
+                        SystemLog::success('online_pass', "Online Pass digenerate untuk User ID {$transaction->user_id}", $invoice_code);
+                    } else if ($item->ticket_category_id) {
+                        // Create physical ticket
+                        $holderNames = $item->holder_names ?? [];
+                        for ($i = 0; $i < $item->quantity; $i++) {
+                            $ticket = Ticket::create([
+                                'transaction_id'     => $transaction->id,
+                                'ticket_category_id' => $item->ticket_category_id,
+                                'ticket_code'        => 'TEMP-' . Str::random(10),
+                                'holder_name'        => $holderNames[$i] ?? null,
+                            ]);
+                            $categorySlug  = strtoupper($item->ticketCategory->slug);
+                            $invRandom     = substr($transaction->invoice_code, 4);
+                            $newTicketCode = "INV-{$categorySlug}-{$invRandom}-" . strtoupper(Str::random(3));
+                            $ticket->update(['ticket_code' => $newTicketCode]);
+                            SystemLog::success('ticket', "Tiket digenerate: {$newTicketCode}", $invoice_code, ['holder' => $holderNames[$i] ?? '-', 'category' => $item->ticketCategory->name]);
+                        }
                     }
                 }
             }
 
             // Kirim email ke user
-            $transaction->refresh()->load('tickets.ticketCategory.event', 'transactionItems.ticketCategory');
+            $transaction->refresh()->load('tickets.ticketCategory.event', 'transactionItems.ticketCategory', 'transactionItems.onlineTicket');
             if ($transaction->user && $transaction->user->email) {
                 Mail::to($transaction->user->email)->send(new PaymentApprovedMail($transaction));
                 SystemLog::success('email', "Email approval dikirim ke {$transaction->user->email}", $invoice_code);
@@ -701,15 +725,17 @@ class AdminController extends BaseController
     // --- MANAGE VOUCHERS ---
     public function listVouchers()
     {
-        $vouchers = Voucher::withTrashed()->with(['event', 'ticketCategory'])->get();
+        $vouchers = Voucher::withTrashed()->with(['event', 'ticketCategory', 'onlineTicket'])->get();
         $events = Event::all();
         $ticketCategories = TicketCategory::with('event')->get();
+        $onlineTickets = \App\Models\OnlineTicket::with('movies')->get();
 
         return view('admin.manageVouchers', [
             'title' => 'Manage Vouchers',
             'vouchers' => $vouchers,
             'events' => $events,
             'ticketCategories' => $ticketCategories,
+            'onlineTickets' => $onlineTickets,
         ]);
     }
 
@@ -721,8 +747,10 @@ class AdminController extends BaseController
             'discount_value' => 'required|numeric|min:0',
             'max_uses'       => 'required|integer|min:1',
             'expired_at'     => 'required|date',
+            'usage_type'     => 'required|in:offline_only,online_only,all',
             'event_id'       => 'nullable|exists:events,id',
             'ticket_category_id' => 'nullable|exists:ticket_categories,id',
+            'online_ticket_id' => 'nullable|exists:online_tickets,id',
         ]);
 
         $data = [
@@ -730,8 +758,10 @@ class AdminController extends BaseController
             'discount_type'      => $request->discount_type,
             'discount_nominal'   => $request->discount_type === 'nominal' ? $request->discount_value : null,
             'discount_percentage'=> $request->discount_type === 'percentage' ? $request->discount_value : null,
-            'event_id'           => $request->event_id ?: null,
-            'ticket_category_id' => $request->ticket_category_id ?: null,
+            'usage_type'         => $request->usage_type,
+            'event_id'           => $request->usage_type === 'offline_only' ? ($request->event_id ?: null) : null,
+            'ticket_category_id' => $request->usage_type === 'offline_only' ? ($request->ticket_category_id ?: null) : null,
+            'online_ticket_id'   => $request->usage_type === 'online_only' ? ($request->online_ticket_id ?: null) : null,
             'max_uses'           => $request->max_uses,
             'expired_at'         => $request->expired_at,
             'status'             => 'active',
@@ -751,8 +781,10 @@ class AdminController extends BaseController
             'discount_value' => 'required|numeric|min:0',
             'max_uses'       => 'required|integer|min:1',
             'expired_at'     => 'required|date',
+            'usage_type'     => 'required|in:offline_only,online_only,all',
             'event_id'       => 'nullable|exists:events,id',
             'ticket_category_id' => 'nullable|exists:ticket_categories,id',
+            'online_ticket_id' => 'nullable|exists:online_tickets,id',
         ]);
 
         $voucher = Voucher::withTrashed()->findOrFail($id);
@@ -762,8 +794,10 @@ class AdminController extends BaseController
             'discount_type'      => $request->discount_type,
             'discount_nominal'   => $request->discount_type === 'nominal' ? $request->discount_value : null,
             'discount_percentage'=> $request->discount_type === 'percentage' ? $request->discount_value : null,
-            'event_id'           => $request->event_id ?: null,
-            'ticket_category_id' => $request->ticket_category_id ?: null,
+            'usage_type'         => $request->usage_type,
+            'event_id'           => $request->usage_type === 'offline_only' ? ($request->event_id ?: null) : null,
+            'ticket_category_id' => $request->usage_type === 'offline_only' ? ($request->ticket_category_id ?: null) : null,
+            'online_ticket_id'   => $request->usage_type === 'online_only' ? ($request->online_ticket_id ?: null) : null,
             'max_uses'           => $request->max_uses,
             'expired_at'         => $request->expired_at,
         ]);

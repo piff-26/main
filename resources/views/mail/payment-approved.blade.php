@@ -22,18 +22,38 @@
             <img src="{{ $message->embed(public_path('assets/mail/header_email.png')) }}" alt="PIFF 2026" style="width: 100%; display: block; border-radius: 8px 8px 0 0;">
         </div>
         <div class="body">
+            @php
+                $hasOffline = $transaction->transactionItems->whereNotNull('ticket_category_id')->isNotEmpty();
+                $hasOnline  = $transaction->transactionItems->whereNotNull('online_ticket_id')->isNotEmpty();
+                $offlineCount = $hasOffline ? $transaction->tickets->count() : 0;
+                $onlineQuantity = $hasOnline ? $transaction->transactionItems->whereNotNull('online_ticket_id')->sum('quantity') : 0;
+            @endphp
             <p>Hello <strong>{{ $transaction->buyer_name }}</strong>,</p>
-            <p>🎉 Your payment has been <strong>verified and approved</strong>! Your E-Ticket is attached to this email.</p>
+            @if($hasOffline && $hasOnline)
+                <p>🎉 Your payment has been <strong>verified and approved</strong>! Your E-Ticket and Invoice are attached to this email.</p>
+            @elseif($hasOffline)
+                <p>🎉 Your payment has been <strong>verified and approved</strong>! Your E-Ticket is attached to this email.</p>
+            @else
+                <p>🎉 Your payment has been <strong>verified and approved</strong>! Your invoice is attached to this email.</p>
+            @endif
 
             <div class="invoice">
                 <div class="row">
                     <span class="label">Invoice</span>
                     <span class="value">{{ $transaction->invoice_code }}</span>
                 </div>
+                @if($hasOffline)
                 <div class="row">
                     <span class="label">Ticket Count</span>
-                    <span class="value">{{ $transaction->tickets->count() }} ticket(s)</span>
+                    <span class="value">{{ $offlineCount }} ticket(s)</span>
                 </div>
+                @endif
+                @if($hasOnline)
+                <div class="row">
+                    <span class="label">Online Pass</span>
+                    <span class="value">{{ $onlineQuantity }} pass(es)</span>
+                </div>
+                @endif
                 <div class="row">
                     <span class="label">Status</span>
                     <span class="value"><span class="badge">Payment Approved</span></span>
@@ -44,7 +64,12 @@
                 </div>
             </div>
 
+            @if($hasOffline)
             <p style="color:#666; font-size:13px;">Present the QR Code on your ticket during check-in at the event venue. You can also download your ticket from the transaction history page.</p>
+            @endif
+            @if($hasOnline)
+            <p style="color:#666; font-size:13px;">You can access your online event content directly from our portal. Log in to your account and go to the Online Event section to start watching.</p>
+            @endif
         </div>
         <div class="footer">
             &copy; 2026 PIFF - Petra International Film Festival

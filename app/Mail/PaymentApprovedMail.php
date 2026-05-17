@@ -16,22 +16,37 @@ class PaymentApprovedMail extends BaseMailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Transaction $transaction) {}
+    // Store only the ID so SerializesModels doesn't strip relations on unserialization
+    private int|string $transactionId;
+    private string $invoiceCode;
+
+    public function __construct(Transaction $transaction)
+    {
+        $this->transactionId = $transaction->id;
+        $this->invoiceCode   = $transaction->invoice_code;
+    }
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '[PIFF 2026] Payment Approved - ' . $this->transaction->invoice_code);
+        return new Envelope(subject: '[PIFF 2026] Payment Approved - ' . $this->invoiceCode);
     }
 
     public function content(): Content
     {
-        return new Content(view: 'mail.payment-approved');
+        // Fresh load with relations needed by the view
+        $transaction = Transaction::with(['tickets', 'transactionItems'])
+            ->find($this->transactionId);
+
+        return new Content(
+            view: 'mail.payment-approved',
+            with: ['transaction' => $transaction],
+        );
     }
 
     public function attachments(): array
     {
         $transaction = Transaction::with('tickets.ticketCategory.event', 'transactionItems.ticketCategory')
-            ->find($this->transaction->id);
+            ->find($this->transactionId);
 
         $bgImageSrc = '';
         $bgPath = public_path('assets/mail/bg_email.jpg');
@@ -45,7 +60,7 @@ class PaymentApprovedMail extends BaseMailable
         return [
             Attachment::fromData(
                 fn() => $pdf->output(),
-                "E-Ticket_{$this->transaction->invoice_code}.pdf"
+                "E-Ticket_{$this->invoiceCode}.pdf"
             )->withMime('application/pdf'),
         ];
     }
