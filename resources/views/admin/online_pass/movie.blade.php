@@ -203,11 +203,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                        <input type="text" name="title" id="edit_title" required class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="text" name="title" id="edit_title" required class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                        <select name="category_id" id="edit_category_id" required class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="category_id" id="edit_category_id" required class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
@@ -215,26 +215,26 @@
                     </div>
                     <div class="mb-4 md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea name="description" id="edit_description" rows="3" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                        <textarea name="description" id="edit_description" rows="3" class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Thumbnail (Leave blank to keep current)</label>
-                        <input type="file" name="thumbnail" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        <input type="file" name="thumbnail" accept="image/*" class="w-full p-3 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
-                        <input type="url" name="video_url" id="edit_video_url" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="url" name="video_url" id="edit_video_url" class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Is Live Streaming?</label>
-                        <select name="is_live" id="edit_is_live" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="is_live" id="edit_is_live" class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="0">No (VOD)</option>
                             <option value="1">Yes (Live)</option>
                         </select>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Scheduled At</label>
-                        <input type="datetime-local" name="scheduled_at" id="edit_scheduled_at" class="w-full rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="datetime-local" name="scheduled_at" id="edit_scheduled_at" class="w-full p-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
