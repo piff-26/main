@@ -79,7 +79,6 @@ class OnlineTicketController extends Controller
 
         $onlineTicket->update([
             'name' => $request->name,
-            'slug' => \Str::slug($request->name) . '-' . uniqid(),
             'image' => $imagePath,
             'description' => $request->description,
             'price' => $request->price,
