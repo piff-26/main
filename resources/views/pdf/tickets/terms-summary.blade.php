@@ -132,13 +132,73 @@
     @endif
 
     @if ($hasOnline)
-        <p style="font-weight: bold; margin-bottom: 6px; {{ $hasOffline ? 'margin-top: 20px;' : '' }}">ONLINE PASS TERMS & CONDITIONS</p>
-        <ol style="font-size: 14px; line-height: 1.5; margin-top: 0;">
-            <li>Online Pass access is strictly for personal use. Account sharing is prohibited and will result in immediate access revocation without refund.</li>
-            <li>Streaming content is only available during the specified access period for your purchased pass.</li>
-            <li>Copying, recording, capturing, or redistributing the streaming content in any form is strictly prohibited and subject to legal action.</li>
-            <li>The organizer is not responsible for playback issues caused by the user's internet connection, insufficient bandwidth, or incompatible devices.</li>
-            <li>Purchased Online Passes are non-refundable and non-transferable under any circumstances.</li>
-        </ol>
+        <p style="font-weight: bold; margin-bottom: 6px; {{ $hasOffline ? 'margin-top: 20px;' : '' }}">
+    TERMS & CONDITIONS – PIFF 2026 ONLINE ACCESS</p>
+
+    <ol style="font-size: 14px; line-height: 1.5; margin-top: 0; padding-left: 18px;">
+
+        <li>
+            <strong>Access Policy</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>PIFF 2026 Online Access will only be available until H+5 after the festival ends (five days after May 30, 2026). Access will automatically expire after the stated period.</li>
+                <li>Online access is valid only for the account or email address used during registration.</li>
+                <li>All access is personal and non-transferable.</li>
+                <li>Users are responsible for maintaining the confidentiality of their accounts, passwords, and access links.</li>
+                <li>PIFF 2026 reserves the right to limit or terminate access if there is any indication of account misuse or violation of these Terms & Conditions.</li>
+                <li>Program schedules are subject to change at any time with or without prior notice.</li>
+            </ul>
+        </li>
+
+        <li>
+            <strong>Payment & Refund Policy</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>All completed payments are final.</li>
+                <li>Purchased tickets or online passes are non-refundable, non-exchangeable, and non-transferable unless otherwise stated by the organizer.</li>
+                <li>In the event of force majeure or certain technical issues, PIFF 2026 reserves the right to determine the appropriate form of compensation.</li>
+            </ul>
+        </li>
+
+        <li>
+            <strong>Copyright & Content Usage</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>All films screened during PIFF 2026 remain the intellectual property and copyright of their respective filmmakers, producers, and rights holders.</li>
+                <li>All films, videos, visuals, audio materials, presentations, designs, and other content presented during PIFF 2026 are protected by copyright and intellectual property laws.</li>
+                <li>Users are prohibited from recording, copying, distributing, reproducing, restreaming, excessive screenshotting, or republishing any PIFF 2026 content without written permission.</li>
+                <li>Any violation may result in access termination without refund and may lead to legal action in accordance with applicable laws.</li>
+            </ul>
+        </li>
+
+        <li>
+            <strong>Technical Issues</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>Users are responsible for ensuring that their internet connection, devices, and software support access to the online services.</li>
+                <li>PIFF 2026 is not responsible for disruptions caused by the user’s internet connection, device malfunction, third-party platform disruptions, or circumstances beyond the organizer’s control.</li>
+                <li>In the event of technical issues originating from the organizer’s side, PIFF 2026 will make reasonable efforts to provide appropriate solutions.</li>
+            </ul>
+        </li>
+
+        <li>
+            <strong>Privacy & Data Policy</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>By registering, users agree that their personal data may be used for administrative, communication, documentation, and promotional purposes related to PIFF 2026.</li>
+                <li>PIFF 2026 is committed to protecting users’ personal data and will not share such data with third parties without consent, unless required by law.</li>
+            </ul>
+        </li>
+
+        <li>
+            <strong>Force Majeure</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>PIFF 2026 shall not be held responsible for delays, changes, or cancellations caused by circumstances beyond the organizer’s reasonable control, including but not limited to natural disasters, internet disruptions, government policies, war, riots, or digital system failures.</li>
+            </ul>
+        </li>
+
+        <li>
+            <strong>Changes to Terms & Conditions</strong>
+            <ul style="margin-top: 4px; padding-left: 18px;">
+                <li>PIFF 2026 reserves the right to modify or update these Terms & Conditions at any time without prior notice.</li>
+                <li>By accessing PIFF 2026 online services, users acknowledge that they have understood and agreed to all applicable Terms & Conditions.</li>
+            </ul>
+        </li>
+    </ol>
     @endif
 </div>

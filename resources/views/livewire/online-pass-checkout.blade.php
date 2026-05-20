@@ -521,26 +521,137 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg flex flex-col"
             style="max-height: 80vh;">
             <div class="px-6 py-4 border-b border-slate-700">
-                <h3 class="text-white font-bold text-lg tracking-wider">TERMS AND CONDITIONS</h3>
+                <h3 class="text-white font-bold text-lg tracking-wider">
+                    TERMS AND CONDITIONS
+                </h3>
             </div>
 
-            <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3" x-ref="tncContent"
+            <div class="overflow-y-auto flex-1 px-6 py-4 text-slate-300 text-sm space-y-3"
+                x-ref="tncContent"
                 x-on:scroll="if($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 10) scrolled = true">
 
-                <p class="font-bold text-white">A. ONLINE PASS VALIDITY</p>
-                <p><span class="font-semibold">1.</span> Online pass only grants digital access to stream the designated movies within the PIFF 2026 Online Portal.</p>
-                <p><span class="font-semibold">2.</span> Your access is linked strictly to the account used to make the purchase. Do not share your login credentials.</p>
-                <p><span class="font-semibold">3.</span> Access is valid only during the predetermined availability period (e.g., from Event Day until H+5).</p>
+                <p class="font-bold text-white">A. ACCESS POLICY</p>
 
-                <p class="font-bold text-white mt-4">B. PURCHASE & REFUND POLICY</p>
-                <p><span class="font-semibold">1.</span> All online pass purchases are final and non-refundable.</p>
-                <p><span class="font-semibold">2.</span> The organizer is not responsible for failed transactions caused by user input errors or network issues.</p>
-                
-                <p class="font-bold text-white mt-4">C. STREAMING REGULATIONS</p>
-                <p><span class="font-semibold">1.</span> You are strictly prohibited from recording, downloading, capturing (screen recording/screenshots), or illegally distributing the streaming content.</p>
-                <p><span class="font-semibold">2.</span> Any violation of the above rule will result in immediate revocation of your online pass without refund, and may lead to legal action in accordance with intellectual property laws.</p>
-                
-                <p class="text-slate-500 text-xs mt-4">Scroll down to agree.</p>
+                <p>
+                    <span class="font-semibold">1.</span>
+                    PIFF 2026 Online Access will only be available until H+5 after the festival ends (five days after May 30, 2026). Access will automatically expire after the stated period.
+                </p>
+
+                <p>
+                    <span class="font-semibold">2.</span>
+                    Online access is valid only for the account or email address used during registration.
+                </p>
+
+                <p>
+                    <span class="font-semibold">3.</span>
+                    All access is personal and non-transferable.
+                </p>
+
+                <p>
+                    <span class="font-semibold">4.</span>
+                    Users are responsible for maintaining the confidentiality of their accounts, passwords, and access links.
+                </p>
+
+                <p>
+                    <span class="font-semibold">5.</span>
+                    PIFF 2026 reserves the right to limit or terminate access if there is any indication of account misuse or violation of these Terms & Conditions.
+                </p>
+
+                <p>
+                    <span class="font-semibold">6.</span>
+                    Program schedules are subject to change at any time with or without prior notice.
+                </p>
+
+                <p class="font-bold text-white mt-4">B. PAYMENT & REFUND POLICY</p>
+
+                <p>
+                    <span class="font-semibold">1.</span>
+                    All completed payments are final.
+                </p>
+
+                <p>
+                    <span class="font-semibold">2.</span>
+                    Purchased tickets or online passes are non-refundable, non-exchangeable, and non-transferable unless otherwise stated by the organizer.
+                </p>
+
+                <p>
+                    <span class="font-semibold">3.</span>
+                    In the event of force majeure or certain technical issues, PIFF 2026 reserves the right to determine the appropriate form of compensation.
+                </p>
+
+                <p class="font-bold text-white mt-4">C. COPYRIGHT & CONTENT USAGE</p>
+
+                <p>
+                    <span class="font-semibold">1.</span>
+                    All films screened during PIFF 2026 remain the intellectual property and copyright of their respective filmmakers, producers, and rights holders.
+                </p>
+
+                <p>
+                    <span class="font-semibold">2.</span>
+                    All films, videos, visuals, audio materials, presentations, designs, and other content presented during PIFF 2026 are protected by copyright and intellectual property laws.
+                </p>
+
+                <p>
+                    <span class="font-semibold">3.</span>
+                    Users are strictly prohibited from recording, copying, distributing, reproducing, restreaming, excessive screenshotting, or republishing any PIFF 2026 content without written permission.
+                </p>
+
+                <p>
+                    <span class="font-semibold">4.</span>
+                    Any violation may result in access termination without refund and may lead to legal action in accordance with applicable laws.
+                </p>
+
+                <p class="font-bold text-white mt-4">D. TECHNICAL ISSUES</p>
+
+                <p>
+                    <span class="font-semibold">1.</span>
+                    Users are responsible for ensuring that their internet connection, devices, and software support access to the online services.
+                </p>
+
+                <p>
+                    <span class="font-semibold">2.</span>
+                    PIFF 2026 is not responsible for disruptions caused by the user’s internet connection, device malfunction, third-party platform disruptions, or circumstances beyond the organizer’s control.
+                </p>
+
+                <p>
+                    <span class="font-semibold">3.</span>
+                    In the event of technical issues originating from the organizer’s side, PIFF 2026 will make reasonable efforts to provide appropriate solutions.
+                </p>
+
+                <p class="font-bold text-white mt-4">E. PRIVACY & DATA POLICY</p>
+
+                <p>
+                    <span class="font-semibold">1.</span>
+                    By registering, users agree that their personal data may be used for administrative, communication, documentation, and promotional purposes related to PIFF 2026.
+                </p>
+
+                <p>
+                    <span class="font-semibold">2.</span>
+                    PIFF 2026 is committed to protecting users’ personal data and will not share such data with third parties without consent, unless required by law.
+                </p>
+
+                <p class="font-bold text-white mt-4">F. FORCE MAJEURE</p>
+
+                <p>
+                    <span class="font-semibold">1.</span>
+                    PIFF 2026 shall not be held responsible for delays, changes, or cancellations caused by circumstances beyond the organizer’s reasonable control, including but not limited to natural disasters, internet disruptions, government policies, war, riots, or digital system failures.
+                </p>
+
+                <p class="font-bold text-white mt-4">G. CHANGES TO TERMS & CONDITIONS</p>
+
+                <p>
+                    <span class="font-semibold">1.</span>
+                    PIFF 2026 reserves the right to modify or update these Terms & Conditions at any time without prior notice.
+                </p>
+
+                <p>
+                    <span class="font-semibold">2.</span>
+                    By accessing PIFF 2026 online services, users acknowledge that they have understood and agreed to all applicable Terms & Conditions.
+                </p>
+
+                <p class="text-slate-500 text-xs mt-4">
+                    Scroll down to agree.
+                </p>
             </div>
 
             <div class="px-6 py-4 border-t border-slate-700">
