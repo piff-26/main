@@ -249,10 +249,10 @@
         }
         
         if (ticket.access_start_date) {
-            document.getElementById('edit_access_start_date').value = new Date(ticket.access_start_date).toISOString().slice(0, 16);
+            document.getElementById('edit_access_start_date').value = ticket.access_start_date.replace(' ', 'T').slice(0, 16);
         }
         if (ticket.access_end_date) {
-            document.getElementById('edit_access_end_date').value = new Date(ticket.access_end_date).toISOString().slice(0, 16);
+            document.getElementById('edit_access_end_date').value = ticket.access_end_date.replace(' ', 'T').slice(0, 16);
         }
 
         const checkboxes = document.querySelectorAll('.edit-movie-checkbox');

@@ -104,12 +104,12 @@
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-calendar text-[#ff5b1d] w-4 mt-0.5"></i>
                                 <span class="text-gray-400 text-sm w-28 shrink-0">Access Opens</span>
-                                <span class="text-white text-sm font-semibold flex-1">{{ \Carbon\Carbon::parse($ticket->access_start_date)->format('d M Y, H:i') }} WIB</span>
+                                <span class="text-white text-sm font-semibold flex-1">{{ \Carbon\Carbon::parse($ticket->access_start_date)->format('d M Y, H:i') }} UTC+7</span>
                             </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-clock text-[#ff5b1d] w-4 mt-0.5"></i>
                                 <span class="text-gray-400 text-sm w-28 shrink-0">Access Closes</span>
-                                <span class="text-white text-sm font-semibold flex-1">{{ \Carbon\Carbon::parse($ticket->access_end_date)->format('d M Y, H:i') }} WIB</span>
+                                <span class="text-white text-sm font-semibold flex-1">{{ \Carbon\Carbon::parse($ticket->access_end_date)->format('d M Y, H:i') }} UTC+7</span>
                             </div>
                         </div>
 
