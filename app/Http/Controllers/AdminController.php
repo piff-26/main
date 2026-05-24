@@ -253,7 +253,7 @@ class AdminController extends BaseController
                 $ticketType = 'Online';
                 $eventName = 'Online Pass - ' . ($firstItem->onlineTicket->name ?? '');
             } else if ($firstItem && $firstItem->ticketCategory) {
-                $eventName = $firstItem->ticketCategory->event->name;
+                $eventName = $firstItem->ticketCategory->event->name ?? '-';
             }
 
             return [
