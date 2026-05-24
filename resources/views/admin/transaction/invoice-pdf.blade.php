@@ -352,8 +352,13 @@
                     @endphp
                     <tr>
                         <td>
-                            <div class="event-name">{{ $item->ticketCategory->event->name }}</div>
-                            <div class="category-name">{{ $item->ticketCategory->name }}</div>
+                            @if($item->online_ticket_id)
+                                <div class="event-name">Online Pass</div>
+                                <div class="category-name">{{ $item->onlineTicket->name ?? '-' }}</div>
+                            @else
+                                <div class="event-name">{{ $item->ticketCategory->event->name ?? '-' }}</div>
+                                <div class="category-name">{{ $item->ticketCategory->name ?? '-' }}</div>
+                            @endif
                         </td>
                         <td class="text-center">{{ $item->quantity }}</td>
                         <td class="text-right price">Rp {{ number_format($item->price, 0, ',', '.') }}</td>

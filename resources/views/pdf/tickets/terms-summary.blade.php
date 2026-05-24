@@ -40,7 +40,7 @@
         <tbody>
             @foreach ($transaction->tickets as $ticket)
                 <tr>
-                    <td>{{ $ticket->ticketCategory->name }} - {{ $ticket->ticketCategory->event->name }}</td>
+                    <td>{{ $ticket->ticketCategory->name ?? '-' }} - {{ $ticket->ticketCategory->event->name ?? '-' }}</td>
                     <td>{{ $ticket->ticket_code }}</td>
                 </tr>
             @endforeach

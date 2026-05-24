@@ -1,5 +1,5 @@
 @php
-    $categoryName = strtolower(trim($ticket->ticketCategory->name));
+    $categoryName = strtolower(trim($ticket->ticketCategory->name ?? ''));
 
     $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($ticket->ticket_code);
     $qrCodeBase64 = base64_encode($qrCodeSvg);
@@ -68,10 +68,10 @@
         style="text-align: center; margin-bottom: 25px; padding: 20px; margin-top:20px;">
         <h1
             style="text-transform: uppercase; letter-spacing: 2px; font-size: 45px; font-weight: 900; margin: 0 0 10px 0; font-weight: bold;">
-            {{ $ticket->ticketCategory->name }} TICKET
+            {{ $ticket->ticketCategory->name ?? '-' }} TICKET
         </h1>
         <h2 style="margin: 0; font-size: 28px; font-weight: normal; color: #2294cd; letter-spacing: 1px;">
-            {{ $ticket->ticketCategory->event->name }}
+            {{ $ticket->ticketCategory->event->name ?? '-' }}
         </h2>
     </div>
 
