@@ -62,7 +62,7 @@
 const categoriesData = {!! json_encode($categories->map(function($cat) {
     return [
         'id' => $cat->id,
-        'event' => $cat->event->name,
+        'event' => $cat->event->name ?? '-',
         'eventId' => $cat->event_id,
         'name' => $cat->name,
         'price' => $cat->price,
@@ -73,7 +73,7 @@ const categoriesData = {!! json_encode($categories->map(function($cat) {
     ];
 })) !!};
 
-const events = {!! json_encode($categories->pluck('event')->unique('id')->map(function($event) {
+const events = {!! json_encode($categories->pluck('event')->filter()->unique('id')->map(function($event) {
     return ['id' => $event->id, 'name' => $event->name];
 })->values()) !!};
 
