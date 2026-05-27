@@ -94,13 +94,18 @@ Route::prefix('admin')->group(function(){
             Route::post('/movie-category', [\App\Http\Controllers\MovieCategoryController::class, 'store'])->name('admin.movie_category.store');
             Route::put('/movie-category/{id}', [\App\Http\Controllers\MovieCategoryController::class, 'update'])->name('admin.movie_category.update');
             Route::delete('/movie-category/{id}', [\App\Http\Controllers\MovieCategoryController::class, 'destroy'])->name('admin.movie_category.destroy');
+        });
 
+        Route::middleware('admin.division:bph,sc,acara,sekkon,it,transkapman')->group(function () {
             // Online Event Portal - Movie
             Route::get('/movie', [\App\Http\Controllers\MovieController::class, 'index'])->name('admin.movie');
             Route::post('/movie', [\App\Http\Controllers\MovieController::class, 'store'])->name('admin.movie.store');
             Route::put('/movie/{id}', [\App\Http\Controllers\MovieController::class, 'update'])->name('admin.movie.update');
             Route::delete('/movie/{id}', [\App\Http\Controllers\MovieController::class, 'destroy'])->name('admin.movie.destroy');
             Route::patch('/movie/{id}/toggle', [\App\Http\Controllers\MovieController::class, 'toggle'])->name('admin.movie.toggle');
+        });
+
+        Route::middleware('admin.division:bph,sc,acara,sekkon,it')->group(function () {
 
             // Online Event Portal - Online Ticket
             Route::get('/online-ticket', [\App\Http\Controllers\OnlineTicketController::class, 'index'])->name('admin.online_ticket');

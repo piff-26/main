@@ -163,8 +163,8 @@
                 <tbody class="divide-y divide-gray-100">
                     @foreach($transaction->transactionItems as $item)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $item->ticket_category_id ? $item->ticketCategory->name : 'Online Pass - ' . ($item->onlineTicket->name ?? '') }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $item->ticket_category_id ? $item->ticketCategory->event->name : 'Digital Access (Terkoneksi Akun)' }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $item->ticket_category_id ? ($item->ticketCategory->name ?? '-') : 'Online Pass - ' . ($item->onlineTicket->name ?? '') }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ $item->ticket_category_id ? ($item->ticketCategory->event->name ?? '-') : 'Digital Access (Terkoneksi Akun)' }}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">{{ $item->quantity }}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm font-semibold text-gray-900">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
@@ -221,7 +221,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-sm font-mono text-gray-900">{{ $ticket->ticket_code }}</td>
                         <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $ticket->holder_name ?? '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600">{{ $ticket->ticketCategory->name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ $ticket->ticketCategory->name ?? '-' }}</td>
                         <td class="px-4 py-3">
                             @if($ticket->is_checked_in)
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i>Checked In</span>

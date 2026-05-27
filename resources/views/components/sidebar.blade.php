@@ -17,7 +17,7 @@
         
         // Online pass 
         ['route' => 'admin.movie_category', 'label' => 'Movie Category',  'icon' => 'fa-film',              'access' => ['bph','sc','acara','it'], 'header' => 'Online Pass'],
-        ['route' => 'admin.movie',          'label' => 'Movies',          'icon' => 'fa-video',             'access' => ['bph','sc','acara','it']],
+        ['route' => 'admin.movie',          'label' => 'Movies',          'icon' => 'fa-video',             'access' => ['bph','sc','acara','it','transkapman']],
         ['route' => 'admin.online_ticket',  'label' => 'Online Tickets',  'icon' => 'fa-ticket-simple',     'access' => ['bph','sc','acara','it']],
         ['route' => 'admin.user_online_pass','label' => 'User Passes',    'icon' => 'fa-users',             'access' => ['bph','sc','acara','it']],
         

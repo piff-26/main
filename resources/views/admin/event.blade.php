@@ -140,9 +140,6 @@ $(document).ready(function() {
                                 <button class="px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition btn-edit" data-id="${event.id}" title="Edit Event">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="px-3 py-2 hover:bg-red-50 rounded-lg transition btn-delete" style="color: #ff362d;" data-id="${event.id}" data-name="${event.name}" title="Delete Event">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                         </div>
 
