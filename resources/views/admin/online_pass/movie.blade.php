@@ -103,7 +103,7 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="button"
-                                    onclick="confirmToggle(this, '{{ $movie->title }}', {{ $movie->is_active ? 'true' : 'false' }})"
+                                    onclick="confirmToggle(this, '{{ addslashes($movie->title) }}', {{ $movie->is_active ? 'true' : 'false' }})"
                                     class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $movie->is_active ? 'bg-indigo-600' : 'bg-gray-200' }}">
                                     <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $movie->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
                                 </button>
