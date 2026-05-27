@@ -37,23 +37,31 @@ class UserController extends BaseController
         $hasAllAccess = false;
 
         if ($userId) {
-            $activePasses = \App\Models\UserOnlinePass::with('onlineTicket.movies')
-                ->where('user_id', $userId)
-                ->where('status', 'active')
-                ->whereHas('onlineTicket', function($q) {
-                    $q->where('access_start_date', '<=', now())
-                      ->where('access_end_date', '>=', now());
-                })
-                ->get();
-                
-            if ($activePasses->count() > 0) {
+            $user = \App\Models\User::find($userId);
+            $allowedEmails = \App\Enums\AllowedOnlineEventEmails::LIST;
+            
+            if ($user && in_array($user->email, $allowedEmails)) {
                 $hasActivePass = true;
-                foreach($activePasses as $pass) {
-                    if ($pass->onlineTicket->movies->count() == 0) {
-                        $hasAllAccess = true;
-                    } else {
-                        foreach($pass->onlineTicket->movies as $movie) {
-                            $myMoviesIds[] = $movie->id;
+                $hasAllAccess = true;
+            } else {
+                $activePasses = \App\Models\UserOnlinePass::with('onlineTicket.movies')
+                    ->where('user_id', $userId)
+                    ->where('status', 'active')
+                    ->whereHas('onlineTicket', function($q) {
+                        $q->where('access_start_date', '<=', now())
+                          ->where('access_end_date', '>=', now());
+                    })
+                    ->get();
+                    
+                if ($activePasses->count() > 0) {
+                    $hasActivePass = true;
+                    foreach($activePasses as $pass) {
+                        if ($pass->onlineTicket->movies->count() == 0) {
+                            $hasAllAccess = true;
+                        } else {
+                            foreach($pass->onlineTicket->movies as $movie) {
+                                $myMoviesIds[] = $movie->id;
+                            }
                         }
                     }
                 }
@@ -85,20 +93,27 @@ class UserController extends BaseController
 
         $movie = \App\Models\Movie::with('category')->where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        $activePasses = \App\Models\UserOnlinePass::with('onlineTicket.movies')
-            ->where('user_id', $userId)
-            ->where('status', \App\Enums\UserOnlinePassStatusEnum::ACTIVE->value)
-            ->get();
-
+        $user = \App\Models\User::find($userId);
+        $allowedEmails = \App\Enums\AllowedOnlineEventEmails::LIST;
         $hasAccess = false;
-        foreach($activePasses as $pass) {
-            if ($pass->onlineTicket->movies->count() == 0) {
-                $hasAccess = true;
-                break;
-            } else {
-                if ($pass->onlineTicket->movies->contains('id', $movie->id)) {
+
+        if ($user && in_array($user->email, $allowedEmails)) {
+            $hasAccess = true;
+        } else {
+            $activePasses = \App\Models\UserOnlinePass::with('onlineTicket.movies')
+                ->where('user_id', $userId)
+                ->where('status', \App\Enums\UserOnlinePassStatusEnum::ACTIVE->value)
+                ->get();
+
+            foreach($activePasses as $pass) {
+                if ($pass->onlineTicket->movies->count() == 0) {
                     $hasAccess = true;
                     break;
+                } else {
+                    if ($pass->onlineTicket->movies->contains('id', $movie->id)) {
+                        $hasAccess = true;
+                        break;
+                    }
                 }
             }
         }
