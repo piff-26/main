@@ -95,7 +95,7 @@
                 @else
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-900">
                         <i class="fas fa-video-slash text-5xl mb-4 text-slate-600"></i>
-                        <p class="font-medium tracking-wide">Video content is not available yet.</p>
+                        <p class="font-medium tracking-wide">Video Coming Soon</p>
                     </div>
                 @endif
             </div>
@@ -179,9 +179,9 @@
 
 @push('scripts')
 <script>
-    const isYouTube = {{ $isYt ? 'true' : 'false' }};
-    const isVimeo = {{ $isVimeo ? 'true' : 'false' }};
-    const ytVideoId = '{{ $ytVideoId ?? '' }}';
+    const isYouTube = {{ isset($isYt) && $isYt ? 'true' : 'false' }};
+    const isVimeo = {{ isset($isVimeo) && $isVimeo ? 'true' : 'false' }};
+    const ytVideoId = '{{ isset($ytVideoId) ? $ytVideoId : '' }}';
     const isLive = {{ $movie->is_live ? 'true' : 'false' }};
 
     let ytPlayer = null;
