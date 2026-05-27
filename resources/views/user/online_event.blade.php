@@ -79,18 +79,26 @@
 
                 {{-- Playlist Grid - My Event --}}
                 @if($myMovies->count() > 0)
-                <div class="mb-10">
+                <div class="mb-10" id="container-my">
                     <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                         <i class="fas fa-play-circle text-[#ff5b1d]"></i> My Event
                     </h3>
-                    <div id="grid-my" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($myMovies as $movie)
-                            <a href="{{ route('user.online_event.watch', $movie->slug) }}"
+                                        @php 
+                        $live_myMovies = $myMovies->where('is_live', true);
+                        $vod_myMovies = $myMovies->where('is_live', false);
+                    @endphp
+
+                    @if($live_myMovies->count() > 0)
+                    <div class="mb-8 sub-section">
+                        <h4 class="text-lg font-semibold text-slate-300 mb-4">Live Streams</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                            @foreach($live_myMovies as $movie)
+<a href="{{ route('user.online_event.watch', $movie->slug) }}"
                                 class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-[#ff5b1d]/50 transition group relative shadow-lg block"
                                 data-title="{{ strtolower($movie->title) }}"
                                 data-desc="{{ strtolower($movie->description ?? '') }}"
                                 data-cat="{{ $movie->category_id ?? '' }}">
-                                <div class="aspect-video relative overflow-hidden bg-slate-800">
+                                <div class="{{ $movie->is_live ? 'aspect-video' : 'aspect-[2/3]' }} relative overflow-hidden bg-slate-800">
                                     <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
                                         <div class="w-12 h-12 bg-[#ff5b1d] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(255,91,29,0.5)]">
                                             <i class="fas fa-play text-white ml-1"></i>
@@ -115,20 +123,70 @@
                                     @endif
                                 </div>
                             </a>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
+                    @endif
+
+                    @if($vod_myMovies->count() > 0)
+                    <div class="sub-section">
+                        <h4 class="text-lg font-semibold text-slate-300 mb-4">Movies</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                            @foreach($vod_myMovies as $movie)
+<a href="{{ route('user.online_event.watch', $movie->slug) }}"
+                                class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-[#ff5b1d]/50 transition group relative shadow-lg block"
+                                data-title="{{ strtolower($movie->title) }}"
+                                data-desc="{{ strtolower($movie->description ?? '') }}"
+                                data-cat="{{ $movie->category_id ?? '' }}">
+                                <div class="{{ $movie->is_live ? 'aspect-video' : 'aspect-[2/3]' }} relative overflow-hidden bg-slate-800">
+                                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
+                                        <div class="w-12 h-12 bg-[#ff5b1d] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(255,91,29,0.5)]">
+                                            <i class="fas fa-play text-white ml-1"></i>
+                                        </div>
+                                    </div>
+                                    @if($movie->thumbnail)
+                                        <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="{{ $movie->title }}" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-slate-500"><i class="fas fa-film text-3xl"></i></div>
+                                    @endif
+                                    @if($movie->is_live)
+                                        <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded animate-pulse">LIVE</span>
+                                    @endif
+                                    @if($movie->category)
+                                        <span class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-[#ff5b1d] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#ff5b1d]/30">{{ $movie->category->name }}</span>
+                                    @endif
+                                </div>
+                                <div class="p-4">
+                                    <h4 class="text-white font-semibold mb-1 line-clamp-1">{{ $movie->title }}</h4>
+                                    @if($movie->description)
+                                        <p class="text-slate-400 text-xs line-clamp-2 leading-snug">{{ $movie->description }}</p>
+                                    @endif
+                                </div>
+                            </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                     <p id="empty-my" class="hidden text-slate-500 text-sm text-center py-6">No films match your search.</p>
                 </div>
                 @endif
 
                 {{-- Playlist Grid - All Event --}}
-                <div class="pt-8 border-t border-slate-800">
+                <div class="pt-8 border-t border-slate-800" id="container-all">
                     <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                         <i class="fas fa-film text-[#ff5b1d]"></i> All Available Films
                     </h3>
-                    <div id="grid-all" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($allMovies as $movie)
-                            @php $isAccessible = $myMovies->contains('id', $movie->id); @endphp
+                                        @php 
+                        $live_allMovies = $allMovies->where('is_live', true);
+                        $vod_allMovies = $allMovies->where('is_live', false);
+                    @endphp
+
+                    @if($live_allMovies->count() > 0)
+                    <div class="mb-8 sub-section">
+                        <h4 class="text-lg font-semibold text-slate-300 mb-4">Live Streams</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                            @foreach($live_allMovies as $movie)
+@php $isAccessible = $myMovies->contains('id', $movie->id); @endphp
                             @if($isAccessible)
                             <a href="{{ route('user.online_event.watch', $movie->slug) }}"
                                 class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-slate-500 transition group relative opacity-100 block"
@@ -141,7 +199,7 @@
                                 data-desc="{{ strtolower($movie->description ?? '') }}"
                                 data-cat="{{ $movie->category_id ?? '' }}">
                             @endif
-                                <div class="aspect-video relative overflow-hidden bg-slate-800">
+                                <div class="{{ $movie->is_live ? 'aspect-video' : 'aspect-[2/3]' }} relative overflow-hidden bg-slate-800">
                                     <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
                                         <div class="w-12 h-12 {{ $isAccessible ? 'bg-[#ff5b1d]' : 'bg-slate-600' }} rounded-full flex items-center justify-center shadow-lg">
                                             @if($isAccessible)
@@ -176,8 +234,68 @@
                             @else
                             </div>
                             @endif
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
+                    @endif
+
+                    @if($vod_allMovies->count() > 0)
+                    <div class="sub-section">
+                        <h4 class="text-lg font-semibold text-slate-300 mb-4">Movies</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                            @foreach($vod_allMovies as $movie)
+@php $isAccessible = $myMovies->contains('id', $movie->id); @endphp
+                            @if($isAccessible)
+                            <a href="{{ route('user.online_event.watch', $movie->slug) }}"
+                                class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-slate-500 transition group relative opacity-100 block"
+                                data-title="{{ strtolower($movie->title) }}"
+                                data-desc="{{ strtolower($movie->description ?? '') }}"
+                                data-cat="{{ $movie->category_id ?? '' }}">
+                            @else
+                            <div class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden transition relative opacity-50"
+                                data-title="{{ strtolower($movie->title) }}"
+                                data-desc="{{ strtolower($movie->description ?? '') }}"
+                                data-cat="{{ $movie->category_id ?? '' }}">
+                            @endif
+                                <div class="{{ $movie->is_live ? 'aspect-video' : 'aspect-[2/3]' }} relative overflow-hidden bg-slate-800">
+                                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
+                                        <div class="w-12 h-12 {{ $isAccessible ? 'bg-[#ff5b1d]' : 'bg-slate-600' }} rounded-full flex items-center justify-center shadow-lg">
+                                            @if($isAccessible)
+                                                <i class="fas fa-play text-white ml-1"></i>
+                                            @else
+                                                <i class="fas fa-lock text-white"></i>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @if($movie->thumbnail)
+                                        <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="{{ $movie->title }}" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-slate-500"><i class="fas fa-film text-3xl"></i></div>
+                                    @endif
+                                    @if(!$isAccessible)
+                                        <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5 border border-slate-600">
+                                            <i class="fas fa-lock text-slate-300 text-xs"></i>
+                                        </div>
+                                    @endif
+                                    @if($movie->category)
+                                        <span class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded-full border {{ $isAccessible ? 'text-[#ff5b1d] border-[#ff5b1d]/30' : 'text-slate-400 border-slate-600' }}">{{ $movie->category->name }}</span>
+                                    @endif
+                                </div>
+                                <div class="p-4">
+                                    <h4 class="text-white font-semibold mb-1 line-clamp-1">{{ $movie->title }}</h4>
+                                    @if($movie->description)
+                                        <p class="text-slate-400 text-xs line-clamp-2 leading-snug">{{ $movie->description }}</p>
+                                    @endif
+                                </div>
+                            @if($isAccessible)
+                            </a>
+                            @else
+                            </div>
+                            @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                     <p id="empty-all" class="hidden text-slate-500 text-sm text-center py-6">No films match your search.</p>
                 </div>
             </div>
@@ -191,15 +309,26 @@
 
                 {{-- Discover What's Streaming Section --}}
                 @if($allMovies->count() > 0)
-                <div class="mb-16">
+                <div class="mb-16" id="container-discover">
                     <div class="text-center mb-8">
                         <h3 class="text-3xl font-bold text-white mb-2">Discover</h3>
                         <p class="text-slate-400">Get an Online Pass today and access these amazing films and live streaming</p>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($allMovies as $movie)
-                            <div class="bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-slate-500 transition group cursor-pointer relative">
-                                <div class="aspect-video relative overflow-hidden bg-slate-800">
+                                        @php 
+                        $live_allMovies = $allMovies->where('is_live', true);
+                        $vod_allMovies = $allMovies->where('is_live', false);
+                    @endphp
+
+                    @if($live_allMovies->count() > 0)
+                    <div class="mb-8 sub-section">
+                        <h4 class="text-lg font-semibold text-slate-300 mb-4">Live Streams</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                            @foreach($live_allMovies as $movie)
+<div class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-slate-500 transition group cursor-pointer relative"
+                                data-title="{{ strtolower($movie->title) }}"
+                                data-desc="{{ strtolower($movie->description ?? '') }}"
+                                data-cat="{{ $movie->category_id ?? '' }}">
+                                <div class="{{ $movie->is_live ? 'aspect-video' : 'aspect-[2/3]' }} relative overflow-hidden bg-slate-800">
                                     <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
                                         <div class="w-12 h-12 bg-slate-600 rounded-full flex items-center justify-center shadow-lg">
                                             <i class="fas fa-lock text-white"></i>
@@ -224,8 +353,49 @@
                                     @endif
                                 </div>
                             </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
+                    @endif
+
+                    @if($vod_allMovies->count() > 0)
+                    <div class="sub-section">
+                        <h4 class="text-lg font-semibold text-slate-300 mb-4">Movies</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                            @foreach($vod_allMovies as $movie)
+<div class="movie-card bg-slate-900/40 rounded-2xl border border-slate-700/50 overflow-hidden hover:border-slate-500 transition group cursor-pointer relative"
+                                data-title="{{ strtolower($movie->title) }}"
+                                data-desc="{{ strtolower($movie->description ?? '') }}"
+                                data-cat="{{ $movie->category_id ?? '' }}">
+                                <div class="{{ $movie->is_live ? 'aspect-video' : 'aspect-[2/3]' }} relative overflow-hidden bg-slate-800">
+                                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
+                                        <div class="w-12 h-12 bg-slate-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-lock text-white"></i>
+                                        </div>
+                                    </div>
+                                    @if($movie->thumbnail)
+                                        <img src="{{ asset('storage/' . $movie->thumbnail) }}" alt="{{ $movie->title }}" class="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-slate-500"><i class="fas fa-film text-3xl"></i></div>
+                                    @endif
+                                    @if($movie->category)
+                                        <span class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-600">{{ $movie->category->name }}</span>
+                                    @endif
+                                    <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5 border border-slate-600">
+                                        <i class="fas fa-lock text-slate-400 text-xs"></i>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h4 class="text-white font-semibold mb-1 line-clamp-1">{{ $movie->title }}</h4>
+                                    @if($movie->description)
+                                        <p class="text-slate-400 text-xs line-clamp-2 leading-snug">{{ $movie->description }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 @endif
 
@@ -303,10 +473,10 @@
         const q = (searchInput?.value || '').toLowerCase().trim();
         const cat = (categoryFilter?.value || '');
 
-        ['grid-my', 'grid-all'].forEach(function(gridId) {
-            const grid = document.getElementById(gridId);
-            if (!grid) return;
-            const cards = grid.querySelectorAll('.movie-card');
+                ['container-my', 'container-all', 'container-discover'].forEach(function(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const cards = container.querySelectorAll('.movie-card');
             let visible = 0;
             cards.forEach(function(card) {
                 const title = card.dataset.title || '';
@@ -321,9 +491,15 @@
                     card.style.display = 'none';
                 }
             });
-            const emptyId = gridId === 'grid-my' ? 'empty-my' : 'empty-all';
-            const emptyEl = document.getElementById(emptyId);
-            if (emptyEl) emptyEl.classList.toggle('hidden', visible > 0);
+            const emptyEl = document.getElementById('empty-' + containerId.split('-')[1]);
+            if (emptyEl) emptyEl.classList.toggle('hidden', visible === 0);
+            
+            const sections = container.querySelectorAll('.sub-section');
+            sections.forEach(function(sec) {
+                const secCards = sec.querySelectorAll('.movie-card');
+                const hasVisible = Array.from(secCards).some(c => c.style.display !== 'none');
+                sec.style.display = hasVisible ? '' : 'none';
+            });
         });
     }
 
