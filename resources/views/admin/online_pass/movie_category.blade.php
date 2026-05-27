@@ -28,11 +28,11 @@
                             <button onclick="editCategory({{ $category }})" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg transition-colors">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button type="button"
+                            {{-- <button type="button"
                                 onclick="confirmDelete('{{ route('admin.movie_category.destroy', $category->id) }}', '{{ $category->name }}')"
                                 class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors">
                                 <i class="fas fa-trash"></i>
-                            </button>
+                            </button> --}}
                         </div>
                     </td>
                 </tr>
