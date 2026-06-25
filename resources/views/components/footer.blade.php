@@ -116,7 +116,7 @@
                             class="h-12 md:h-16 w-auto object-contain">
                         <img src="{{ asset('assets/sponsor/ad_produksi.png') }}" alt="AD Produksi"
                             class="h-12 md:h-16 w-auto object-contain">
-                        <img src="{{ asset('assets/sponsor/ant_lightning.PNG') }}" alt="Ant Lightning"
+                        <img src="{{ asset('assets/sponsor/ant_lightning.png') }}" alt="Ant Lightning"
                             class="h-12 md:h-16 w-auto object-contain">
                         <img src="{{ asset('assets/sponsor/kedai_22.png') }}" alt="Kedai 22"
                             class="h-12 md:h-16 w-auto object-contain">
