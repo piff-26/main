@@ -107,13 +107,23 @@
                 </div>
 
                 {{-- Sponsored By --}}
-                {{-- <div>
+                <div>
                     <h4 class="font-montech-bold text-lg uppercase mb-4 tracking-widest">SPONSORED BY</h4>
-                    <div
-                        class="w-full h-48 bg-gray-700 border border-gray-600 flex items-center justify-center text-gray-500">
-                        Space Sponsor
+                    <div class="flex flex-wrap items-center gap-6 bg-white/5 p-4 rounded-lg border border-white/10">
+                        <img src="{{ asset('assets/sponsor/vidio_logo.png') }}" alt="Vidio"
+                            class="h-12 md:h-16 w-auto object-contain">
+                        <img src="{{ asset('assets/sponsor/88_printing.png') }}" alt="88 Printing"
+                            class="h-12 md:h-16 w-auto object-contain">
+                        <img src="{{ asset('assets/sponsor/ad_produksi.png') }}" alt="AD Produksi"
+                            class="h-12 md:h-16 w-auto object-contain">
+                        <img src="{{ asset('assets/sponsor/ant_lightning.PNG') }}" alt="Ant Lightning"
+                            class="h-12 md:h-16 w-auto object-contain">
+                        <img src="{{ asset('assets/sponsor/kedai_22.png') }}" alt="Kedai 22"
+                            class="h-12 md:h-16 w-auto object-contain">
+                        <img src="{{ asset('assets/sponsor/new_era_putih.png') }}" alt="New Era"
+                            class="h-12 md:h-16 w-auto object-contain">
                     </div>
-                </div> --}}
+                </div>
 
             </div>
         </div>
