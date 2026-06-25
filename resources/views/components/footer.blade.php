@@ -112,6 +112,8 @@
                     <div class="flex flex-wrap items-center gap-6 bg-white/5 p-4 rounded-lg border border-white/10">
                         <img src="{{ asset('assets/sponsor/vidio_logo.png') }}" alt="Vidio"
                             class="h-12 md:h-16 w-auto object-contain">
+                        <img src="{{ asset('assets/sponsor/new_era_putih.png') }}" alt="New Era"
+                            class="h-12 md:h-16 w-auto object-contain">
                         <img src="{{ asset('assets/sponsor/88_printing.png') }}" alt="88 Printing"
                             class="h-12 md:h-16 w-auto object-contain">
                         <img src="{{ asset('assets/sponsor/ad_produksi.png') }}" alt="AD Produksi"
@@ -119,8 +121,6 @@
                         <img src="{{ asset('assets/sponsor/ant_lightning.png') }}" alt="Ant Lightning"
                             class="h-12 md:h-16 w-auto object-contain">
                         <img src="{{ asset('assets/sponsor/kedai_22.png') }}" alt="Kedai 22"
-                            class="h-12 md:h-16 w-auto object-contain">
-                        <img src="{{ asset('assets/sponsor/new_era_putih.png') }}" alt="New Era"
                             class="h-12 md:h-16 w-auto object-contain">
                     </div>
                 </div>
